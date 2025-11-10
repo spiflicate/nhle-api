@@ -71,7 +71,7 @@ For more details, see [Environment Configuration Documentation](docs/ENVIRONMENT
 
 ### Gamecenter API (`gc`)
 
-The primary API for accessing NHLe game data, scores, team and player information.
+The primary API for accessing NHL game data, scores, team and player information (live and historical).
 
 #### `gc.game` - Game Data
 
