@@ -1,4 +1,4 @@
-# NHLe API Client Library
+# NHLe API Library
 
 A TypeScript wrapper for the NHLe API with simple, composable functions and full type safety.
 
@@ -16,7 +16,7 @@ npm install nhle-api
 
 ## Usage
 
-Here are some basic examples of how to use the NHLe API client:
+Here are some basic examples of how to use the NHLe API library:
 
 ```typescript
 import { gc } from "nhle-api";
@@ -52,7 +52,7 @@ console.log(player);
 
 ## Configuration
 
-The client supports simple configuration through environment variables:
+The library supports simple configuration through environment variables:
 
 ```bash
 # Set request timeout (in milliseconds, default: 5000)
