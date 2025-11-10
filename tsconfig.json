@@ -1,0 +1,41 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "nodenext",
+    "esModuleInterop": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "exactOptionalPropertyTypes": true,
+    "emitDeclarationOnly": true,
+    "allowImportingTsExtensions": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "noUncheckedIndexedAccess": true,
+    "declaration": true,
+    "outDir": "./lib",
+    "baseUrl": ".",
+    "paths": {
+      "#/*": [
+        "./src/*"
+      ]
+    }
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.d.ts",
+    "test/**/*.ts",
+    "test/**/*.d.ts",
+    "../untitled folder/example-data/*.ts",
+    "scripts/*",
+    "../untitled folder/errors.ts",
+    "../untitled folder/val.ts",
+  ],
+  "exclude": [
+    "node_modules",
+    "lib",
+    "testing.ts",
+    "tsconfig.json"
+  ]
+}

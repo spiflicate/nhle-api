@@ -1,0 +1,12 @@
+# See https://help.github.com/articles/ignoring-files/
+# for a more complete description of ignoring files.
+
+# Miscellaneous
+*.log
+.DS_Store
+
+# Node modules
+/node_modules
+
+# Build output
+/lib
