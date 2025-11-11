@@ -3,7 +3,6 @@ import type {
    CountryCode,
    DefaultWithTranslations,
    Market,
-   Network,
    PositionCode,
 } from './common.ts';
 
@@ -45,6 +44,6 @@ interface TvBroadcast {
    id: number;
    market: Market;
    countryCode: CountryCode;
-   network: Network;
+   network: string;
    sequenceNumber: number;
 }
