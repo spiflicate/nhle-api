@@ -145,3 +145,9 @@ Advanced analytics endpoints (functionality being finalized)
 
 - [Environment Configuration](docs/ENVIRONMENT_CONFIG.md) - Configure timeouts, language, and base URLs
 - [Query Builder Guide](docs/QUERY_BUILDER_GUIDE.md) - Advanced query building for stats API
+
+## Support
+
+If you find this library helpful, consider supporting its development:
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/R6R01DV0JD)

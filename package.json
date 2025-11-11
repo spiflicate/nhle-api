@@ -1,7 +1,7 @@
 {
    "name": "nhle-api",
    "version": "0.5.0",
-   "description": "A modern NHL API wrapper written in TypeScript.",
+   "description": "A modern NHLe API wrapper written in TypeScript.",
    "main": "lib/index.cjs",
    "module": "lib/index.js",
    "types": "lib/index.d.ts",

@@ -36,6 +36,9 @@ export const Season = type('number.integer | string.numeric.parse')
 export const TeamAbbrev = type
    .enumerated(
       ...(Object.keys(NHL.TeamsEnum) as (keyof typeof NHL.TeamsEnum)[]),
+      ...(Object.keys(
+         NHL.InactiveTeamsEnum,
+      ) as (keyof typeof NHL.InactiveTeamsEnum)[]),
    )
    .describe('a valid NHL team abbreviation');
 

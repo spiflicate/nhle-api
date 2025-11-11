@@ -37,13 +37,17 @@ export type LocationInfo = Record<string, unknown>;
 export type PartnerGameInfo = Record<string, unknown>;
 
 // response types for team module of gamecenter api
-export type NHLStandings = Record<string, unknown>;
-export type NHLStandingsSeason = Record<string, unknown>;
+// export type NHLStandings = Record<string, unknown>;
+// export type NHLStandingsSeason = Record<string, unknown>;
+export * from './standings.ts';
+export * from './standings-season.ts';
 export type TeamRoster = Record<string, unknown>;
 export type TeamRosterSeasons = Record<string, unknown>;
-export type TeamProspects = Record<string, unknown>;
+// export type TeamProspects = Record<string, unknown>;
+export * from './team-prospects.ts';
 export type TeamScheduleMonth = Record<string, unknown>;
-export type TeamScheduleSeason = Record<string, unknown>;
+// export type TeamScheduleSeason = Record<string, unknown>;
+export * from './team-schedule-season.ts';
 export type TeamScheduleWeek = Record<string, unknown>;
 export type TeamStats = Record<string, unknown>;
 export type TeamStatsSeason = Record<string, unknown>;

@@ -1,13 +1,13 @@
 export interface NetworkTVSchedule {
-   date: Date;
-   startDate: Date;
-   endDate: Date;
+   date: string;
+   startDate: string;
+   endDate: string;
    broadcasts: Broadcast[];
 }
 
 export interface Broadcast {
-   startTime: Date;
-   endTime: Date;
+   startTime: string;
+   endTime: string;
    durationSeconds: number;
    title: string;
    description: string;

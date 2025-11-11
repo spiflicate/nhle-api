@@ -1,4 +1,8 @@
-import type { Default, DefaultWithLangAlternatives } from './common.ts';
+import type {
+   Default,
+   DefaultWithTranslations,
+   GameState,
+} from './common.ts';
 
 export interface GamecenterLanding {
    id: number;
@@ -35,8 +39,8 @@ interface LandingAwayTeam {
    id: number;
    commonName: Default;
    abbrev: string;
-   placeName: DefaultWithLangAlternatives;
-   placeNameWithPreposition: DefaultWithLangAlternatives;
+   placeName: DefaultWithTranslations;
+   placeNameWithPreposition: DefaultWithTranslations;
    score?: number;
    sog?: number;
    logo: string;
@@ -54,14 +58,12 @@ interface Clock {
 
 type UTCOffset = '-05:00' | '-08:00' | '-06:00';
 
-type GameState = 'OFF' | 'FUT' | 'LIVE' | 'PRE';
-
 interface LandingHomeTeam {
    id: number;
-   commonName: DefaultWithLangAlternatives;
+   commonName: DefaultWithTranslations;
    abbrev: string;
    placeName: Default;
-   placeNameWithPreposition: DefaultWithLangAlternatives;
+   placeNameWithPreposition: DefaultWithTranslations;
    score?: number;
    sog?: number;
    logo: string;
@@ -128,7 +130,7 @@ interface GoalieSeasonStatsGoalie {
    playerId: number;
    teamId: number;
    sweaterNumber: number;
-   name: DefaultWithLangAlternatives;
+   name: DefaultWithTranslations;
    gamesPlayed: number;
    wins: number;
    losses: number;
@@ -177,7 +179,7 @@ interface Skater {
    playerId: number;
    teamId: number;
    sweaterNumber: number;
-   name: DefaultWithLangAlternatives;
+   name: DefaultWithTranslations;
    position: Position;
    gamesPlayed?: number;
    goals?: number;
@@ -253,7 +255,7 @@ interface Defenseman {
 
 interface Forward {
    playerId: number;
-   name: DefaultWithLangAlternatives;
+   name: DefaultWithTranslations;
    sweaterNumber: number;
    positionCode: Position;
    headshot: string;
@@ -262,7 +264,7 @@ interface Forward {
 
 interface AwayTeamGoalie {
    playerId: number;
-   name: DefaultWithLangAlternatives;
+   name: DefaultWithTranslations;
    sweaterNumber: number;
    positionCode: Position;
    headshot: string;
@@ -298,8 +300,8 @@ interface CommittedByPlayer {
 }
 
 interface DrawnBy {
-   firstName: DefaultWithLangAlternatives;
-   lastName: DefaultWithLangAlternatives;
+   firstName: DefaultWithTranslations;
+   lastName: DefaultWithTranslations;
    sweaterNumber: number;
 }
 
@@ -313,9 +315,9 @@ interface Goal {
    eventId: number;
    strength: Strength;
    playerId: number;
-   firstName: DefaultWithLangAlternatives;
-   lastName: DefaultWithLangAlternatives;
-   name: DefaultWithLangAlternatives;
+   firstName: DefaultWithTranslations;
+   lastName: DefaultWithTranslations;
+   name: DefaultWithTranslations;
    teamAbbrev: Default;
    headshot: string;
    highlightClipSharingUrl?: string;
@@ -339,9 +341,9 @@ interface Goal {
 
 interface Assist {
    playerId: number;
-   firstName: DefaultWithLangAlternatives;
-   lastName: DefaultWithLangAlternatives;
-   name: DefaultWithLangAlternatives;
+   firstName: DefaultWithTranslations;
+   lastName: DefaultWithTranslations;
+   name: DefaultWithTranslations;
    assistsToDate: number;
    sweaterNumber: number;
 }

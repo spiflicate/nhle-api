@@ -1,7 +1,8 @@
 import type {
    CountryCode,
    Default,
-   DefaultWithLangAlternatives,
+   DefaultWithTranslations,
+   GameState,
    Market,
 } from './common.js';
 
@@ -14,11 +15,11 @@ export interface GamecenterBoxscore {
    venue: Default;
    venueLocation: Default;
    startTimeUTC: Date;
-   easternUTCOffset: UTCOffset;
-   venueUTCOffset: UTCOffset;
+   easternUTCOffset: string;
+   venueUTCOffset: string;
    tvBroadcasts: TvBroadcast[];
    gameState: GameState;
-   gameScheduleState: 'OK';
+   gameScheduleState: 'OK' | string;
    periodDescriptor?: PeriodDescriptor;
    regPeriods: number;
    awayTeam: Team;
@@ -39,7 +40,7 @@ interface Team {
    logo: string;
    darkLogo: string;
    placeName: Default;
-   placeNameWithPreposition: DefaultWithLangAlternatives;
+   placeNameWithPreposition: DefaultWithTranslations;
    radioLink?: string;
 }
 
@@ -50,13 +51,9 @@ interface Clock {
    inIntermission: boolean;
 }
 
-type UTCOffset = '-05:00' | '-08:00' | '-06:00';
-
 interface GameOutcome {
    lastPeriodType: string;
 }
-
-type GameState = 'OFF' | 'FUT' | 'LIVE' | 'PRE';
 
 interface PeriodDescriptor {
    number: number;
@@ -80,7 +77,7 @@ interface PlayerByGameStatsTeam {
 interface Skater {
    playerId: number;
    sweaterNumber: number;
-   name: DefaultWithLangAlternatives;
+   name: DefaultWithTranslations;
    position: Exclude<Position, 'G'>;
    goals: number;
    assists: number;
@@ -109,7 +106,7 @@ interface Defense extends Skater {
 interface Goalie {
    playerId: number;
    sweaterNumber: number;
-   name: DefaultWithLangAlternatives;
+   name: DefaultWithTranslations;
    position: 'G';
    evenStrengthShotsAgainst: string;
    powerPlayShotsAgainst: string;

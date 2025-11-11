@@ -1,7 +1,7 @@
 import type { TeamAbbrev } from '../../types.ts';
 import type {
    CountryCode,
-   DefaultWithLangAlternatives,
+   DefaultWithTranslations,
    Market,
    Network,
    PositionCode,
@@ -35,9 +35,9 @@ interface Pick {
    positionCode: PositionCode;
 }
 
-type Name = DefaultWithLangAlternatives;
+type Name = DefaultWithTranslations;
 
-type TeamName = DefaultWithLangAlternatives;
+type TeamName = DefaultWithTranslations;
 
 type HexColorCode = `#${string}`;
 

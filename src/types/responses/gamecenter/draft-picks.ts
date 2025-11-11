@@ -1,12 +1,12 @@
 import type { TeamAbbrev } from '../../types.ts';
 import type {
    Default,
-   DefaultWithLangAlternatives,
+   DefaultWithTranslations,
    PositionCode,
 } from './common.ts';
 
 export interface DraftPicks {
-   broadcastStartTimeUTC: Date;
+   broadcastStartTimeUTC: string;
    draftYear: number;
    draftYears: number[];
    selectableRounds: number[];
@@ -89,4 +89,4 @@ type CountryCode =
 
 type DisplayAbbrev = Default;
 
-type TeamName = DefaultWithLangAlternatives;
+type TeamName = DefaultWithTranslations;
