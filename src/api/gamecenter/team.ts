@@ -119,17 +119,17 @@ export const prospects = async (
 };
 
 /**
- * Get club statistics for a team
+ * Get team statistics for a specific season
  * @param team - The team abbreviation (e.g., 'TOR', 'MTL', 'NYR')
  * @param season - The season identifier (8-digit format: YYYYYYYY). Defaults to current season
- * @param gameType - The game type (2 = regular season, 3 = playoffs). Defaults to regular season
+ * @param gameType - The game type ('REG' or 2, 'POST' or 3, etc.). Defaults to regular season
  * @returns Promise resolving to team statistics
  * @example
  * ```ts
- * clubStats('TOR', 20232024, 2).then((data) => console.log(data));
+ * stats('TOR', 20232024, 'REG').then((data) => console.log(data));
  * ```
  */
-export const clubStats = async (
+export const stats = async (
    team: TeamAbbrev,
    season?: Season,
    gameType?: GameType,
@@ -150,15 +150,17 @@ export const clubStats = async (
 };
 
 /**
- * Get club statistics across all seasons for a team
+ * Get valid season and game type options for a team's statistics
  * @param team - The team abbreviation (e.g., 'TOR', 'MTL', 'NYR')
- * @returns Promise resolving to historical team statistics
+ * @returns Promise resolving to available season and game type combinations for the team.
+ * Only includes seasons and game types where the team actually played (e.g., excludes playoff game types
+ * for seasons where the team didn't make the playoffs)
  * @example
  * ```ts
- * clubStatsSeason('TOR').then((data) => console.log(data));
+ * statsSeason('TOR').then((data) => console.log(data));
  * ```
  */
-export const clubStatsSeason = async (
+export const statsSeason = async (
    team: TeamAbbrev,
 ): Promise<APIResponse<TeamStatsSeason>> => {
    const parsed = TeamAbbrevAT(team);
