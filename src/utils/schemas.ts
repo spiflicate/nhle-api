@@ -25,6 +25,30 @@ export const Year = type(`${NHL.START_YEAR} <= number <= ${NHL.END_YEAR}`)
    )
    .describe(`a valid year from ${NHL.START_YEAR} to ${NHL.END_YEAR}`);
 
+export const NHLMonth = type('Date | string')
+   .narrow((v) => {
+      if (typeof v === 'string') {
+         return /^\d{4}-\d{2}$/.test(v);
+      } else if (v instanceof Date) {
+         return true;
+      }
+      return false;
+   })
+   .pipe((v) => (typeof v === 'string' ? v : v.toISOString().slice(0, 7)))
+   .describe(
+      'a valid month, either as a string (formatted as YYYY-MM) or a Date object',
+   );
+
+export const NHLDate = type('Date | string.date.iso')
+   .pipe((v) =>
+      typeof v === 'string'
+         ? new Date(v).toISOString().slice(0, 10)
+         : v.toISOString().slice(0, 10),
+   )
+   .describe(
+      'a valid date, either as a string (ISO date string) or a Date object',
+   );
+
 export const Season = type('number.integer | string.numeric.parse')
    .narrow((v): v is number => {
       const yr = Math.trunc(v / 10000);
@@ -43,7 +67,10 @@ export const TeamAbbrev = type
    .describe('a valid NHL team abbreviation');
 
 export const TeamId = type
-   .enumerated(...Object.values(NHL.TeamsEnum))
+   .enumerated(
+      ...Object.values(NHL.TeamsEnum),
+      ...Object.values(NHL.InactiveTeamsEnum),
+   )
    .describe('a valid NHL team ID');
 
 export const GameType = type
@@ -53,7 +80,7 @@ export const GameType = type
       ) as (keyof typeof NHL.GameTypeEnum)[]),
    )
    .pipe((v) => NHL.GameTypeEnum[v])
-   .or(type('1|2|3|4|19|"1"|"2"|"3"|"4"|"19"'))
+   .or(type('1|2|3|4|19'))
    .describe('a valid NHL game type (e.g., REG, PRE, POST)');
 
 export const GameNumber = type('number')
@@ -80,29 +107,6 @@ export const PlayoffRound = type('1 <= number <= 4')
 export const EventId = type('number.integer | string.numeric.parse')
    .narrow((v): v is number => Number.isInteger(v) && v > 0)
    .describe('a positive integer representing an NHL event ID');
-
-export const NHLDate = type('Date | string.date.iso')
-   .pipe((v) =>
-      typeof v === 'string'
-         ? new Date(v).toISOString().slice(0, 10)
-         : v.toISOString().slice(0, 10),
-   )
-   .describe(
-      'a valid date, either as a string (ISO date string) or a Date object',
-   );
-export const NHLMonth = type('Date | string')
-   .narrow((v) => {
-      if (typeof v === 'string') {
-         return /^\d{4}-\d{2}$/.test(v);
-      } else if (v instanceof Date) {
-         return true;
-      }
-      return false;
-   })
-   .pipe((v) => (typeof v === 'string' ? v : v.toISOString().slice(0, 7)))
-   .describe(
-      'a valid month, either as a string (formatted as YYYY-MM) or a Date object',
-   );
 
 export const GameTypeCode = type('1|2|3|4|19').describe(
    'a valid NHL game type code (1=PRE, 2=REG, 3=POST, 4=ASG, 19=INTL)',
@@ -261,11 +265,6 @@ export const BaseParams = type({
    gameType: GameType.or('undefined').pipe(
       (v) => v ?? NHL.GameTypeEnum.REG,
    ),
-});
-
-export const SeasonAndGameType = type({
-   season: Season.or('undefined').optional(),
-   gameType: GameType.or('undefined').optional(),
 });
 
 export const PlayerParams = BaseParams.merge({
