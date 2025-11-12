@@ -90,11 +90,29 @@ export const playByPlay = async (
 };
 
 /**
- * Get reports data for a specific game (three stars, shootout details, etc.)
+ * Get comprehensive game data including stats, reports, and game information
+ *
+ * Includes:
+ * - **Season Series**: Head-to-head games between the two teams
+ * - **Game Info**: Officials (referees, linesmen), coaches, scratches
+ * - **Game Video**: Recap and condensed game video IDs
+ * - **Line Score**: Period-by-period scoring
+ * - **Shots by Period**: Shot totals for each period
+ * - **Team Game Stats**: SOG, faceoffs, power play, PIM, hits, blocks, giveaways, takeaways
+ * - **Game Reports**: Links to official NHL reports:
+ *   - Game Summary
+ *   - Event Summary
+ *   - Play-by-Play
+ *   - Faceoff Summary & Comparison
+ *   - Rosters
+ *   - Shot Summary
+ *   - Shift Chart
+ *   - Time on Ice (both teams)
+ *
  * @param gameId - The unique identifier for the game (10-digit format)
- * @returns Promise resolving to game reports data
+ * @returns Promise resolving to comprehensive game data with stats, reports, and metadata
  * @note The official endpoint name is 'right-rail', as it is used
- * to populate the right rail UI component of the NHL website. The
+ * to populate the right rail UI component of the NHL Gamecenter website. The
  * function has been renamed to 'reports' for clarity.
  * @example
  * ```ts
