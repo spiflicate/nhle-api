@@ -4,8 +4,6 @@
  */
 
 export const NHL_TIMEZONE = 'America/New_York';
-export const NHL_START_DATE = new Date('1916-12-19'); // 1 year prior to the first NHL game
-export const NHL_END_DATE = new Date('2026-04-17'); // 1 year after the last game of the 2024-2025 season
 
 /**
  * Formats a date object into a string in the format YYYY-MM-DD
@@ -91,3 +89,8 @@ export const getSeason = (date: string | Date): string => {
  * @returns The current season formatted as yyyyYYYY
  */
 export const getCurrentSeason = (): string => getSeason(new Date());
+
+export const NHL_START_DATE = new Date('1917-12-01');
+export const NHL_END_DATE = new Date(
+   `${getCurrentSeason().slice(4, 8)}-06-30`,
+);
