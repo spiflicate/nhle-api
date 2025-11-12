@@ -2,10 +2,6 @@ import type * as C from '#/constants/edge-adv.ts';
 import type * as T from '#/utils/schemas.ts';
 
 /**
- * Type definitions for common parameters
- */
-
-/**
  * Represents a valid NHL year (e.g., 2023, 2024, ...)
  */
 export type Year = typeof T.Year.inferIn;
@@ -70,6 +66,11 @@ export type PlayoffRound = 1 | 2 | 3 | 4;
  * Represents a valid country code (e.g., CAN, USA, SWE, ...)
  */
 export type CountryCode = typeof T.CountryCode.inferIn;
+/**
+ * Represents a valid country code (e.g., CAN, USA, SWE, ...)
+ */
+export type PostalCode = typeof T.PostalCode.inferIn;
+
 /**
  * Represents a valid NHL player ID
  */
