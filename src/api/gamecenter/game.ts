@@ -56,8 +56,8 @@ const _paths = {
       playByPlay: 'wsc/play-by-play/{gameId}',
    },
    pptReplay: {
-      goal: 'ppt-replay/{gameId}/goal/{eventId}',
-      event: 'ppt-replay/{date}',
+      goal: 'ppt-replay/goal/{gameId}/{eventId}',
+      event: 'ppt-replay/{gameId}/{eventId}',
    },
    whereToWatch: 'where-to-watch',
    networkTVSchedule: 'network/tv-schedule/{date}',
@@ -245,15 +245,15 @@ export const wsc = {
 };
 
 /**
- * Access PPT (Prime Time) replay data endpoints
- * @description Endpoints for accessing video replay information
+ * Access PPT (Player and Puck Tracking) visualization data endpoints
+ * @description Endpoints for accessing player and puck tracking data used for replay visualizations
  */
 export const pptReplay = {
    /**
-    * Get goal replay data for a specific game and event
+    * Get player and puck tracking visualization data for a specific goal event
     * @param gameId - The unique identifier for the game (10-digit format)
     * @param eventId - The unique identifier for the goal event
-    * @returns Promise resolving to goal replay data with video URLs
+    * @returns Promise resolving to tracking data used for goal replay visualization
     * @example
     * ```ts
     * pptReplay.goal(2023020001, 42).then((data) => console.log(data));
@@ -278,29 +278,30 @@ export const pptReplay = {
    },
 
    /**
-    * Get event replay data for a specific date
-    * @param date - Date to get event replay data for (Date object or ISO date string 'YYYY-MM-DD')
-    * @returns Promise resolving to event replay data with all replays for the date
+    * Get player and puck tracking visualization data for a specific event
+    * @param gameId - The unique identifier for the game (10-digit format)
+    * @param eventId - The unique identifier for the event
+    * @returns Promise resolving to tracking data used for event replay visualization
     * @example
     * ```ts
-    * pptReplay.event('2023-11-15').then((data) => console.log(data));
-    * pptReplay.event(new Date()).then((data) => console.log(data));
+    * pptReplay.event(2023020001, 42).then((data) => console.log(data));
     * ```
     */
    event: async (
-      date: Date | string,
+      gameId: GameId,
+      eventId: number | string,
    ): Promise<APIResponse<PPTReplayEvent>> => {
-      const parsedDate = NHLDate(date);
-      if (isParseError(parsedDate)) {
+      const parsed = GameIdAndEventId({ gameId, eventId });
+      if (isParseError(parsed)) {
          return {
             status: 'error',
-            error: new ValidationError(parsedDate.summary, {
+            error: new ValidationError(parsed.summary, {
                endpoint: _paths.pptReplay.event,
             }),
          };
       }
       return nhlClient.get(
-         route(_paths.pptReplay.event, { date: parsedDate }),
+         route(_paths.pptReplay.event, { gameId, eventId }),
       );
    },
 };
