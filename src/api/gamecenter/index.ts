@@ -1,6 +1,6 @@
 /**
- * NHL API Endpoints
- * This file re-exports all the API endpoint functions
+ * Game Center API exports
+ * NHL Game Center API endpoints for accessing game, player, team, draft, and miscellaneous information
  */
 export * as draft from './draft.ts';
 export * as game from './game.ts';

@@ -1,5 +1,6 @@
 /**
- * Game-related API endpoints
+ * @module api/gamecenter/game
+ * @description Game-related API endpoints for schedules, play-by-play, boxscores, playoffs, and game information
  */
 import nhlClient from '#/client/index.ts';
 import type { APIResponse } from '#/client/types.ts';
@@ -21,19 +22,20 @@ import type {
    WSCGameStory,
    WSCPlayByPlay,
 } from '#/types/responses/gamecenter/index.ts';
+import type { GameId, Season, SeriesLetter, Year } from '#/types/types.ts';
 import {
    getCurrentDate,
    getCurrentSeason,
    getCurrentYear,
 } from '#/utils/date.ts';
 import {
-   GameId,
    GameIdAndEventId,
+   GameId as GameIdAT,
    isParseError,
    NHLDate,
-   Season,
+   Season as SeasonAT,
    SeriesAndSeasonParams,
-   Year,
+   Year as YearAT,
 } from '#/utils/schemas.ts';
 import { route } from '#/utils/utils.ts';
 
@@ -63,20 +65,24 @@ const _paths = {
 
 /**
  * Get play-by-play data for a specific game
- * @param gameId - The unique identifier for the game
- * @returns Promise resolving to play-by-play data
+ * @param gameId - The unique identifier for the game (10-digit format)
+ * @returns Promise resolving to play-by-play data including all game events
+ * @example
+ * ```ts
+ * playByPlay(2023020001).then((data) => console.log(data));
+ * ```
  */
-export const playByPlay = (
-   gameId: string | number,
+export const playByPlay = async (
+   gameId: GameId,
 ): Promise<APIResponse<GamecenterPlayByPlay>> => {
-   const parsedGameId = GameId(gameId);
+   const parsedGameId = GameIdAT(gameId);
    if (isParseError(parsedGameId)) {
-      return Promise.resolve({
+      return {
          status: 'error',
          error: new ValidationError(parsedGameId.summary, {
             endpoint: _paths.gamecenter.playByPlay,
          }),
-      });
+      };
    }
    return nhlClient.get(
       route(_paths.gamecenter.playByPlay, { gameId: parsedGameId }),
@@ -84,24 +90,28 @@ export const playByPlay = (
 };
 
 /**
- * Get reports data for a specific game
- * @param gameId - The unique identifier for the game
- * @returns Promise resolving to reports data
+ * Get reports data for a specific game (three stars, shootout details, etc.)
+ * @param gameId - The unique identifier for the game (10-digit format)
+ * @returns Promise resolving to game reports data
  * @note The official endpoint name is 'right-rail', as it is used
  * to populate the right rail UI component of the NHL website. The
  * function has been renamed to 'reports' for clarity.
+ * @example
+ * ```ts
+ * reports(2023020001).then((data) => console.log(data));
+ * ```
  */
-export const reports = (
-   gameId: string | number,
+export const reports = async (
+   gameId: GameId,
 ): Promise<APIResponse<GamecenterReports>> => {
-   const parsedGameId = GameId(gameId);
+   const parsedGameId = GameIdAT(gameId);
    if (isParseError(parsedGameId)) {
-      return Promise.resolve({
+      return {
          status: 'error',
          error: new ValidationError(parsedGameId.summary, {
             endpoint: _paths.gamecenter.reports,
          }),
-      });
+      };
    }
    return nhlClient.get(
       route(_paths.gamecenter.reports, { gameId: parsedGameId }),
@@ -109,20 +119,24 @@ export const reports = (
 };
 /**
  * Get landing page data for a specific game
- * @param gameId - The unique identifier for the game
- * @returns Promise resolving to landing page data
+ * @param gameId - The unique identifier for the game (10-digit format)
+ * @returns Promise resolving to landing page data with game summary and key information
+ * @example
+ * ```ts
+ * landing(2023020001).then((data) => console.log(data));
+ * ```
  */
-export const landing = (
-   gameId: string | number,
+export const landing = async (
+   gameId: GameId,
 ): Promise<APIResponse<GamecenterLanding>> => {
-   const parsedGameId = GameId(gameId);
+   const parsedGameId = GameIdAT(gameId);
    if (isParseError(parsedGameId)) {
-      return Promise.resolve({
+      return {
          status: 'error',
          error: new ValidationError(parsedGameId.summary, {
             endpoint: _paths.gamecenter.landing,
          }),
-      });
+      };
    }
    return nhlClient.get(
       route(_paths.gamecenter.landing, { gameId: parsedGameId }),
@@ -130,43 +144,55 @@ export const landing = (
 };
 /**
  * Get boxscore data for a specific game
- * @param gameId - The unique identifier for the game
- * @returns Promise resolving to boxscore data
+ * @param gameId - The unique identifier for the game (10-digit format)
+ * @returns Promise resolving to boxscore data with player stats and game summary
+ * @example
+ * ```ts
+ * boxscore(2023020001).then((data) => console.log(data));
+ * ```
  */
-export const boxscore = (
-   gameId: string | number,
+export const boxscore = async (
+   gameId: GameId,
 ): Promise<APIResponse<GamecenterBoxscore>> => {
-   const parsedGameId = GameId(gameId);
+   const parsedGameId = GameIdAT(gameId);
    if (isParseError(parsedGameId)) {
-      return Promise.resolve({
+      return {
          status: 'error',
          error: new ValidationError(parsedGameId.summary, {
             endpoint: _paths.gamecenter.boxscore,
          }),
-      });
+      };
    }
    return nhlClient.get(
       route(_paths.gamecenter.boxscore, { gameId: parsedGameId }),
    );
 };
 
+/**
+ * Access Web Service Cache (WSC) game data endpoints
+ * @description Alternative data source for game information
+ */
 export const wsc = {
    /**
     * Get game story data for a specific game
-    * @param gameId - The unique identifier for the game
-    * @returns Promise resolving to game story data
+    * @param gameId - The unique identifier for the game (10-digit format)
+    * @returns Promise resolving to game story data with narrative content
+    * @example
+    * ```ts
+    * wsc.gameStory(2023020001).then((data) => console.log(data));
+    * ```
     */
-   gameStory: (
-      gameId: number | string,
+   gameStory: async (
+      gameId: GameId,
    ): Promise<APIResponse<WSCGameStory>> => {
-      const parsedGameId = GameId(gameId);
+      const parsedGameId = GameIdAT(gameId);
       if (isParseError(parsedGameId)) {
-         return Promise.resolve({
+         return {
             status: 'error',
             error: new ValidationError(parsedGameId.summary, {
                endpoint: _paths.wsc.gameStory,
             }),
-         });
+         };
       }
       return nhlClient.get(
          route(_paths.wsc.gameStory, { gameId: parsedGameId }),
@@ -174,21 +200,25 @@ export const wsc = {
    },
 
    /**
-    * Get play-by-play data for a specific game
-    * @param gameId - The unique identifier for the game
-    * @returns Promise resolving to play-by-play data
+    * Get WSC play-by-play data for a specific game
+    * @param gameId - The unique identifier for the game (10-digit format)
+    * @returns Promise resolving to play-by-play data from WSC source
+    * @example
+    * ```ts
+    * wsc.playByPlay(2023020001).then((data) => console.log(data));
+    * ```
     */
-   playByPlay: (
-      gameId: number | string,
+   playByPlay: async (
+      gameId: GameId,
    ): Promise<APIResponse<WSCPlayByPlay>> => {
-      const parsedGameId = GameId(gameId);
+      const parsedGameId = GameIdAT(gameId);
       if (isParseError(parsedGameId)) {
-         return Promise.resolve({
+         return {
             status: 'error',
             error: new ValidationError(parsedGameId.summary, {
                endpoint: _paths.wsc.playByPlay,
             }),
-         });
+         };
       }
       return nhlClient.get(
          route(_paths.wsc.playByPlay, { gameId: parsedGameId }),
@@ -197,27 +227,32 @@ export const wsc = {
 };
 
 /**
- * Access PPT replay related endpoints
+ * Access PPT (Prime Time) replay data endpoints
+ * @description Endpoints for accessing video replay information
  */
 export const pptReplay = {
    /**
     * Get goal replay data for a specific game and event
-    * @param gameId - The unique identifier for the game
-    * @param eventId - The unique identifier for the event
-    * @returns Promise resolving to goal replay data
+    * @param gameId - The unique identifier for the game (10-digit format)
+    * @param eventId - The unique identifier for the goal event
+    * @returns Promise resolving to goal replay data with video URLs
+    * @example
+    * ```ts
+    * pptReplay.goal(2023020001, 42).then((data) => console.log(data));
+    * ```
     */
-   goal: (
-      gameId: number | string,
+   goal: async (
+      gameId: GameId,
       eventId: number | string,
    ): Promise<APIResponse<PPTReplayGoal>> => {
       const parsed = GameIdAndEventId({ gameId, eventId });
       if (isParseError(parsed)) {
-         return Promise.resolve({
+         return {
             status: 'error',
             error: new ValidationError(parsed.summary, {
                endpoint: _paths.pptReplay.goal,
             }),
-         });
+         };
       }
       return nhlClient.get(
          route(_paths.pptReplay.goal, { gameId, eventId }),
@@ -226,20 +261,25 @@ export const pptReplay = {
 
    /**
     * Get event replay data for a specific date
-    * @param date - Date to get event replay data for (Date object or ISO date string)
-    * @returns Promise resolving to event replay data
+    * @param date - Date to get event replay data for (Date object or ISO date string 'YYYY-MM-DD')
+    * @returns Promise resolving to event replay data with all replays for the date
+    * @example
+    * ```ts
+    * pptReplay.event('2023-11-15').then((data) => console.log(data));
+    * pptReplay.event(new Date()).then((data) => console.log(data));
+    * ```
     */
    event: async (
       date: Date | string,
    ): Promise<APIResponse<PPTReplayEvent>> => {
       const parsedDate = NHLDate(date);
       if (isParseError(parsedDate)) {
-         return Promise.resolve({
+         return {
             status: 'error',
             error: new ValidationError(parsedDate.summary, {
                endpoint: _paths.pptReplay.event,
             }),
-         });
+         };
       }
       return nhlClient.get(
          route(_paths.pptReplay.event, { date: parsedDate }),
@@ -248,37 +288,53 @@ export const pptReplay = {
 };
 
 /**
- * Access schedule related endpoints
+ * Get the league schedule for a specific date
+ * @param date - Date to get schedule for (Date object or ISO date string 'YYYY-MM-DD'). Defaults to current date
+ * @returns Promise resolving to league-wide schedule data for the specified date
+ * @example
+ * ```ts
+ * // Get today's schedule
+ * schedule().then((data) => console.log(data));
+ *
+ * // Get schedule for a specific date
+ * schedule('2023-11-15').then((data) => console.log(data));
+ * ```
  */
-export const schedule = (
+export const schedule = async (
    date?: Date | string,
 ): Promise<APIResponse<LeagueSchedule>> => {
    const parsedDate = NHLDate(date ?? getCurrentDate());
    if (isParseError(parsedDate)) {
-      return Promise.resolve({
+      return {
          status: 'error',
          error: new ValidationError(parsedDate.summary, {
             endpoint: _paths.schedule,
          }),
-      });
+      };
    }
    return nhlClient.get(route(_paths.schedule, { date: parsedDate }));
 };
 
 /**
- * Access schedule calendar related endpoints
+ * Get schedule calendar data for a specific date
+ * @param date - Date to get calendar data for (Date object or ISO date string 'YYYY-MM-DD'). Defaults to current date
+ * @returns Promise resolving to schedule calendar data showing game availability
+ * @example
+ * ```ts
+ * scheduleCalendar('2023-11-15').then((data) => console.log(data));
+ * ```
  */
-export const scheduleCalendar = (
+export const scheduleCalendar = async (
    date?: Date | string,
 ): Promise<APIResponse<ScheduleCalendar>> => {
    const parsedDate = NHLDate(date);
    if (isParseError(parsedDate)) {
-      return Promise.resolve({
+      return {
          status: 'error',
          error: new ValidationError(parsedDate.summary, {
             endpoint: _paths.scheduleCalendar,
          }),
-      });
+      };
    }
    return nhlClient.get(
       route(_paths.scheduleCalendar, { date: parsedDate }),
@@ -286,37 +342,49 @@ export const scheduleCalendar = (
 };
 
 /**
- * Access playoff bracket related endpoints
+ * Get playoff bracket data for a specific year
+ * @param year - The playoff year (YYYY format). Defaults to current year
+ * @returns Promise resolving to playoff bracket structure with all series
+ * @example
+ * ```ts
+ * playoffBracket(2023).then((data) => console.log(data));
+ * ```
  */
-export const playoffBracket = (
-   year?: string,
+export const playoffBracket = async (
+   year?: Year,
 ): Promise<APIResponse<PlayoffBracket>> => {
-   const parsedYear = Year(year ?? getCurrentYear());
+   const parsedYear = YearAT(year ?? getCurrentYear());
    if (isParseError(parsedYear)) {
-      return Promise.resolve({
+      return {
          status: 'error',
          error: new ValidationError(parsedYear.summary, {
             endpoint: _paths.playoffBracket,
          }),
-      });
+      };
    }
    return nhlClient.get(route(_paths.playoffBracket, { year: parsedYear }));
 };
 
 /**
- * Access playoff series related endpoints
+ * Get playoff series information for a season
+ * @param season - The season identifier (8-digit format: YYYYYYYY, e.g., 20232024). Defaults to current season
+ * @returns Promise resolving to all playoff series data for the season
+ * @example
+ * ```ts
+ * playoffSeries(20232024).then((data) => console.log(data));
+ * ```
  */
-export const playoffSeries = (
-   season?: string,
+export const playoffSeries = async (
+   season?: Season,
 ): Promise<APIResponse<PlayoffSeries>> => {
-   const parsedSeason = Season(season ?? getCurrentSeason());
+   const parsedSeason = SeasonAT(season ?? getCurrentSeason());
    if (isParseError(parsedSeason)) {
-      return Promise.resolve({
+      return {
          status: 'error',
          error: new ValidationError(parsedSeason.summary, {
             endpoint: _paths.playoffSeries,
          }),
-      });
+      };
    }
    return nhlClient.get(
       route(_paths.playoffSeries, { season: parsedSeason }),
@@ -324,11 +392,18 @@ export const playoffSeries = (
 };
 
 /**
- * Access playoff series schedule related endpoints
+ * Get schedule for a specific playoff series
+ * @param seriesLetter - Single letter identifier for the playoff series (A-O)
+ * @param season - The season identifier (8-digit format: YYYYYYYY). Defaults to current season
+ * @returns Promise resolving to schedule for the specified playoff series
+ * @example
+ * ```ts
+ * playoffSeriesSchedule('A', 20232024).then((data) => console.log(data));
+ * ```
  */
-export const playoffSeriesSchedule = (
-   seriesLetter: string,
-   season?: string,
+export const playoffSeriesSchedule = async (
+   seriesLetter: SeriesLetter,
+   season?: Season,
 ): Promise<APIResponse<PlayoffSeriesSchedule>> => {
    const parsed = SeriesAndSeasonParams({
       seriesLetter,
@@ -336,12 +411,12 @@ export const playoffSeriesSchedule = (
    });
 
    if (isParseError(parsed)) {
-      return Promise.resolve({
+      return {
          status: 'error',
          error: new ValidationError(parsed.summary, {
             endpoint: _paths.playoffSeriesSchedule,
          }),
-      });
+      };
    }
    // series letter is a single character from A to O (/[a-oA-O]/)
    // Are series letters assigned in a pre determined manner?
@@ -349,30 +424,36 @@ export const playoffSeriesSchedule = (
 };
 
 /**
- * Access where-to-watch related endpoints
+ * Get information about where games are available to watch
+ * @returns Promise resolving to streaming and broadcast availability information
+ * @example
+ * ```ts
+ * whereToWatch().then((data) => console.log(data));
+ * ```
  */
-export const whereToWatch = (): Promise<APIResponse<WhereToWatch>> =>
+export const whereToWatch = async (): Promise<APIResponse<WhereToWatch>> =>
    nhlClient.get(_paths.whereToWatch);
 
 /**
- * Access network related endpoints
+ * Get TV network schedule for a specific date
+ * @param date - Date to get TV schedule for (Date object or ISO date string 'YYYY-MM-DD'). Defaults to current date
+ * @returns Promise resolving to TV schedule data with network broadcast information
+ * @example
+ * ```ts
+ * networkTVSchedule('2023-11-15').then((data) => console.log(data));
+ * ```
  */
-/**
- * Get TV schedule data for a specific date
- * @param date - Date to get TV schedule data for (optional)
- * @returns Promise resolving to TV schedule data
- */
-export const networkTVSchedule = (
+export const networkTVSchedule = async (
    date?: Date | string,
 ): Promise<APIResponse<NetworkTVSchedule>> => {
    const parsedDate = NHLDate(date ?? getCurrentDate());
    if (isParseError(parsedDate)) {
-      return Promise.resolve({
+      return {
          status: 'error',
          error: new ValidationError(parsedDate.summary, {
             endpoint: _paths.networkTVSchedule,
          }),
-      });
+      };
    }
    return nhlClient.get(
       route(_paths.networkTVSchedule, { date: parsedDate }),

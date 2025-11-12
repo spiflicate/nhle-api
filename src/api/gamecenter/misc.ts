@@ -1,11 +1,18 @@
 /**
- * @module api/misc
- * @description Miscellaneous NHL API endpoints for meta information, location data, and other utility functions
+ * @module api/gamecenter/misc
+ * @description Miscellaneous NHL API endpoints for meta information, location data, and utility functions
  */
 
 import nhlClient from '#/client/index.ts';
 import type { APIResponse } from '#/client/types.ts';
 import { ValidationError } from '#/errors/index.ts';
+import type {
+   CountryCode,
+   GameId,
+   PostalCode,
+   SeriesLetter,
+   Year,
+} from '#/types/index.ts';
 import type {
    GameMeta,
    LocationInfo,
@@ -15,10 +22,10 @@ import type {
    PostalCodeInfo,
 } from '#/types/responses/gamecenter/index.ts';
 import {
-   CountryCode,
-   GameId,
+   CountryCode as CountryCodeAT,
+   GameId as GameIdAT,
    isParseError,
-   PostalCode,
+   PostalCode as PostalCodeAT,
    SeriesParams,
 } from '#/utils/schemas.ts';
 import { route } from '#/utils/utils.ts';
@@ -32,31 +39,46 @@ const _paths = {
    partnerGame: 'partner-game/{countryCode}/now',
 };
 
-// returns a basic array of all valid NHL seasons
-export const seasons = (): Promise<APIResponse<NHLSeasons>> => {
+/**
+ * Get list of all valid NHL seasons
+ * @returns Promise resolving to array of all NHL seasons
+ * @example
+ * ```ts
+ * seasons().then((data) => console.log(data));
+ * ```
+ */
+export const seasons = async (): Promise<APIResponse<NHLSeasons>> => {
    return nhlClient.get(_paths.season);
 };
 
+/**
+ * Access meta information endpoints
+ * @description Get metadata about playoff series and games
+ */
 export const meta = {
    /**
     * Get meta information for a playoff series
     *
-    * @param year - The year in YYYY format
-    * @param seriesLetter - Single letter identifier for the playoff series
+    * @param seriesLetter - Single letter identifier for the playoff series (A-O)
+    * @param year - The year in YYYY format. Defaults to current year
     * @returns Promise resolving to playoff series meta information
+    * @example
+    * ```ts
+    * meta.playoffSeries('A', 2023).then((data) => console.log(data));
+    * ```
     */
-   playoffSeries: (
-      seriesLetter: string,
-      year?: number | string,
+   playoffSeries: async (
+      seriesLetter: SeriesLetter,
+      year?: Year,
    ): Promise<APIResponse<PlayoffSeriesMeta>> => {
       const parsed = SeriesParams({ year, seriesLetter });
       if (isParseError(parsed)) {
-         return Promise.resolve({
+         return {
             status: 'error',
             error: new ValidationError(parsed.summary, {
                endpoint: _paths.metaPlayoffSeries,
             }),
-         });
+         };
       }
       return nhlClient.get(route(_paths.metaPlayoffSeries, parsed));
    },
@@ -64,18 +86,22 @@ export const meta = {
    /**
     * Get meta information for a specific game
     *
-    * @param gameId - The unique game identifier
+    * @param gameId - The unique game identifier (10-digit format)
     * @returns Promise resolving to game meta information
+    * @example
+    * ```ts
+    * meta.game(2023020001).then((data) => console.log(data));
+    * ```
     */
-   game: (gameId: string | number): Promise<APIResponse<GameMeta>> => {
-      const parsedGameId = GameId(gameId);
+   game: async (gameId: GameId): Promise<APIResponse<GameMeta>> => {
+      const parsedGameId = GameIdAT(gameId);
       if (isParseError(parsedGameId)) {
-         return Promise.resolve({
+         return {
             status: 'error',
             error: new ValidationError(parsedGameId.summary, {
                endpoint: _paths.metaGame,
             }),
-         });
+         };
       }
       return nhlClient.get(
          route(_paths.metaGame, { gameId: parsedGameId }),
@@ -84,22 +110,27 @@ export const meta = {
 };
 
 /**
- * Lookup information based on postal code
+ * Lookup information based on postal/zip code
  *
- * @param postalCode - The postal/zip code to lookup
- * @returns Promise resolving to postal code information
+ * @param postalCode - The postal/zip code to lookup (US or Canadian format)
+ * @returns Promise resolving to location information including lat/long coordinates
+ * @example
+ * ```ts
+ * postalLookup('10001').then((data) => console.log(data)); // US zip
+ * postalLookup('M5H 2N2').then((data) => console.log(data)); // Canadian postal
+ * ```
  */
-export const postalLookup = (
-   postalCode: string,
+export const postalLookup = async (
+   postalCode: PostalCode,
 ): Promise<APIResponse<PostalCodeInfo>> => {
-   const parsedPostalCode = PostalCode(postalCode);
+   const parsedPostalCode = PostalCodeAT(postalCode);
    if (isParseError(parsedPostalCode)) {
-      return Promise.resolve({
+      return {
          status: 'error',
          error: new ValidationError(parsedPostalCode.summary, {
             endpoint: _paths.postalLookup,
          }),
-      });
+      };
    }
    return nhlClient.get(
       route(_paths.postalLookup, { postalCode: parsedPostalCode }),
@@ -107,32 +138,40 @@ export const postalLookup = (
 };
 
 /**
- * Get location information
+ * Get location information based on IP address
  *
  * @returns Promise resolving to the location determined by the API
- *          (assumed to be based on the user's IP address)
+ *          (based on the user's IP address)
+ * @example
+ * ```ts
+ * location().then((data) => console.log(data));
+ * ```
  */
-export const location = (): Promise<APIResponse<LocationInfo>> => {
+export const location = async (): Promise<APIResponse<LocationInfo>> => {
    return nhlClient.get(_paths.location);
 };
 
 /**
  * Get partner game information for a specific country
  *
- * @param countryCode - The two-letter country code (e.g. 'ca', 'se', 'cz', etc.)
- * @returns Promise resolving to partner game information
+ * @param countryCode - The three-letter country code (e.g., 'USA', 'CAN', 'SWE')
+ * @returns Promise resolving to partner game information for the country
+ * @example
+ * ```ts
+ * partnerGame('USA').then((data) => console.log(data));
+ * ```
  */
-export const partnerGame = (
-   countryCode: string,
+export const partnerGame = async (
+   countryCode: CountryCode,
 ): Promise<APIResponse<PartnerGameInfo>> => {
-   const parsedCountryCode = CountryCode(countryCode);
+   const parsedCountryCode = CountryCodeAT(countryCode);
    if (isParseError(parsedCountryCode)) {
-      return Promise.resolve({
+      return {
          status: 'error',
          error: new ValidationError(parsedCountryCode.summary, {
             endpoint: _paths.partnerGame,
          }),
-      });
+      };
    }
    return nhlClient.get(
       route(_paths.partnerGame, { countryCode: parsedCountryCode }),
