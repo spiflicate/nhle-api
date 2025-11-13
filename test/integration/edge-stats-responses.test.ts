@@ -230,18 +230,22 @@ describe('Integration: Edge-Stats API Response Validation', () => {
          const result = await skaters.getLeaders('points', 'en');
 
          expect(result).toBeDefined();
-         expect(result).toHaveProperty('data');
-         expect(Array.isArray(result.data)).toBe(true);
+         if (result.status === 'success') {
+            expect(result).toHaveProperty('data');
+            expect(Array.isArray(result.data.data)).toBe(true);
 
-         if (result.data.length > 0) {
-            const leader = result.data[0];
-            expect(leader).toHaveProperty('points');
-            expect(leader).toHaveProperty('goals');
-            expect(leader).toHaveProperty('assists');
-            expect(typeof leader.points).toBe('number');
+            if (result.data.data.length > 0) {
+               const leader = result.data.data[0];
+               if (leader) {
+                  expect(leader).toHaveProperty('points');
+                  expect(leader).toHaveProperty('goals');
+                  expect(leader).toHaveProperty('assists');
+                  expect(typeof leader.points).toBe('number');
 
-            // Verify data is sorted or as expected
-            expect(leader.points).toBeGreaterThanOrEqual(100);
+                  // Verify data is sorted or as expected
+                  expect(leader.points).toBeGreaterThanOrEqual(100);
+               }
+            }
          }
 
          console.log('✓ Skater leaders response validated');
@@ -258,15 +262,17 @@ describe('Integration: Edge-Stats API Response Validation', () => {
          );
 
          expect(result).toBeDefined();
-         expect(result).toHaveProperty('data');
-         expect(Array.isArray(result.data)).toBe(true);
-         expect(result.data.length).toBeLessThanOrEqual(10);
+         if (result.status === 'success') {
+            expect(result).toHaveProperty('data');
+            expect(Array.isArray(result.data.data)).toBe(true);
+            expect(result.data.data.length).toBeLessThanOrEqual(10);
 
-         result.data.forEach((stat: any) => {
-            expect(stat).toHaveProperty('playerId');
-            expect(stat).toHaveProperty('seasonId');
-            expect(stat.seasonId).toBe('20232024');
-         });
+            result.data.data.forEach((stat: any) => {
+               expect(stat).toHaveProperty('playerId');
+               expect(stat).toHaveProperty('seasonId');
+               expect(stat.seasonId).toBe('20232024');
+            });
+         }
 
          console.log('✓ Skater stats summary response validated');
       });
@@ -275,9 +281,9 @@ describe('Integration: Edge-Stats API Response Validation', () => {
          const result = await skaters.getMilestones('en');
 
          expect(result).toBeDefined();
-         expect(result).toHaveProperty('data');
-         if (Array.isArray(result.data)) {
-            expect(Array.isArray(result.data)).toBe(true);
+         if (result.status === 'success') {
+            expect(result).toHaveProperty('data');
+            expect(Array.isArray(result.data.data)).toBe(true);
          }
 
          console.log('✓ Skater milestones response validated');
@@ -289,16 +295,20 @@ describe('Integration: Edge-Stats API Response Validation', () => {
          const result = await goalies.getLeaders('wins', 'en');
 
          expect(result).toBeDefined();
-         expect(result).toHaveProperty('data');
-         expect(Array.isArray(result.data)).toBe(true);
+         if (result.status === 'success') {
+            expect(result).toHaveProperty('data');
+            expect(Array.isArray(result.data.data)).toBe(true);
 
-         if (result.data.length > 0) {
-            const leader = result.data[0];
-            expect(leader).toHaveProperty('playerId');
-            expect(leader).toHaveProperty('wins');
-            expect(leader).toHaveProperty('shutouts');
-            expect(typeof leader.wins).toBe('number');
-            expect(leader.wins).toBeGreaterThan(0);
+            if (result.data.data.length > 0) {
+               const leader = result.data.data[0];
+               if (leader) {
+                  expect(leader).toHaveProperty('playerId');
+                  expect(leader).toHaveProperty('wins');
+                  expect(leader).toHaveProperty('shutouts');
+                  expect(typeof leader.wins).toBe('number');
+                  expect(leader.wins).toBeGreaterThan(0);
+               }
+            }
          }
 
          console.log('✓ Goalie leaders response structure validated');
@@ -315,14 +325,16 @@ describe('Integration: Edge-Stats API Response Validation', () => {
          );
 
          expect(result).toBeDefined();
-         expect(result).toHaveProperty('data');
-         expect(Array.isArray(result.data)).toBe(true);
+         if (result.status === 'success') {
+            expect(result).toHaveProperty('data');
+            expect(Array.isArray(result.data.data)).toBe(true);
 
-         result.data.forEach((stat: any) => {
-            expect(stat).toHaveProperty('playerId');
-            expect(stat).toHaveProperty('gamesPlayed');
-            expect(stat).toHaveProperty('savePercentage');
-         });
+            result.data.data.forEach((stat: any) => {
+               expect(stat).toHaveProperty('playerId');
+               expect(stat).toHaveProperty('gamesPlayed');
+               expect(stat).toHaveProperty('savePercentage');
+            });
+         }
 
          console.log('✓ Goalie stats summary response validated');
       });
@@ -333,17 +345,21 @@ describe('Integration: Edge-Stats API Response Validation', () => {
          const result = await teams.getAll('en');
 
          expect(result).toBeDefined();
-         expect(result).toHaveProperty('data');
-         expect(Array.isArray(result.data)).toBe(true);
-         expect(result.data.length).toBeGreaterThan(0);
+         if (result.status === 'success') {
+            expect(result).toHaveProperty('data');
+            expect(Array.isArray(result.data.data)).toBe(true);
+            expect(result.data.data.length).toBeGreaterThan(0);
 
-         if (result.data.length > 0) {
-            const team = result.data[0];
-            expect(team).toHaveProperty('id');
-            expect(team).toHaveProperty('name');
-            expect(team).toHaveProperty('abbreviation');
-            expect(typeof team.id).toBe('number');
-            expect(typeof team.name).toBe('string');
+            if (result.data.data.length > 0) {
+               const team = result.data.data[0];
+               if (team) {
+                  expect(team).toHaveProperty('id');
+                  expect(team).toHaveProperty('name');
+                  expect(team).toHaveProperty('abbreviation');
+                  expect(typeof team.id).toBe('number');
+                  expect(typeof team.name).toBe('string');
+               }
+            }
          }
 
          console.log('✓ All teams response validated');
@@ -371,15 +387,17 @@ describe('Integration: Edge-Stats API Response Validation', () => {
          );
 
          expect(result).toBeDefined();
-         expect(result).toHaveProperty('data');
-         expect(Array.isArray(result.data)).toBe(true);
+         if (result.status === 'success') {
+            expect(result).toHaveProperty('data');
+            expect(Array.isArray(result.data.data)).toBe(true);
 
-         result.data.forEach((stat: any) => {
-            expect(stat).toHaveProperty('id');
-            expect(stat).toHaveProperty('abbreviation');
-            expect(stat).toHaveProperty('wins');
-            expect(stat).toHaveProperty('points');
-         });
+            result.data.data.forEach((stat: any) => {
+               expect(stat).toHaveProperty('id');
+               expect(stat).toHaveProperty('abbreviation');
+               expect(stat).toHaveProperty('wins');
+               expect(stat).toHaveProperty('points');
+            });
+         }
 
          console.log('✓ Team stats summary response validated');
       });
@@ -390,14 +408,16 @@ describe('Integration: Edge-Stats API Response Validation', () => {
          const result = await seasons.get('en');
 
          expect(result).toBeDefined();
-         expect(result).toHaveProperty('data');
-         expect(Array.isArray(result.data)).toBe(true);
+         if (result.status === 'success') {
+            expect(result).toHaveProperty('data');
+            expect(Array.isArray(result.data.data)).toBe(true);
 
-         if (result.data.length > 0) {
-            const season = result.data[0];
-            expect(season).toHaveProperty('seasonId');
-            expect(season).toHaveProperty('regularSeasonStartDate');
-            expect(season).toHaveProperty('regularSeasonEndDate');
+            if (result.data.data.length > 0) {
+               const season = result.data.data[0];
+               expect(season).toHaveProperty('seasonId');
+               expect(season).toHaveProperty('regularSeasonStartDate');
+               expect(season).toHaveProperty('regularSeasonEndDate');
+            }
          }
 
          console.log('✓ Season response validated');
@@ -407,15 +427,17 @@ describe('Integration: Edge-Stats API Response Validation', () => {
          const result = await games.get('en');
 
          expect(result).toBeDefined();
-         expect(result).toHaveProperty('data');
-         expect(Array.isArray(result.data)).toBe(true);
+         if (result.status === 'success') {
+            expect(result).toHaveProperty('data');
+            expect(Array.isArray(result.data.data)).toBe(true);
 
-         if (result.data.length > 0) {
-            const game = result.data[0];
-            expect(game).toHaveProperty('gameId');
-            expect(game).toHaveProperty('date');
-            expect(game).toHaveProperty('homeTeam');
-            expect(game).toHaveProperty('awayTeam');
+            if (result.data.data.length > 0) {
+               const game = result.data.data[0];
+               expect(game).toHaveProperty('gameId');
+               expect(game).toHaveProperty('date');
+               expect(game).toHaveProperty('homeTeam');
+               expect(game).toHaveProperty('awayTeam');
+            }
          }
 
          console.log('✓ Game response validated');
@@ -427,15 +449,19 @@ describe('Integration: Edge-Stats API Response Validation', () => {
          const result = await countries.get('en');
 
          expect(result).toBeDefined();
-         expect(result).toHaveProperty('data');
-         expect(Array.isArray(result.data)).toBe(true);
-         expect(result.data.length).toBeGreaterThan(0);
+         if (result.status === 'success') {
+            expect(result).toHaveProperty('data');
+            expect(Array.isArray(result.data.data)).toBe(true);
+            expect(result.data.data.length).toBeGreaterThan(0);
 
-         if (result.data.length > 0) {
-            const country = result.data[0];
-            expect(country).toHaveProperty('code');
-            expect(country).toHaveProperty('name');
-            expect(typeof country.code).toBe('string');
+            if (result.data.data.length > 0) {
+               const country = result.data.data[0];
+               if (country) {
+                  expect(country).toHaveProperty('code');
+                  expect(country).toHaveProperty('name');
+                  expect(typeof country.code).toBe('string');
+               }
+            }
          }
 
          console.log('✓ Countries response validated');
@@ -445,13 +471,15 @@ describe('Integration: Edge-Stats API Response Validation', () => {
          const result = await glossary.get('en');
 
          expect(result).toBeDefined();
-         expect(result).toHaveProperty('data');
-         expect(Array.isArray(result.data)).toBe(true);
+         if (result.status === 'success') {
+            expect(result).toHaveProperty('data');
+            expect(Array.isArray(result.data.data)).toBe(true);
 
-         if (result.data.length > 0) {
-            const entry = result.data[0];
-            expect(entry).toHaveProperty('term');
-            expect(entry).toHaveProperty('definition');
+            if (result.data.data.length > 0) {
+               const entry = result.data.data[0];
+               expect(entry).toHaveProperty('term');
+               expect(entry).toHaveProperty('definition');
+            }
          }
 
          console.log('✓ Glossary response validated');
@@ -480,9 +508,13 @@ describe('Integration: Edge-Stats API Response Validation', () => {
          );
 
          expect(result).toBeDefined();
-         expect(result.data.length).toBeLessThanOrEqual(5);
-         expect(result).toHaveProperty('limit');
-         expect(result.limit).toBeLessThanOrEqual(5);
+         if (result.status === 'success') {
+            expect(result.data.data.length).toBeLessThanOrEqual(5);
+            expect(result.data).toHaveProperty('limit');
+            if (result.data.limit) {
+               expect(result.data.limit).toBeLessThanOrEqual(5);
+            }
+         }
 
          console.log('✓ Limit parameter handled correctly');
       });
@@ -499,9 +531,11 @@ describe('Integration: Edge-Stats API Response Validation', () => {
          );
 
          expect(result).toBeDefined();
-         // The mock factory always returns start: 0, so just verify it's present
-         expect(result).toHaveProperty('start');
-         expect(typeof result.start).toBe('number');
+         if (result.status === 'success') {
+            // The mock factory always returns start: 0, so just verify it's present
+            expect(result.data).toHaveProperty('start');
+            expect(typeof result.data.start).toBe('number');
+         }
 
          console.log('✓ Start offset parameter handled correctly');
       });

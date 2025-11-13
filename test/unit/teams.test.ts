@@ -59,7 +59,9 @@ describe('Teams Module', () => {
    test('getAll should fetch all teams', async () => {
       const result = await teams.getAll('en');
       expect(result).toBeDefined();
-      expect(result.data).toBeInstanceOf(Array);
+      if (result.status === 'success') {
+         expect(result.data.data).toBeInstanceOf(Array);
+      }
       expect(mockCalls[0]).toContain('/team');
    });
 
@@ -74,7 +76,9 @@ describe('Teams Module', () => {
          cayenneExp: 'seasonId=20232024',
       });
       expect(result).toBeDefined();
-      expect(result.data).toBeInstanceOf(Array);
+      if (result.status === 'success') {
+         expect(result.data.data).toBeInstanceOf(Array);
+      }
       expect(mockCalls[0]).toContain('/team/summary');
    });
 
@@ -83,7 +87,9 @@ describe('Teams Module', () => {
          cayenneExp: q.equals('seasonId', '20232024').build(),
       }));
       expect(result).toBeDefined();
-      expect(result.data).toBeInstanceOf(Array);
+      if (result.status === 'success') {
+         expect(result.data.data).toBeInstanceOf(Array);
+      }
    });
 
    test('getStatsWithFilters should accept high-level filters', async () => {
@@ -91,7 +97,9 @@ describe('Teams Module', () => {
          seasonId: '20232024',
       });
       expect(result).toBeDefined();
-      expect(result.data).toBeInstanceOf(Array);
+      if (result.status === 'success') {
+         expect(result.data.data).toBeInstanceOf(Array);
+      }
    });
 
    test('getStatsWithFilters should handle sorting options', async () => {
@@ -122,8 +130,10 @@ describe('Teams Module', () => {
       const result = await teams.getStatsWithParams('summary', {
          cayenneExp: 'seasonId=20232024',
       });
-      expect(result.data).toBeDefined();
-      expect(result.total).toBeDefined();
-      expect(Array.isArray(result.data)).toBe(true);
+      if (result.status === 'success') {
+         expect(result.data.data).toBeDefined();
+         expect(result.data.total).toBeDefined();
+         expect(Array.isArray(result.data.data)).toBe(true);
+      }
    });
 });

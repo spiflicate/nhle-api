@@ -455,7 +455,10 @@ describe('Game Module', () => {
       });
 
       test('playoffSeriesSchedule should fetch playoff series schedule', async () => {
-         const result = await game.playoffSeriesSchedule('A', testData.seasonId);
+         const result = await game.playoffSeriesSchedule(
+            'A',
+            testData.seasonId,
+         );
          expect(result).toBeDefined();
          expect(typeof result).toBe('object');
          expect(mockCalls[0]).toContain('schedule/playoff-series');
@@ -471,10 +474,7 @@ describe('Game Module', () => {
 
       test('playoffSeriesSchedule should reject invalid series letter', async () => {
          try {
-            await game.playoffSeriesSchedule(
-               'Z' as any,
-               testData.seasonId,
-            );
+            await game.playoffSeriesSchedule('Z' as any, testData.seasonId);
             expect.unreachable();
          } catch {
             // Expected to throw for invalid series letter (must be A-O)

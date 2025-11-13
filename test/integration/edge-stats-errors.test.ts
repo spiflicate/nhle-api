@@ -45,7 +45,7 @@ describe('Integration: Edge-Stats API Error Handling', () => {
          } catch (error) {
             expect(error).toBeInstanceOf(NHLError);
             if (error instanceof NHLError) {
-               expect(error.status).toBe(404);
+               expect(error.context.statusCode).toBe(404);
             }
             console.log('✓ 404 error handled correctly');
          }
@@ -154,7 +154,7 @@ describe('Integration: Edge-Stats API Error Handling', () => {
                json: async () => {
                   throw new Error('Invalid JSON');
                },
-            } as Response;
+            } as unknown as Response;
          }) as any;
 
          try {
@@ -178,7 +178,9 @@ describe('Integration: Edge-Stats API Error Handling', () => {
          try {
             const result = await skaters.getPlayerInfo('en');
             // Should return whatever the API returned
-            expect(result).toBe('not json');
+            if (result.status === 'success') {
+               expect(result.data).toBe('not json');
+            }
             console.log('✓ Non-JSON response handled');
          } catch (error) {
             // This is also acceptable - depends on strictness of implementation

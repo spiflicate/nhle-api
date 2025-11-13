@@ -12,9 +12,9 @@
 
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import * as misc from '#/api/gamecenter/misc.ts';
+import type { APIResponse } from '#/client/types.ts';
 import { ValidationError } from '#/errors/index.ts';
 import { testData } from '../../test-utils.ts';
-import { APIResponse } from '#/client/types.ts';
 
 const expectValidationError = (error: APIResponse<unknown>) => {
    expect(error).toBeDefined();

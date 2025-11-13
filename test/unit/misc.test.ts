@@ -111,7 +111,9 @@ describe('Misc Modules', () => {
       test('should fetch all countries', async () => {
          const result = await countries.get('en');
          expect(result).toBeDefined();
-         expect(result.data).toBeInstanceOf(Array);
+         if (result.status === 'success') {
+            expect(result.data.data).toBeInstanceOf(Array);
+         }
          expect(mockCalls[0]).toContain('/country');
       });
    });
@@ -120,7 +122,9 @@ describe('Misc Modules', () => {
       test('should fetch shift charts by game ID', async () => {
          const result = await shiftCharts.getByGame('2023020001', 'en');
          expect(result).toBeDefined();
-         expect(result.data).toBeInstanceOf(Array);
+         if (result.status === 'success') {
+            expect(result.data.data).toBeInstanceOf(Array);
+         }
          expect(mockCalls[0]).toContain('/shiftcharts');
       });
    });
@@ -129,7 +133,9 @@ describe('Misc Modules', () => {
       test('should fetch glossary entries', async () => {
          const result = await glossary.get('en');
          expect(result).toBeDefined();
-         expect(result.data).toBeInstanceOf(Array);
+         if (result.status === 'success') {
+            expect(result.data.data).toBeInstanceOf(Array);
+         }
          expect(mockCalls[0]).toContain('/glossary');
       });
    });

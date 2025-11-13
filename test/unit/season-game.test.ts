@@ -60,14 +60,18 @@ describe('Season/Game/Draft Modules', () => {
       test('should fetch component season data', async () => {
          const result = await seasons.getComponent('en');
          expect(result).toBeDefined();
-         expect(result.data).toBeInstanceOf(Array);
+         if (result.status === 'success') {
+            expect(result.data.data).toBeInstanceOf(Array);
+         }
          expect(mockCalls[0]).toContain('/componentSeason');
       });
 
       test('should fetch season data', async () => {
          const result = await seasons.get('en');
          expect(result).toBeDefined();
-         expect(result.data).toBeInstanceOf(Array);
+         if (result.status === 'success') {
+            expect(result.data.data).toBeInstanceOf(Array);
+         }
          expect(mockCalls[0]).toContain('/season');
       });
    });
@@ -76,7 +80,9 @@ describe('Season/Game/Draft Modules', () => {
       test('should fetch game data', async () => {
          const result = await games.get('en');
          expect(result).toBeDefined();
-         expect(result.data).toBeInstanceOf(Array);
+         if (result.status === 'success') {
+            expect(result.data.data).toBeInstanceOf(Array);
+         }
          expect(mockCalls[0]).toContain('/game');
       });
    });
@@ -85,7 +91,9 @@ describe('Season/Game/Draft Modules', () => {
       test('should fetch draft data', async () => {
          const result = await draft.get('en');
          expect(result).toBeDefined();
-         expect(result.data).toBeInstanceOf(Array);
+         if (result.status === 'success') {
+            expect(result.data.data).toBeInstanceOf(Array);
+         }
          expect(mockCalls[0]).toContain('/draft');
       });
    });

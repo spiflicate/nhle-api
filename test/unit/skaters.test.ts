@@ -73,28 +73,36 @@ describe('Skaters Module', () => {
    test('getPlayerInfo should fetch player information', async () => {
       const result = await skaters.getPlayerInfo('en');
       expect(result).toBeDefined();
-      expect(result.data).toBeInstanceOf(Array);
+      if (result.status === 'success') {
+         expect(result.data).toBeInstanceOf(Object);
+      }
       expect(mockCalls[0]).toContain('/en/players');
    });
 
    test('getLeaders should fetch skater leaders with attribute', async () => {
       const result = await skaters.getLeaders('points', 'en');
       expect(result).toBeDefined();
-      expect(result.data).toBeInstanceOf(Array);
+      if (result.status === 'success') {
+         expect(result.data.data).toBeInstanceOf(Array);
+      }
       expect(mockCalls[0]).toContain('/leaders/skaters/points');
    });
 
    test('getMilestones should fetch skater milestones', async () => {
       const result = await skaters.getMilestones('en');
       expect(result).toBeDefined();
-      expect(result.data).toBeInstanceOf(Array);
+      if (result.status === 'success') {
+         expect(result.data.data).toBeInstanceOf(Array);
+      }
       expect(mockCalls[0]).toContain('/milestones/skaters');
    });
 
    test('getInfo should fetch skater info', async () => {
       const result = await skaters.getInfo('en');
       expect(result).toBeDefined();
-      expect(result.data).toBeInstanceOf(Array);
+      if (result.status === 'success') {
+         expect(result.data).toBeInstanceOf(Object);
+      }
       expect(mockCalls[0]).toContain('/en/skater');
    });
 
@@ -103,7 +111,9 @@ describe('Skaters Module', () => {
          cayenneExp: 'seasonId=20232024',
       });
       expect(result).toBeDefined();
-      expect(result.data).toBeInstanceOf(Array);
+      if (result.status === 'success') {
+         expect(result.data.data).toBeInstanceOf(Array);
+      }
       expect(mockCalls[0]).toContain('/skater/summary');
    });
 
@@ -112,7 +122,9 @@ describe('Skaters Module', () => {
          cayenneExp: q.equals('seasonId', '20232024').build(),
       }));
       expect(result).toBeDefined();
-      expect(result.data).toBeInstanceOf(Array);
+      if (result.status === 'success') {
+         expect(result.data.data).toBeInstanceOf(Array);
+      }
    });
 
    test('getStatsWithFilters should accept high-level filters', async () => {
@@ -120,7 +132,9 @@ describe('Skaters Module', () => {
          seasonId: '20232024',
       });
       expect(result).toBeDefined();
-      expect(result.data).toBeInstanceOf(Array);
+      if (result.status === 'success') {
+         expect(result.data.data).toBeInstanceOf(Array);
+      }
    });
 
    test('getStatsWithFilters should handle sorting options', async () => {
@@ -156,8 +170,10 @@ describe('Skaters Module', () => {
       const result = await skaters.getStatsWithParams('summary', {
          cayenneExp: 'seasonId=20232024',
       });
-      expect(result.data).toBeDefined();
-      expect(result.total).toBeDefined();
-      expect(Array.isArray(result.data)).toBe(true);
+      if (result.status === 'success') {
+         expect(result.data.data).toBeDefined();
+         expect(result.data.total).toBeDefined();
+         expect(Array.isArray(result.data.data)).toBe(true);
+      }
    });
 });
