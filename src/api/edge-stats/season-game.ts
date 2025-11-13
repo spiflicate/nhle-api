@@ -8,6 +8,7 @@
  */
 
 import { edgeStatsClient } from '#/client/index.ts';
+import type { APIResponse } from '#/client/types.ts';
 import type { Draft, Game, PaginatedResponse, Season } from './types.ts';
 
 /**
@@ -25,7 +26,7 @@ export const seasons = {
     */
    getComponent: async (
       lang: string = 'en',
-   ): Promise<PaginatedResponse<Season>> =>
+   ): Promise<APIResponse<PaginatedResponse<Season>>> =>
       edgeStatsClient.get(`/${lang}/componentSeason`),
 
    /**
@@ -37,7 +38,9 @@ export const seasons = {
     * @example
     * const seasonInfo = await seasons.get('en');
     */
-   get: async (lang: string = 'en'): Promise<PaginatedResponse<Season>> =>
+   get: async (
+      lang: string = 'en',
+   ): Promise<APIResponse<PaginatedResponse<Season>>> =>
       edgeStatsClient.get(`/${lang}/season`),
 };
 
@@ -54,7 +57,9 @@ export const games = {
     * @example
     * const gameInfo = await games.get('en');
     */
-   get: async (lang: string = 'en'): Promise<PaginatedResponse<Game>> =>
+   get: async (
+      lang: string = 'en',
+   ): Promise<APIResponse<PaginatedResponse<Game>>> =>
       edgeStatsClient.get(`/${lang}/game`),
 };
 
@@ -71,6 +76,8 @@ export const draft = {
     * @example
     * const draftInfo = await draft.get('en');
     */
-   get: async (lang: string = 'en'): Promise<PaginatedResponse<Draft>> =>
+   get: async (
+      lang: string = 'en',
+   ): Promise<APIResponse<PaginatedResponse<Draft>>> =>
       edgeStatsClient.get(`/${lang}/draft`),
 };

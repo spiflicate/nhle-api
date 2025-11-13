@@ -8,6 +8,7 @@
  */
 
 import { edgeStatsClient } from '#/client/index.ts';
+import type { APIResponse } from '#/client/types.ts';
 import {
    buildCayenneExp,
    CayenneQueryBuilder,
@@ -49,7 +50,7 @@ export const skaters = {
    getLeaders: async (
       attribute: string,
       lang: string = 'en',
-   ): Promise<PaginatedResponse<SkaterLeader>> =>
+   ): Promise<APIResponse<PaginatedResponse<SkaterLeader>>> =>
       edgeStatsClient.get(`/${lang}/leaders/skaters/${attribute}`),
 
    /**
@@ -63,7 +64,7 @@ export const skaters = {
     */
    getMilestones: async (
       lang: string = 'en',
-   ): Promise<PaginatedResponse<SkaterMilestone>> =>
+   ): Promise<APIResponse<PaginatedResponse<SkaterMilestone>>> =>
       edgeStatsClient.get(`/${lang}/milestones/skaters`),
 
    /**
@@ -104,7 +105,7 @@ export const skaters = {
       report: string,
       params: StatsQueryParams,
       lang: string = 'en',
-   ): Promise<PaginatedResponse<SkaterStats>> =>
+   ): Promise<APIResponse<PaginatedResponse<SkaterStats>>> =>
       edgeStatsClient.get(`/${lang}/skater/${report}`, params),
 
    /**
@@ -136,7 +137,7 @@ export const skaters = {
       report: string,
       buildQuery: (builder: CayenneQueryBuilder) => StatsQueryParams,
       lang: string = 'en',
-   ): Promise<PaginatedResponse<SkaterStats>> => {
+   ): Promise<APIResponse<PaginatedResponse<SkaterStats>>> => {
       const builder = new CayenneQueryBuilder();
       const params = buildQuery(builder);
       return edgeStatsClient.get(`/${lang}/skater/${report}`, params);
@@ -180,7 +181,7 @@ export const skaters = {
          start?: number;
       },
       lang: string = 'en',
-   ): Promise<PaginatedResponse<SkaterStats>> => {
+   ): Promise<APIResponse<PaginatedResponse<SkaterStats>>> => {
       // Build cayenneExp from high-level filters
       const cayenneFilters: Record<string, string | number> = {};
       if (filters?.seasonId) cayenneFilters.seasonId = filters.seasonId;

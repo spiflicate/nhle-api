@@ -147,7 +147,7 @@ describe('Misc Module', () => {
       });
 
       test('meta.playoffSeries should return validation error for invalid series letter', async () => {
-         const result = await misc.meta.playoffSeries('Z', 2024);
+         const result = await misc.meta.playoffSeries('Z' as any, 2024);
          expectValidationError(result);
       });
 

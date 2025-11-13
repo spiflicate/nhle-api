@@ -79,12 +79,6 @@ describe('Season/Game/Draft Modules', () => {
          expect(result.data).toBeInstanceOf(Array);
          expect(mockCalls[0]).toContain('/game');
       });
-
-      test('should fetch game metadata', async () => {
-         const result = await games.getMeta('en');
-         expect(result).toBeDefined();
-         expect(mockCalls[0]).toContain('/game/meta');
-      });
    });
 
    describe('Draft', () => {

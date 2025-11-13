@@ -130,7 +130,7 @@ describe('Player Module', () => {
       });
 
       test('player.gameLog should handle string game type', async () => {
-         await player.gameLog(testData.playerId, 20232024, '2');
+         await player.gameLog(testData.playerId, 20232024, 2);
          expect(mockCalls[0]).toContain('player/');
       });
 
@@ -187,7 +187,7 @@ describe('Player Module', () => {
       });
 
       test('statsLeaders.skaters should handle string game type', async () => {
-         await player.statsLeaders.skaters(20232024, '2');
+         await player.statsLeaders.skaters(20232024, 2);
          expect(mockCalls[0]).toContain('skater-stats-leaders');
       });
 
@@ -214,7 +214,7 @@ describe('Player Module', () => {
       });
 
       test('statsLeaders.goalies should handle string game type', async () => {
-         await player.statsLeaders.goalies(20232024, '2');
+         await player.statsLeaders.goalies(20232024, 2);
          expect(mockCalls[0]).toContain('goalie-stats-leaders');
       });
    });

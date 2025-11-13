@@ -160,7 +160,7 @@ describe('Team Module', () => {
    });
 
    test('clubStats should handle string game type', async () => {
-      await team.clubStats('TOR', 20232024, '2');
+      await team.clubStats('TOR', 20232024, 2);
       expect(mockCalls[0]).toContain('club-stats/TOR');
    });
 

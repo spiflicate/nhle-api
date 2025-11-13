@@ -8,6 +8,7 @@
  */
 
 import { edgeStatsClient } from '#/client/index.ts';
+import type { APIResponse } from '#/client/types.ts';
 import type {
    Config,
    ContentModule,
@@ -64,7 +65,9 @@ export const countries = {
     * @example
     * const countries = await countries.get('en');
     */
-   get: async (lang: string = 'en'): Promise<PaginatedResponse<Country>> =>
+   get: async (
+      lang: string = 'en',
+   ): Promise<APIResponse<PaginatedResponse<Country>>> =>
       edgeStatsClient.get(`/${lang}/country`),
 };
 
@@ -85,7 +88,7 @@ export const shiftCharts = {
    getByGame: async (
       gameId: string | number,
       lang: string = 'en',
-   ): Promise<PaginatedResponse<ShiftChart>> =>
+   ): Promise<APIResponse<PaginatedResponse<ShiftChart>>> =>
       edgeStatsClient.get(`/${lang}/shiftcharts`, {
          cayenneExp: `gameId=${gameId}`,
       }),
@@ -106,7 +109,7 @@ export const glossary = {
     */
    get: async (
       lang: string = 'en',
-   ): Promise<PaginatedResponse<GlossaryEntry>> =>
+   ): Promise<APIResponse<PaginatedResponse<GlossaryEntry>>> =>
       edgeStatsClient.get(`/${lang}/glossary`),
 };
 
@@ -146,6 +149,6 @@ export const franchises = {
     */
    get: async (
       lang: string = 'en',
-   ): Promise<PaginatedResponse<Franchise>> =>
+   ): Promise<APIResponse<PaginatedResponse<Franchise>>> =>
       edgeStatsClient.get(`/${lang}/franchise`),
 };

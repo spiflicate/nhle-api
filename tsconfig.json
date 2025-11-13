@@ -26,11 +26,7 @@
     "src/**/*.ts",
     "src/**/*.d.ts",
     "test/**/*.ts",
-    "test/**/*.d.ts",
-    "../untitled folder/example-data/*.ts",
-    "scripts/*",
-    "../untitled folder/errors.ts",
-    "../untitled folder/val.ts",
+    "test/**/*.d.ts"
   ],
   "exclude": [
     "node_modules",

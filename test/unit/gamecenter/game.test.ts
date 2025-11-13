@@ -471,7 +471,10 @@ describe('Game Module', () => {
 
       test('playoffSeriesSchedule should reject invalid series letter', async () => {
          try {
-            await game.playoffSeriesSchedule('Z', testData.seasonId);
+            await game.playoffSeriesSchedule(
+               'Z' as any,
+               testData.seasonId,
+            );
             expect.unreachable();
          } catch {
             // Expected to throw for invalid series letter (must be A-O)

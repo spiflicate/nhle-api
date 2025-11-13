@@ -78,7 +78,6 @@ export const getSeason = (date: string | Date): string => {
       throw new Error('Invalid date provided, could not extract year');
    }
    if (month && parseInt(month, 10) < 7) {
-      console.log(month, parseInt(month, 10) < 7);
       return `${parseInt(year, 10) - 1}${year}`;
    }
    return `${year}${parseInt(year, 10) + 1}`;

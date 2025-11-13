@@ -8,6 +8,7 @@
  */
 
 import { edgeStatsClient } from '#/client/index.ts';
+import type { APIResponse } from '#/client/types.ts';
 import {
    buildCayenneExp,
    CayenneQueryBuilder,
@@ -37,7 +38,7 @@ export const goalies = {
    getLeaders: async (
       attribute: string,
       lang: string = 'en',
-   ): Promise<PaginatedResponse<GoalieLeader>> =>
+   ): Promise<APIResponse<PaginatedResponse<GoalieLeader>>> =>
       edgeStatsClient.get(`/${lang}/leaders/goalies/${attribute}`),
 
    /**
@@ -66,7 +67,7 @@ export const goalies = {
       report: string,
       params: StatsQueryParams,
       lang: string = 'en',
-   ): Promise<PaginatedResponse<GoalieStats>> =>
+   ): Promise<APIResponse<PaginatedResponse<GoalieStats>>> =>
       edgeStatsClient.get(`/${lang}/goalie/${report}`, params),
 
    /**
@@ -98,7 +99,7 @@ export const goalies = {
       report: string,
       buildQuery: (builder: CayenneQueryBuilder) => StatsQueryParams,
       lang: string = 'en',
-   ): Promise<PaginatedResponse<GoalieStats>> => {
+   ): Promise<APIResponse<PaginatedResponse<GoalieStats>>> => {
       const builder = new CayenneQueryBuilder();
       const params = buildQuery(builder);
       return edgeStatsClient.get(`/${lang}/goalie/${report}`, params);
@@ -142,7 +143,7 @@ export const goalies = {
          start?: number;
       },
       lang: string = 'en',
-   ): Promise<PaginatedResponse<GoalieStats>> => {
+   ): Promise<APIResponse<PaginatedResponse<GoalieStats>>> => {
       // Build cayenneExp from high-level filters
       const cayenneFilters: Record<string, string | number> = {};
       if (filters?.seasonId) cayenneFilters.seasonId = filters.seasonId;
@@ -182,6 +183,6 @@ export const goalies = {
     */
    getMilestones: async (
       lang: string = 'en',
-   ): Promise<PaginatedResponse<GoalieMilestone>> =>
+   ): Promise<APIResponse<PaginatedResponse<GoalieMilestone>>> =>
       edgeStatsClient.get(`/${lang}/milestones/goalies`),
 };

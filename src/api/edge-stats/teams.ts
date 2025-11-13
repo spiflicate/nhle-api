@@ -8,6 +8,7 @@
  */
 
 import { edgeStatsClient } from '#/client/index.ts';
+import type { APIResponse } from '#/client/types.ts';
 import {
    buildCayenneExp,
    CayenneQueryBuilder,
@@ -32,7 +33,9 @@ export const teams = {
     * @example
     * const allTeams = await teams.getAll('en');
     */
-   getAll: async (lang: string = 'en'): Promise<PaginatedResponse<Team>> =>
+   getAll: async (
+      lang: string = 'en',
+   ): Promise<APIResponse<PaginatedResponse<Team>>> =>
       edgeStatsClient.get(`/${lang}/team`),
 
    /**
@@ -72,7 +75,7 @@ export const teams = {
       report: string,
       params: StatsQueryParams,
       lang: string = 'en',
-   ): Promise<PaginatedResponse<TeamStats>> =>
+   ): Promise<APIResponse<PaginatedResponse<TeamStats>>> =>
       edgeStatsClient.get(`/${lang}/team/${report}`, params),
 
    /**
@@ -104,7 +107,7 @@ export const teams = {
       report: string,
       buildQuery: (builder: CayenneQueryBuilder) => StatsQueryParams,
       lang: string = 'en',
-   ): Promise<PaginatedResponse<TeamStats>> => {
+   ): Promise<APIResponse<PaginatedResponse<TeamStats>>> => {
       const builder = new CayenneQueryBuilder();
       const params = buildQuery(builder);
       return edgeStatsClient.get(`/${lang}/team/${report}`, params);
@@ -147,7 +150,7 @@ export const teams = {
          start?: number;
       },
       lang: string = 'en',
-   ): Promise<PaginatedResponse<TeamStats>> => {
+   ): Promise<APIResponse<PaginatedResponse<TeamStats>>> => {
       // Build cayenneExp from high-level filters
       const cayenneFilters: Record<string, string | number> = {};
       if (filters?.seasonId) cayenneFilters.seasonId = filters.seasonId;
