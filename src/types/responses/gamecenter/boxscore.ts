@@ -4,6 +4,7 @@ import type {
    DefaultWithTranslations,
    GameState,
    Market,
+   Position,
 } from './common.js';
 
 export interface GamecenterBoxscore {
@@ -65,8 +66,6 @@ interface PlayerByGameStats {
    awayTeam: PlayerByGameStatsTeam;
    homeTeam: PlayerByGameStatsTeam;
 }
-
-type Position = 'C' | 'R' | 'L' | 'D';
 
 interface PlayerByGameStatsTeam {
    forwards: Forward[];

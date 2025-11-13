@@ -45,10 +45,10 @@ export type TeamRoster = Record<string, unknown>;
 export type TeamRosterSeasons = Record<string, unknown>;
 // export type TeamProspects = Record<string, unknown>;
 export * from './team-prospects.ts';
-export type TeamScheduleMonth = Record<string, unknown>;
 // export type TeamScheduleSeason = Record<string, unknown>;
-export * from './team-schedule-season.ts';
-export type TeamScheduleWeek = Record<string, unknown>;
+// export type TeamScheduleMonth = Record<string, unknown>;
+// export type TeamScheduleWeek = Record<string, unknown>;
+export * from './team-schedule.ts';
 export type TeamStats = Record<string, unknown>;
 export type TeamStatsSeason = Record<string, unknown>;
 

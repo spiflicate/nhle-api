@@ -1,8 +1,5 @@
-import type {
-   Default,
-   DefaultWithTranslations,
-   GameState,
-} from './common.ts';
+import type { Default, DefaultWithTranslations } from './common.ts';
+import type { GameState } from './GameState.ts';
 
 export interface GamecenterLanding {
    id: number;

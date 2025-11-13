@@ -25,11 +25,11 @@ export type GameId = typeof T.GameId.inferIn;
 /**
  * Represents a valid NHL team abbreviation (e.g., NYR, MTL, ...)
  */
-export type TeamAbbrev = typeof T.TeamAbbrev.inferIn;
+export type TeamAbbrev = typeof T.TeamAbbrev.inferIn | (string & {});
 /**
  * Represents a valid NHL team ID
  */
-export type TeamId = typeof T.TeamId.inferIn;
+export type TeamId = typeof T.TeamId.inferIn | (number & {});
 /**
  * Represents a valid NHL game number
  */

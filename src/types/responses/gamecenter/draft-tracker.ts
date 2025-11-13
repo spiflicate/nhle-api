@@ -14,7 +14,7 @@ export interface DraftTracker {
    logoFrUrl: string;
    uiAccentColor: HexColorCode;
    round: number;
-   state: 'over' | string;
+   state: string;
    picks: Pick[];
 }
 
@@ -28,7 +28,7 @@ interface Pick {
    teamPlaceNameWithPreposition: TeamName;
    teamLogoLight: string;
    teamLogoDark: string;
-   state: 'confirmed' | string;
+   state: string;
    lastName: Name;
    firstName: Name;
    positionCode: PositionCode;

@@ -20,73 +20,19 @@ interface Pick {
    overallPick: number;
    teamId: number;
    teamAbbrev: TeamAbbrev;
-   teamName: TeamName;
-   teamCommonName: TeamName;
-   teamPlaceNameWithPreposition: TeamName;
-   displayAbbrev: DisplayAbbrev;
+   teamName: DefaultWithTranslations;
+   teamCommonName: DefaultWithTranslations;
+   teamPlaceNameWithPreposition: DefaultWithTranslations;
+   displayAbbrev: Default;
    teamLogoLight: string;
    teamLogoDark: string;
    teamPickHistory: string;
-   firstName: DisplayAbbrev;
-   lastName: DisplayAbbrev;
+   firstName: Default;
+   lastName: Default;
    positionCode: PositionCode;
-   countryCode: CountryCode;
+   countryCode: string;
    height: number;
    weight: number;
-   amateurLeague: AmateurLeague;
+   amateurLeague: string;
    amateurClubName: string;
 }
-
-type AmateurLeague =
-   | 'OHL'
-   | 'SWEDEN-2'
-   | 'QMJHL'
-   | 'H-EAST'
-   | 'WHL'
-   | 'RUSSIA-JR.'
-   | 'BIG10'
-   | 'USHL'
-   | 'HIGH-MN'
-   | 'NCHC'
-   | 'SWEDEN-JR.'
-   | 'NTDP - USHL'
-   | 'SWEDEN'
-   | 'CZECHIA'
-   | 'FINLAND-JR.'
-   | 'HIGH-ON'
-   | 'CZECHIA-JR.'
-   | 'GERMANY'
-   | 'CCHL'
-   | 'SWE-JR. U18'
-   | 'SWISS-JR.'
-   | 'FINLAND'
-   | 'RUSSIA'
-   | 'BCHL'
-   | 'HIGH-RI'
-   | 'SWISS'
-   | 'HIGH-MA'
-   | string;
-
-type CountryCode =
-   | 'CAN'
-   | 'SWE'
-   | 'USA'
-   | 'CZE'
-   | 'RUS'
-   | 'FIN'
-   | 'CHN'
-   | 'AUS'
-   | 'SVN'
-   | 'SVK'
-   | 'BLR'
-   | 'DEU'
-   | 'ITA'
-   | 'CHE'
-   | 'NOR'
-   | 'DNK'
-   | 'HRV'
-   | string;
-
-type DisplayAbbrev = Default;
-
-type TeamName = DefaultWithTranslations;

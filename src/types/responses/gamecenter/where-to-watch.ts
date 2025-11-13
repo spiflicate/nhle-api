@@ -3,7 +3,7 @@ export interface WhereToWatch {
    active: boolean;
    countryCode: string;
    countryName: string;
-   streamingName?: StreamingName;
+   streamingName?: string;
    streamingSiteUrl?: string;
    streamingLogoUrl?: string;
    primaryBroadcastName?: string;
@@ -13,15 +13,3 @@ export interface WhereToWatch {
    secondaryBroadcastSiteUrl?: string;
    secondaryBroadcastLogoUrl?: string;
 }
-
-export type StreamingName =
-   | 'NHL Live'
-   | 'NHL.TV INTL'
-   | 'ESPN+'
-   | 'ESPN Play'
-   | 'Disney Plus'
-   | 'Disney+'
-   | 'Viaplay'
-   | 'TV24'
-   | 'TV3'
-   | string;
