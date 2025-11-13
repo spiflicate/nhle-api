@@ -309,5 +309,7 @@ export const SeriesParams = type({
 export const ScheduleParams = type({
    team: TeamAbbrev,
    date: NHLDate.or('undefined').pipe((v) => v ?? getCurrentDate()),
-   period: type('"week" | "month" | undefined').pipe((v) => v ?? 'week'),
+   month: NHLMonth.or('undefined').pipe(
+      (v) => v ?? getCurrentDate().slice(0, 7),
+   ),
 });

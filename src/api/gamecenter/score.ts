@@ -36,9 +36,9 @@ const _paths = {
  * score('2023-11-15').then((data) => console.log(data));
  * ```
  */
-export const score = async (
+export async function score(
    date?: Date | string,
-): Promise<APIResponse<NHLScore>> => {
+): Promise<APIResponse<NHLScore>> {
    const parsed = NHLDate(date ?? getCurrentDate());
    if (isParseError(parsed)) {
       return {
@@ -49,7 +49,7 @@ export const score = async (
       };
    }
    return nhlClient.get(route(_paths.score, { date: parsed }));
-};
+}
 
 /**
  * Get current scoreboard information
@@ -59,8 +59,9 @@ export const score = async (
  * scoreboard().then((data) => console.log(data));
  * ```
  */
-export const scoreboard = async (): Promise<APIResponse<NHLScoreboard>> =>
-   nhlClient.get<NHLScoreboard>(_paths.scoreboard.now);
+export async function scoreboard(): Promise<APIResponse<NHLScoreboard>> {
+   return nhlClient.get<NHLScoreboard>(_paths.scoreboard.now);
+}
 
 /**
  * Get scoreboard data for a specific team

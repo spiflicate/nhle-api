@@ -51,10 +51,10 @@ const DraftRankingsEnum = {
  * picks(2023, 1).then((data) => console.log(data));
  * ```
  */
-export const picks = async (
+export async function picks(
    year?: Year,
    round?: DraftRound,
-): Promise<APIResponse<DraftPicks>> => {
+): Promise<APIResponse<DraftPicks>> {
    const parsed = DraftParams({ year, round });
    if (isParseError(parsed)) {
       return {
@@ -68,7 +68,7 @@ export const picks = async (
       return nhlClient.get(route(_paths.draftPicks.byYear, parsed));
 
    return nhlClient.get(route(_paths.draftPicks.byYearAndRound, parsed));
-};
+}
 
 /**
  * Get current draft tracker information for live draft coverage
@@ -78,9 +78,9 @@ export const picks = async (
  * tracker().then((data) => console.log(data));
  * ```
  */
-export const tracker = async (): Promise<APIResponse<DraftTracker>> =>
-   nhlClient.get(_paths.draftTracker);
-
+export async function tracker(): Promise<APIResponse<DraftTracker>> {
+   return nhlClient.get(_paths.draftTracker);
+}
 /**
  * Access draft rankings by category (skaters/goalies, NA/International)
  * @param year - The draft year (defaults to current year if not provided)
@@ -94,15 +94,13 @@ export const tracker = async (): Promise<APIResponse<DraftTracker>> =>
  * rankings(2024).all().then((allRankings) => console.log(allRankings));
  * ```
  */
-export const rankings = (
-   year?: Year,
-): {
+export function rankings(year?: Year): {
    skatersNA: () => Promise<APIResponse<DraftRankings>>;
    skatersIntl: () => Promise<APIResponse<DraftRankings>>;
    goaliesNA: () => Promise<APIResponse<DraftRankings>>;
    goaliesIntl: () => Promise<APIResponse<DraftRankings>>;
    all: () => Promise<APIResponse<DraftRankings>[]>;
-} => {
+} {
    const getRankings = async (
       type: '1' | '2' | '3' | '4',
    ): Promise<APIResponse<DraftRankings>> => {
@@ -160,4 +158,4 @@ export const rankings = (
             getRankings(DraftRankingsEnum.goaliesIntl),
          ]),
    };
-};
+}

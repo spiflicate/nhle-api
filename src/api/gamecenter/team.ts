@@ -7,7 +7,6 @@ import type { APIResponse } from '#/client/types.ts';
 import { ValidationError } from '#/errors/index.ts';
 import type {
    GameType,
-   NHLMonth,
    NHLStandings,
    NHLStandingsSeason,
    Season,
@@ -40,8 +39,11 @@ const paths = {
    clubStatsSeason: 'club-stats-season/{team}',
    standings: 'standings/{date}',
    standingsSeason: 'standings-season',
-   clubSchedule: 'club-schedule/{team}/{period}/{date}',
-   clubScheduleSeason: 'club-schedule-season/{team}/{season}',
+   clubSchedule: {
+      season: 'club-schedule-season/{team}/{season}',
+      month: 'club-schedule/{team}/month/{month}',
+      week: 'club-schedule/{team}/week/{date}',
+   },
 };
 
 /**
@@ -214,113 +216,127 @@ export const standingsSeason = async (): Promise<
 };
 
 /**
- * Internal helper function for club schedule endpoints
- * @private
+ * Get the team schedule for any seven-day period
+ * @param team - The team abbreviation (e.g., 'TOR', 'MTL', 'NYR')
+ * @param date - The date indicating the start of the seven-day period (Date object or ISO date string 'YYYY-MM-DD').
+ * Defaults to current date
+ * @returns A promise that resolves to the club schedule for the specified week
+ *
+ * @example
+ * ```ts
+ * // Get the schedule for the Chicago Blackhawks for the week of November 4, 2023
+ * // This returns the schedule from November 4 to November 10, 2023
+ * gc.team.schedule.week('CHI', '2023-11-04').then((data) => {
+ *    console.log(data);
+ * });
+ * ```
  */
-const clubSchedule = async (
+async function clubScheduleWeek(
    team: TeamAbbrev,
    date?: Date | string,
-   period?: 'week' | 'month',
-): Promise<APIResponse<TeamScheduleWeek | TeamScheduleMonth>> => {
-   const parsed = ScheduleParams({ team, date, period });
+): Promise<APIResponse<TeamScheduleWeek>>;
+async function clubScheduleWeek(
+   team: string,
+   date?: Date | string,
+): Promise<APIResponse<TeamScheduleWeek>>;
+async function clubScheduleWeek(
+   team: TeamAbbrev | string,
+   date?: Date | string,
+): Promise<APIResponse<TeamScheduleWeek>> {
+   const parsed = ScheduleParams({ team, date });
    if (isParseError(parsed)) {
       return {
          status: 'error',
          error: new ValidationError(parsed.summary, {
-            endpoint: paths.clubSchedule,
+            endpoint: paths.clubSchedule.week,
          }),
       };
    }
-   if (period === 'month') {
-      parsed.date = parsed.date?.slice(0, 7); // 'YYYY-MM'
-   }
-   return nhlClient.get(route(paths.clubSchedule, parsed));
-};
+   return nhlClient.get(route(paths.clubSchedule.week, parsed));
+}
 
 /**
- * Internal helper function for club schedule season endpoint
- * @private
+ * Get the team schedule for any month
+ * @param team - The team abbreviation (e.g., 'TOR', 'MTL', 'NYR')
+ * @param date - The date indicating the month to get the schedule for (ISO date string 'YYYY-MM').
+ * Defaults to current month
+ * @returns A promise that resolves to the club schedule for the specified month
+ *
+ * @example
+ * ```ts
+ * // Get the schedule for the Toronto Maple Leafs for November 2023
+ * gc.team.schedule.month('TOR', '2023-11').then((data) => {
+ *    console.log(data);
+ * });
+ * ```
  */
-const clubScheduleSeason = async (
+async function clubScheduleMonth(
+   team: TeamAbbrev,
+   date?: Date | string,
+): Promise<APIResponse<TeamScheduleMonth>>;
+async function clubScheduleMonth(
+   team: string,
+   date?: Date | string,
+): Promise<APIResponse<TeamScheduleMonth>>;
+async function clubScheduleMonth(
+   team: TeamAbbrev | string,
+   date?: Date | string,
+): Promise<APIResponse<TeamScheduleMonth>> {
+   const parsed = ScheduleParams({ team, month: date });
+   if (isParseError(parsed)) {
+      return {
+         status: 'error',
+         error: new ValidationError(parsed.summary, {
+            endpoint: paths.clubSchedule.month,
+         }),
+      };
+   }
+   return nhlClient.get(route(paths.clubSchedule.month, parsed));
+}
+
+/**
+ * Returns the full season schedule for the provided team and season
+ * @param team - The team abbreviation for the desired team (e.g., 'TOR', 'MTL', 'NYR')
+ * @param season - The specific season (8-digit format: YYYYYYYY, e.g., 20232024). Defaults to current season
+ * @returns A promise that resolves to the full season schedule for the specified team and season
+ * @example
+ * ```ts
+ * // Get the full season schedule for the Boston Bruins for the 2022-2023 season
+ * gc.team.schedule.season('BOS', 20222023).then((data) => {
+ *    console.log(data);
+ * });
+ * ```
+ */
+async function clubScheduleSeason(
    team: TeamAbbrev,
    season?: Season,
-): Promise<APIResponse<TeamScheduleSeason>> => {
+): Promise<APIResponse<TeamScheduleSeason>>;
+async function clubScheduleSeason(
+   team: string,
+   season?: Season,
+): Promise<APIResponse<TeamScheduleSeason>>;
+async function clubScheduleSeason(
+   team: TeamAbbrev | string,
+   season?: Season,
+): Promise<APIResponse<TeamScheduleSeason>> {
    const parsed = TeamAndSeasonParams({ team, season });
    if (isParseError(parsed)) {
       return {
          status: 'error',
          error: new ValidationError(parsed.summary, {
-            endpoint: paths.clubScheduleSeason,
+            endpoint: paths.clubSchedule.season,
          }),
       };
    }
-   return nhlClient.get(route(paths.clubScheduleSeason, parsed));
-};
+   return nhlClient.get(route(paths.clubSchedule.season, parsed));
+}
 
 /**
  * Access team schedule endpoints for different time periods
  * @description Get team schedules by season, week, or month
  */
 export const schedule = {
-   /**
-    * Returns the full season schedule for the provided team and season
-    * @param team - The team abbreviation for the desired team (e.g., 'TOR', 'MTL', 'NYR')
-    * @param season - The specific season (8-digit format: YYYYYYYY, e.g., 20232024). Defaults to current season
-    * @returns A promise that resolves to the full season schedule for the specified team and season
-    * @example
-    * ```ts
-    * // Get the full season schedule for the Boston Bruins for the 2022-2023 season
-    * schedule.season('BOS', 20222023).then((data) => {
-    *    console.log(data);
-    * });
-    * ```
-    */
    season: clubScheduleSeason,
-
-   /**
-    * Get the team schedule for any seven-day period
-    * @param team - The team abbreviation (e.g., 'TOR', 'MTL', 'NYR')
-    * @param date - The date indicating the start of the seven-day period (Date object or ISO date string 'YYYY-MM-DD').
-    * Defaults to current date
-    * @returns A promise that resolves to the club schedule for the specified week
-    *
-    * @example
-    * ```ts
-    * import { team } from 'nhle-api';
-    *
-    * // Get the schedule for the Chicago Blackhawks for the week of November 4, 2023
-    * // This returns the schedule from November 4 to November 10, 2023
-    * team.schedule.week('CHI', '2023-11-04').then((data) => {
-    *    console.log(data);
-    * });
-    * ```
-    */
-   week: async (
-      team: TeamAbbrev,
-      date?: Date | string,
-   ): Promise<APIResponse<TeamScheduleWeek>> =>
-      clubSchedule(team, date, 'week'),
-
-   /**
-    * Get the team schedule for any month
-    * @param team - The team abbreviation (e.g., 'TOR', 'MTL', 'NYR')
-    * @param date - The date indicating the month to get the schedule for (ISO date string 'YYYY-MM').
-    * Defaults to current month
-    * @returns A promise that resolves to the club schedule for the specified month
-    *
-    * @example
-    * ```ts
-    * import { team } from 'nhle-api';
-    *
-    * // Get the schedule for the Toronto Maple Leafs for November 2023
-    * team.schedule.month('TOR', '2023-11').then((data) => {
-    *    console.log(data);
-    * });
-    * ```
-    */
-   month: async (
-      team: TeamAbbrev,
-      date?: NHLMonth,
-   ): Promise<APIResponse<TeamScheduleMonth>> =>
-      clubSchedule(team, date, 'month'),
+   week: clubScheduleWeek,
+   month: clubScheduleMonth,
 };

@@ -41,9 +41,9 @@ const searchUrlParams = { culture: 'en', q: '' };
  * landing(8478402).then((data) => console.log(data)); // Connor McDavid
  * ```
  */
-export const landing = async (
+export async function landing(
    playerId: number | string,
-): Promise<APIResponse<PlayerLanding>> => {
+): Promise<APIResponse<PlayerLanding>> {
    const parsedPlayerId = PlayerId(playerId);
    if (isParseError(parsedPlayerId)) {
       return {
@@ -56,7 +56,7 @@ export const landing = async (
    return nhlClient.get(
       route(_paths.landing, { playerId: parsedPlayerId }),
    );
-};
+}
 
 /**
  * Get player game log for a specific season
@@ -69,11 +69,11 @@ export const landing = async (
  * gameLog(8478402, 20232024, 2).then((data) => console.log(data));
  * ```
  */
-export const gameLog = async (
+export async function gameLog(
    playerId: number | string,
    season?: Season,
    gameType?: GameType,
-): Promise<APIResponse<PlayerGameLog>> => {
+): Promise<APIResponse<PlayerGameLog>> {
    const Parser = BaseParams.merge({
       playerId: PlayerId,
    });
@@ -87,7 +87,7 @@ export const gameLog = async (
       };
    }
    return nhlClient.get(route(_paths.gameLog, parsed));
-};
+}
 
 /**
  * Get player spotlight featuring highlighted players
@@ -97,11 +97,9 @@ export const gameLog = async (
  * spotlight().then((data) => console.log(data));
  * ```
  */
-export const spotlight = async (): Promise<
-   APIResponse<PlayerSpotlight>
-> => {
+export async function spotlight(): Promise<APIResponse<PlayerSpotlight>> {
    return nhlClient.get(_paths.spotlight);
-};
+}
 
 /**
  * Search for players by name
@@ -112,69 +110,71 @@ export const spotlight = async (): Promise<
  * search('McDavid').then((data) => console.log(data));
  * ```
  */
-export const search = async (
+export async function search(
    query: string,
-): Promise<APIResponse<PlayerSearchResult>> => {
+): Promise<APIResponse<PlayerSearchResult>> {
    return nhlPlayerSearch.get('', {
       ...searchUrlParams,
       q: query,
    });
-};
+}
 
 /**
  * Access stats leaders endpoints for skaters and goalies
  * @description Get statistical leaders across various categories
  */
 export const statsLeaders = {
-   /**
-    * Get skater stats leaders
-    * @param season - The season identifier (8-digit format: YYYYYYYY). Defaults to current season
-    * @param gameType - The game type (2 = regular season, 3 = playoffs). Defaults to regular season
-    * @returns Promise resolving to skater statistical leaders
-    * @example
-    * ```ts
-    * statsLeaders.skaters(20232024, 2).then((data) => console.log(data));
-    * ```
-    */
-   skaters: async (
-      season?: Season,
-      gameType?: GameType,
-   ): Promise<APIResponse<SkaterStatsLeaders>> => {
-      const parsed = BaseParams({ season, gameType });
-      if (isParseError(parsed)) {
-         return {
-            status: 'error',
-            error: new ValidationError(parsed.summary, {
-               endpoint: _paths.statsLeaders.skaters,
-            }),
-         };
-      }
-      return nhlClient.get(route(_paths.statsLeaders.skaters, parsed));
-   },
-
-   /**
-    * Get goalie stats leaders
-    * @param season - The season identifier (8-digit format: YYYYYYYY). Defaults to current season
-    * @param gameType - The game type (2 = regular season, 3 = playoffs). Defaults to regular season
-    * @returns Promise resolving to goalie statistical leaders
-    * @example
-    * ```ts
-    * statsLeaders.goalies(20232024, 2).then((data) => console.log(data));
-    * ```
-    */
-   goalies: async (
-      season?: Season,
-      gameType?: GameType,
-   ): Promise<APIResponse<GoalieStatsLeaders>> => {
-      const parsed = BaseParams({ season, gameType });
-      if (isParseError(parsed)) {
-         return {
-            status: 'error',
-            error: new ValidationError(parsed.summary, {
-               endpoint: _paths.statsLeaders.goalies,
-            }),
-         };
-      }
-      return nhlClient.get(route(_paths.statsLeaders.goalies, parsed));
-   },
+   skaters: statsLeadersSkaters,
+   goalies: statsLeadersGoalies,
 };
+/**
+ * Get skater stats leaders
+ * @param season - The season identifier (8-digit format: YYYYYYYY). Defaults to current season
+ * @param gameType - The game type (2 = regular season, 3 = playoffs). Defaults to regular season
+ * @returns Promise resolving to skater statistical leaders
+ * @example
+ * ```ts
+ * statsLeaders.skaters(20232024, 2).then((data) => console.log(data));
+ * ```
+ */
+async function statsLeadersSkaters(
+   season?: Season,
+   gameType?: GameType,
+): Promise<APIResponse<SkaterStatsLeaders>> {
+   const parsed = BaseParams({ season, gameType });
+   if (isParseError(parsed)) {
+      return {
+         status: 'error',
+         error: new ValidationError(parsed.summary, {
+            endpoint: _paths.statsLeaders.skaters,
+         }),
+      };
+   }
+   return nhlClient.get(route(_paths.statsLeaders.skaters, parsed));
+}
+
+/**
+ * Get goalie stats leaders
+ * @param season - The season identifier (8-digit format: YYYYYYYY). Defaults to current season
+ * @param gameType - The game type (2 = regular season, 3 = playoffs). Defaults to regular season
+ * @returns Promise resolving to goalie statistical leaders
+ * @example
+ * ```ts
+ * statsLeaders.goalies(20232024, 2).then((data) => console.log(data));
+ * ```
+ */
+async function statsLeadersGoalies(
+   season?: Season,
+   gameType?: GameType,
+): Promise<APIResponse<GoalieStatsLeaders>> {
+   const parsed = BaseParams({ season, gameType });
+   if (isParseError(parsed)) {
+      return {
+         status: 'error',
+         error: new ValidationError(parsed.summary, {
+            endpoint: _paths.statsLeaders.goalies,
+         }),
+      };
+   }
+   return nhlClient.get(route(_paths.statsLeaders.goalies, parsed));
+}

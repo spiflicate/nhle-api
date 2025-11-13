@@ -47,67 +47,67 @@ const _paths = {
  * seasons().then((data) => console.log(data));
  * ```
  */
-export const seasons = async (): Promise<APIResponse<NHLSeasons>> => {
+export async function seasons(): Promise<APIResponse<NHLSeasons>> {
    return nhlClient.get(_paths.season);
-};
+}
 
 /**
  * Access meta information endpoints
  * @description Get metadata about playoff series and games
  */
 export const meta = {
-   /**
-    * Get meta information for a playoff series
-    *
-    * @param seriesLetter - Single letter identifier for the playoff series (A-O)
-    * @param year - The year in YYYY format. Defaults to current year
-    * @returns Promise resolving to playoff series meta information
-    * @example
-    * ```ts
-    * meta.playoffSeries('A', 2023).then((data) => console.log(data));
-    * ```
-    */
-   playoffSeries: async (
-      seriesLetter: SeriesLetter,
-      year?: Year,
-   ): Promise<APIResponse<PlayoffSeriesMeta>> => {
-      const parsed = SeriesParams({ year, seriesLetter });
-      if (isParseError(parsed)) {
-         return {
-            status: 'error',
-            error: new ValidationError(parsed.summary, {
-               endpoint: _paths.metaPlayoffSeries,
-            }),
-         };
-      }
-      return nhlClient.get(route(_paths.metaPlayoffSeries, parsed));
-   },
-
-   /**
-    * Get meta information for a specific game
-    *
-    * @param gameId - The unique game identifier (10-digit format)
-    * @returns Promise resolving to game meta information
-    * @example
-    * ```ts
-    * meta.game(2023020001).then((data) => console.log(data));
-    * ```
-    */
-   game: async (gameId: GameId): Promise<APIResponse<GameMeta>> => {
-      const parsedGameId = GameIdAT(gameId);
-      if (isParseError(parsedGameId)) {
-         return {
-            status: 'error',
-            error: new ValidationError(parsedGameId.summary, {
-               endpoint: _paths.metaGame,
-            }),
-         };
-      }
-      return nhlClient.get(
-         route(_paths.metaGame, { gameId: parsedGameId }),
-      );
-   },
+   game: metaGame,
+   playoffSeries: metaPlayoffSeries,
 };
+/**
+ * Get meta information for a playoff series
+ *
+ * @param seriesLetter - Single letter identifier for the playoff series (A-O)
+ * @param year - The year in YYYY format. Defaults to current year
+ * @returns Promise resolving to playoff series meta information
+ * @example
+ * ```ts
+ * meta.playoffSeries('A', 2023).then((data) => console.log(data));
+ * ```
+ */
+async function metaPlayoffSeries(
+   seriesLetter: SeriesLetter,
+   year?: Year,
+): Promise<APIResponse<PlayoffSeriesMeta>> {
+   const parsed = SeriesParams({ year, seriesLetter });
+   if (isParseError(parsed)) {
+      return {
+         status: 'error',
+         error: new ValidationError(parsed.summary, {
+            endpoint: _paths.metaPlayoffSeries,
+         }),
+      };
+   }
+   return nhlClient.get(route(_paths.metaPlayoffSeries, parsed));
+}
+
+/**
+ * Get meta information for a specific game
+ *
+ * @param gameId - The unique game identifier (10-digit format)
+ * @returns Promise resolving to game meta information
+ * @example
+ * ```ts
+ * meta.game(2023020001).then((data) => console.log(data));
+ * ```
+ */
+async function metaGame(gameId: GameId): Promise<APIResponse<GameMeta>> {
+   const parsedGameId = GameIdAT(gameId);
+   if (isParseError(parsedGameId)) {
+      return {
+         status: 'error',
+         error: new ValidationError(parsedGameId.summary, {
+            endpoint: _paths.metaGame,
+         }),
+      };
+   }
+   return nhlClient.get(route(_paths.metaGame, { gameId: parsedGameId }));
+}
 
 /**
  * Lookup information based on postal/zip code
@@ -120,9 +120,9 @@ export const meta = {
  * postalLookup('M5H 2N2').then((data) => console.log(data)); // Canadian postal
  * ```
  */
-export const postalLookup = async (
+export async function postalLookup(
    postalCode: PostalCode,
-): Promise<APIResponse<PostalCodeInfo>> => {
+): Promise<APIResponse<PostalCodeInfo>> {
    const parsedPostalCode = PostalCodeAT(postalCode);
    if (isParseError(parsedPostalCode)) {
       return {
@@ -135,7 +135,7 @@ export const postalLookup = async (
    return nhlClient.get(
       route(_paths.postalLookup, { postalCode: parsedPostalCode }),
    );
-};
+}
 
 /**
  * Get location information based on IP address
@@ -147,9 +147,9 @@ export const postalLookup = async (
  * location().then((data) => console.log(data));
  * ```
  */
-export const location = async (): Promise<APIResponse<LocationInfo>> => {
+export async function location(): Promise<APIResponse<LocationInfo>> {
    return nhlClient.get(_paths.location);
-};
+}
 
 /**
  * Get partner game information for a specific country
@@ -161,9 +161,9 @@ export const location = async (): Promise<APIResponse<LocationInfo>> => {
  * partnerGame('USA').then((data) => console.log(data));
  * ```
  */
-export const partnerGame = async (
+export async function partnerGame(
    countryCode: CountryCode,
-): Promise<APIResponse<PartnerGameInfo>> => {
+): Promise<APIResponse<PartnerGameInfo>> {
    const parsedCountryCode = CountryCodeAT(countryCode);
    if (isParseError(parsedCountryCode)) {
       return {
@@ -176,4 +176,4 @@ export const partnerGame = async (
    return nhlClient.get(
       route(_paths.partnerGame, { countryCode: parsedCountryCode }),
    );
-};
+}
