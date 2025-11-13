@@ -1,5 +1,4 @@
 import type {
-   CountryTLA,
    DefaultWithTranslations,
    PositionCode,
    ShootsCatches,
@@ -24,7 +23,7 @@ interface PlayerBase {
    weightInKilograms: number;
    birthDate: string;
    birthCity?: DefaultWithTranslations;
-   birthCountry: CountryTLA;
+   birthCountry: string;
    birthStateProvince?: DefaultWithTranslations;
 }
 
