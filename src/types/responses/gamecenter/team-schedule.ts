@@ -1,8 +1,12 @@
+import type { SeriesLetter, TeamAbbrev } from '#/types/types.ts';
 import type {
    CountryCode,
    Default,
    DefaultWithTranslations,
+   GameScheduleState,
+   GameState,
    Market,
+   PeriodType,
 } from './common.ts';
 
 export interface TeamScheduleSeason {
@@ -11,6 +15,25 @@ export interface TeamScheduleSeason {
    clubTimezone: string;
    clubUTCOffset: string;
    games: Game[];
+}
+
+export interface TeamScheduleMonth {
+   currentMonth: string;
+   nextMonth?: string;
+   calendarUrl?: string;
+   clubTimezone: string;
+   clubUTCOffset: string;
+   games: Game[];
+   previousMonth?: string;
+}
+
+export interface TeamScheduleWeek {
+   nextStartDate?: string;
+   calendarUrl?: string;
+   clubTimezone: string;
+   clubUTCOffset: string;
+   games: Game[];
+   previousStartDate?: string;
 }
 
 interface Game {
@@ -32,15 +55,18 @@ interface Game {
    periodDescriptor: PeriodDescriptor;
    gameOutcome?: GameOutcome;
    winningGoalie?: WinningGoal;
-   winningGoalScorer?: WinningGoal;
-   threeMinRecap?: string;
-   threeMinRecapFr?: string;
-   condensedGame?: string;
-   condensedGameFr?: string;
    gameCenterLink?: string;
+   seriesStatus?: SeriesStatus;
+   seriesUrl?: string;
+   winningGoalScorer?: WinningGoal;
+   specialEvent?: SpecialEvent;
+   threeMinRecap?: string;
+   condensedGame?: string;
+   threeMinRecapFr?: string;
+   condensedGameFr?: string;
    ticketsLink?: string;
    ticketsLinkFr?: string;
-   specialEvent?: SpecialEvent;
+   alternateBroadcasts?: AlternateBroadcast[];
 }
 
 interface Team {
@@ -48,75 +74,48 @@ interface Team {
    commonName: DefaultWithTranslations;
    placeName: DefaultWithTranslations;
    placeNameWithPreposition: DefaultWithTranslations;
-   abbrev: Abbrev;
-   logo: string;
-   darkLogo: string;
+   abbrev: TeamAbbrev;
+   logo?: string;
+   darkLogo?: string;
+   homeSplitSquad?: boolean;
    awaySplitSquad?: boolean;
    score?: number;
+   radioLink?: string;
    airlineLink?: string;
    airlineDesc?: string;
    hotelLink?: string;
    hotelDesc?: string;
-   radioLink?: string;
    promoLink?: string;
    promoDesc?: string;
-   homeSplitSquad?: boolean;
 }
-
-type Abbrev =
-   | 'ANA'
-   | 'BOS'
-   | 'BUF'
-   | 'CAR'
-   | 'CBJ'
-   | 'CGY'
-   | 'CHI'
-   | 'COL'
-   | 'DAL'
-   | 'DET'
-   | 'EDM'
-   | 'FLA'
-   | 'LAK'
-   | 'MIN'
-   | 'MTL'
-   | 'NJD'
-   | 'NSH'
-   | 'NYI'
-   | 'NYR'
-   | 'OTT'
-   | 'PHI'
-   | 'PIT'
-   | 'SEA'
-   | 'SJS'
-   | 'STL'
-   | 'TBL'
-   | 'TOR'
-   | 'UTA'
-   | 'VAN'
-   | 'VGK'
-   | 'WPG'
-   | 'WSH';
 
 interface GameOutcome {
    lastPeriodType: PeriodType;
 }
 
-type PeriodType = 'REG' | 'OT' | 'SO';
-
-type GameScheduleState = 'OK' | 'TBD';
-
-type GameState = 'FINAL' | 'OFF' | 'FUT' | 'LIVE';
-
 interface PeriodDescriptor {
+   number?: number;
    periodType: PeriodType;
    maxRegulationPeriods: number;
+   otPeriods?: number;
 }
 
 interface SpecialEvent {
    parentId: number;
    name: DefaultWithTranslations;
+   lightLogoUrl?: DefaultWithTranslations;
 }
 
+interface SeriesStatus {
+   round: number;
+   seriesAbbrev: string;
+   seriesTitle: string;
+   seriesLetter: SeriesLetter;
+   neededToWin: number;
+   topSeedWins: number;
+   bottomSeedWins: number;
+   gameNumberOfSeries: number;
+}
 interface TvBroadcast {
    id: number;
    market: Market;
@@ -129,4 +128,9 @@ interface WinningGoal {
    playerId: number;
    firstInitial: Default;
    lastName: DefaultWithTranslations;
+}
+
+interface AlternateBroadcast {
+   country: CountryCode;
+   descriptions: Default[];
 }
