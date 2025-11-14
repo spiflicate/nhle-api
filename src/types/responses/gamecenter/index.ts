@@ -29,12 +29,17 @@ export type PlayoffSeries = Record<string, unknown>;
 export type PlayoffSeriesSchedule = Record<string, unknown>;
 
 // response types for misc module of gamecenter api
+// export type PlayoffSeriesMeta = Record<string, unknown>;
+// export type GameMeta = Record<string, unknown>;
+// export type PostalCodeInfo = Record<string, unknown>;
+// export type PartnerGameInfo = Record<string, unknown>;
 export type NHLSeasons = Record<string, unknown>;
-export type PlayoffSeriesMeta = Record<string, unknown>;
-export type GameMeta = Record<string, unknown>;
-export type PostalCodeInfo = Record<string, unknown>;
-export type LocationInfo = Record<string, unknown>;
-export type PartnerGameInfo = Record<string, unknown>;
+export * from './meta.ts';
+export * from './partner-game.ts';
+export * from './postal-code-info.ts';
+export interface LocationInfo {
+   country: string;
+}
 
 // response types for team module of gamecenter api
 // export type NHLStandings = Record<string, unknown>;

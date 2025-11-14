@@ -144,7 +144,7 @@ export const CountryCode = type(/^[a-zA-Z]{2}$/)
    .pipe((v) => v.toLowerCase())
    .describe('a valid ISO 3166-1 alpha-2 country code, e.g. US, CA, RU');
 
-export const PostalCode = type(/^[a-zA-Z]\d[a-zA-Z] \d[a-zA-Z]\d$/)
+export const PostalCode = type(/^[a-zA-Z]\d[a-zA-Z][ -]?\d[a-zA-Z]\d$/)
    .or(type(/^\d{5}$/))
    .describe(
       'a valid postal code, either US ZIP code (5 digit) or Canadian postal code (A1A 1A1 format; space required)',

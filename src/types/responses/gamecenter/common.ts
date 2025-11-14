@@ -2,13 +2,13 @@
  * Common types used in Gamecenter API responses
  */
 
-type Suggestions<T> = T | (string & {});
+type IncompleteOptions<T> = T | (string & {});
 
 /** GameState - The current state of the game. */
 export type GameState = 'OFF' | 'FUT' | 'LIVE' | 'PRE' | 'CRIT' | 'FINAL';
 
 /** GameScheduleState - The current state of the game. */
-export type GameScheduleState = Suggestions<'OK' | 'TBD' | 'CNCL'>;
+export type GameScheduleState = IncompleteOptions<'OK' | 'TBD' | 'CNCL'>;
 
 /** PeriodType - The type of period in the game. */
 export type PeriodType = 'REG' | 'OT' | 'SO';
@@ -51,3 +51,5 @@ export interface DefaultWithTranslations extends Default {
    sv?: string;
    [key: string]: string | undefined;
 }
+
+export type UTSOffset = `+${number}:${number}` | `-${number}:${number}`;
