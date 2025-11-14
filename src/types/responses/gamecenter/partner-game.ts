@@ -1,6 +1,6 @@
 import type { DefaultWithTranslations } from './common.ts';
 
-export interface PartnerGame {
+export interface PartnerGameInfo {
    currentOddsDate: string;
    lastUpdatedUTC: string;
    bettingPartner?: BettingPartner;
