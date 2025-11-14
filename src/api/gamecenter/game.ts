@@ -38,7 +38,6 @@ import {
    Year as YearAT,
 } from '#/utils/schemas.ts';
 import { route } from '#/utils/utils.ts';
-import { goalies } from '../edge-adv/goalies.ts';
 
 const _paths = {
    schedule: 'schedule/{date}',
