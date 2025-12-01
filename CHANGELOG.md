@@ -5,6 +5,49 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1] - 2025-12-01
+
+### Release Notes
+
+This release addresses some partial refactors to improve the codebase for myself, as well as a few bug fixes and enhancements. Response types are still a work in progress and will be further improved in future releases - the target for 0.6.0 is to have all endpoints fully typed.
+
+### Added
+
+- Team schedule interfaces for season, month, and week data structures
+- PostalCode and PostalCodeInfo type definitions
+- GameMeta and PlayoffSeriesMeta interfaces for enhanced game data structures
+- PartnerGameInfo interface for partner game data
+
+### Changed
+
+- Refactored API endpoint functions from arrow functions to named function declarations for better debugging
+- Consolidated API paths into a single `_paths.ts` file for improved maintainability
+- Updated ScheduleParams to include month parameter with default value
+- Simplified type definitions and removed DefaultWithTranslations for clarity
+- Updated GameScheduleState type definition for improved consistency
+- Improved draft rankings function error handling and response structure when using `all()`
+- Enhanced Game Center API documentation with detailed JSDoc comments
+- Updated team statistics functions for improved clarity and consistency
+
+### Fixed
+
+- Corrected pptReplay endpoints to use correct parameters
+- Updated PostalCode validation regex to accommodate optional space
+- Changed birthCountry type from CountryTLA to string for simplicity
+- Renamed Suggestions type to IncompleteOptions for consistency
+- Renamed PartnerGame interface to PartnerGameInfo
+- Removed erroneous import from game.ts
+- Updated NHL_START_DATE and NHL_END_DATE to reflect accurate season dates
+- Improved type validator definitions
+- Fixed ScheduleParams handling in team.schedule endpoint
+- Removed unused WADL check script from package.json
+
+### Technical
+
+- Added comprehensive schedule endpoint tests
+- Enhanced type safety across Game Center responses
+- Improved module descriptions and parameter documentation
+
 ## [0.5.0] - 2025-11-10
 
 ### Added
@@ -30,12 +73,3 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Configured dual ESM/CJS package exports
 - Added MIT license
 - Added changelog
-
-## [Unreleased]
-
-### Planned
-
-- Additional API endpoint coverage
-- Enhanced error handling
-- More comprehensive examples and documentation
-- Enhanced response types for better type safety
