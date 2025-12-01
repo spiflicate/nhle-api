@@ -30,21 +30,7 @@ import {
    TeamAndSeasonParams,
 } from '#/utils/schemas.ts';
 import { route } from '../../utils/utils.ts';
-
-const paths = {
-   rosterSeasons: 'roster-season/{team}',
-   roster: 'roster/{team}/{season}',
-   prospects: 'prospects/{team}',
-   clubStats: 'club-stats/{team}/{season}/{gameType}',
-   clubStatsSeason: 'club-stats-season/{team}',
-   standings: 'standings/{date}',
-   standingsSeason: 'standings-season',
-   clubSchedule: {
-      season: 'club-schedule-season/{team}/{season}',
-      month: 'club-schedule/{team}/month/{month}',
-      week: 'club-schedule/{team}/week/{date}',
-   },
-};
+import { _teamPaths as _paths } from './_paths.ts';
 
 /**
  * Get available roster seasons for a team
@@ -55,20 +41,20 @@ const paths = {
  * rosterSeasons('TOR').then((data) => console.log(data));
  * ```
  */
-export const rosterSeasons = async (
+export async function rosterSeasons(
    team: TeamAbbrev,
-): Promise<APIResponse<TeamRosterSeasons>> => {
+): Promise<APIResponse<TeamRosterSeasons>> {
    const parsed = TeamAbbrevAT(team);
    if (isParseError(parsed)) {
       return {
          status: 'error',
          error: new ValidationError(parsed.summary, {
-            endpoint: paths.rosterSeasons,
+            endpoint: _paths.rosterSeasons,
          }),
       };
    }
-   return nhlClient.get(route(paths.rosterSeasons, { team: parsed }));
-};
+   return nhlClient.get(route(_paths.rosterSeasons, { team: parsed }));
+}
 
 /**
  * Get team roster for a specific season
@@ -80,21 +66,21 @@ export const rosterSeasons = async (
  * roster('TOR', 20232024).then((data) => console.log(data));
  * ```
  */
-export const roster = async (
+export async function roster(
    team: string,
    season?: string | number,
-): Promise<APIResponse<TeamRoster>> => {
+): Promise<APIResponse<TeamRoster>> {
    const parsed = TeamAndSeasonParams({ team, season });
    if (isParseError(parsed)) {
       return {
          status: 'error',
          error: new ValidationError(parsed.summary, {
-            endpoint: paths.roster,
+            endpoint: _paths.roster,
          }),
       };
    }
-   return nhlClient.get(route(paths.roster, parsed));
-};
+   return nhlClient.get(route(_paths.roster, parsed));
+}
 
 /**
  * Get team prospects information
@@ -105,20 +91,20 @@ export const roster = async (
  * prospects('TOR').then((data) => console.log(data));
  * ```
  */
-export const prospects = async (
+export async function prospects(
    team: TeamAbbrev,
-): Promise<APIResponse<TeamProspects>> => {
+): Promise<APIResponse<TeamProspects>> {
    const parsed = TeamAbbrevAT(team);
    if (isParseError(parsed)) {
       return {
          status: 'error',
          error: new ValidationError(parsed.summary, {
-            endpoint: paths.prospects,
+            endpoint: _paths.prospects,
          }),
       };
    }
-   return nhlClient.get(route(paths.prospects, { team: parsed }));
-};
+   return nhlClient.get(route(_paths.prospects, { team: parsed }));
+}
 
 /**
  * Get team statistics for a specific season
@@ -131,11 +117,11 @@ export const prospects = async (
  * stats('TOR', 20232024, 'REG').then((data) => console.log(data));
  * ```
  */
-export const stats = async (
+export async function stats(
    team: TeamAbbrev,
    season?: Season,
    gameType?: GameType,
-): Promise<APIResponse<TeamStats>> => {
+): Promise<APIResponse<TeamStats>> {
    const Parser = BaseParams.merge({
       team: TeamAbbrevAT,
    });
@@ -144,12 +130,12 @@ export const stats = async (
       return {
          status: 'error',
          error: new ValidationError(parsed.summary, {
-            endpoint: paths.clubStats,
+            endpoint: _paths.clubStats,
          }),
       };
    }
-   return nhlClient.get(route(paths.clubStats, parsed));
-};
+   return nhlClient.get(route(_paths.clubStats, parsed));
+}
 
 /**
  * Get valid season and game type options for a team's statistics
@@ -162,20 +148,20 @@ export const stats = async (
  * statsSeason('TOR').then((data) => console.log(data));
  * ```
  */
-export const statsSeason = async (
+export async function statsSeason(
    team: TeamAbbrev,
-): Promise<APIResponse<TeamStatsSeason>> => {
+): Promise<APIResponse<TeamStatsSeason>> {
    const parsed = TeamAbbrevAT(team);
    if (isParseError(parsed)) {
       return {
          status: 'error',
          error: new ValidationError(parsed.summary, {
-            endpoint: paths.clubStatsSeason,
+            endpoint: _paths.clubStatsSeason,
          }),
       };
    }
-   return nhlClient.get(route(paths.clubStatsSeason, { team: parsed }));
-};
+   return nhlClient.get(route(_paths.clubStatsSeason, { team: parsed }));
+}
 
 /**
  * Get league standings for a specific date
@@ -186,20 +172,20 @@ export const statsSeason = async (
  * standings('2023-11-15').then((data) => console.log(data));
  * ```
  */
-export const standings = async (
+export async function standings(
    date?: Date | string,
-): Promise<APIResponse<NHLStandings>> => {
+): Promise<APIResponse<NHLStandings>> {
    const parsed = NHLDate(date ?? getCurrentDate());
    if (isParseError(parsed)) {
       return {
          status: 'error',
          error: new ValidationError(parsed.summary, {
-            endpoint: paths.standings,
+            endpoint: _paths.standings,
          }),
       };
    }
-   return nhlClient.get(route(paths.standings, { date: parsed }));
-};
+   return nhlClient.get(route(_paths.standings, { date: parsed }));
+}
 
 /**
  * Get current season standings information
@@ -209,11 +195,11 @@ export const standings = async (
  * standingsSeason().then((data) => console.log(data));
  * ```
  */
-export const standingsSeason = async (): Promise<
+export async function standingsSeason(): Promise<
    APIResponse<NHLStandingsSeason>
-> => {
-   return nhlClient.get(paths.standingsSeason);
-};
+> {
+   return nhlClient.get(_paths.standingsSeason);
+}
 
 /**
  * Get the team schedule for any seven-day period
@@ -231,15 +217,15 @@ export const standingsSeason = async (): Promise<
  * });
  * ```
  */
-async function clubScheduleWeek(
+async function scheduleWeek(
    team: TeamAbbrev,
    date?: Date | string,
 ): Promise<APIResponse<TeamScheduleWeek>>;
-async function clubScheduleWeek(
+async function scheduleWeek(
    team: string,
    date?: Date | string,
 ): Promise<APIResponse<TeamScheduleWeek>>;
-async function clubScheduleWeek(
+async function scheduleWeek(
    team: TeamAbbrev | string,
    date?: Date | string,
 ): Promise<APIResponse<TeamScheduleWeek>> {
@@ -248,11 +234,11 @@ async function clubScheduleWeek(
       return {
          status: 'error',
          error: new ValidationError(parsed.summary, {
-            endpoint: paths.clubSchedule.week,
+            endpoint: _paths.clubSchedule.week,
          }),
       };
    }
-   return nhlClient.get(route(paths.clubSchedule.week, parsed));
+   return nhlClient.get(route(_paths.clubSchedule.week, parsed));
 }
 
 /**
@@ -270,15 +256,15 @@ async function clubScheduleWeek(
  * });
  * ```
  */
-async function clubScheduleMonth(
+async function scheduleMonth(
    team: TeamAbbrev,
    date?: Date | string,
 ): Promise<APIResponse<TeamScheduleMonth>>;
-async function clubScheduleMonth(
+async function scheduleMonth(
    team: string,
    date?: Date | string,
 ): Promise<APIResponse<TeamScheduleMonth>>;
-async function clubScheduleMonth(
+async function scheduleMonth(
    team: TeamAbbrev | string,
    date?: Date | string,
 ): Promise<APIResponse<TeamScheduleMonth>> {
@@ -287,11 +273,11 @@ async function clubScheduleMonth(
       return {
          status: 'error',
          error: new ValidationError(parsed.summary, {
-            endpoint: paths.clubSchedule.month,
+            endpoint: _paths.clubSchedule.month,
          }),
       };
    }
-   return nhlClient.get(route(paths.clubSchedule.month, parsed));
+   return nhlClient.get(route(_paths.clubSchedule.month, parsed));
 }
 
 /**
@@ -307,15 +293,15 @@ async function clubScheduleMonth(
  * });
  * ```
  */
-async function clubScheduleSeason(
+async function scheduleSeason(
    team: TeamAbbrev,
    season?: Season,
 ): Promise<APIResponse<TeamScheduleSeason>>;
-async function clubScheduleSeason(
+async function scheduleSeason(
    team: string,
    season?: Season,
 ): Promise<APIResponse<TeamScheduleSeason>>;
-async function clubScheduleSeason(
+async function scheduleSeason(
    team: TeamAbbrev | string,
    season?: Season,
 ): Promise<APIResponse<TeamScheduleSeason>> {
@@ -324,11 +310,11 @@ async function clubScheduleSeason(
       return {
          status: 'error',
          error: new ValidationError(parsed.summary, {
-            endpoint: paths.clubSchedule.season,
+            endpoint: _paths.clubSchedule.season,
          }),
       };
    }
-   return nhlClient.get(route(paths.clubSchedule.season, parsed));
+   return nhlClient.get(route(_paths.clubSchedule.season, parsed));
 }
 
 /**
@@ -336,7 +322,7 @@ async function clubScheduleSeason(
  * @description Get team schedules by season, week, or month
  */
 export const schedule = {
-   season: clubScheduleSeason,
-   week: clubScheduleWeek,
-   month: clubScheduleMonth,
+   season: scheduleSeason,
+   week: scheduleWeek,
+   month: scheduleMonth,
 };

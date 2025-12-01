@@ -20,22 +20,7 @@ import {
    Year as YearType,
 } from '#/utils/schemas.ts';
 import { route } from '#/utils/utils.ts';
-
-const _paths = {
-   draftPicks: {
-      byYearAndRound: 'draft/picks/{year}/{round}',
-      byYear: 'draft/picks/{year}/all',
-   },
-   draftRankings: 'draft/rankings/{year}/{type}',
-   draftTracker: 'draft-tracker/picks/now',
-};
-
-const DraftRankingsEnum = {
-   skatersNA: '1',
-   skatersIntl: '2',
-   goaliesNA: '3',
-   goaliesIntl: '4',
-} as const;
+import { _draftPaths as _paths } from './_paths.ts';
 
 /**
  * Get draft picks for a specific year and round, or all picks for a year
@@ -101,6 +86,12 @@ export function rankings(year?: Year): {
    goaliesIntl: () => Promise<APIResponse<DraftRankings>>;
    all: () => Promise<APIResponse<DraftRankings>[]>;
 } {
+   const DraftRankingsEnum = {
+      skatersNA: '1',
+      skatersIntl: '2',
+      goaliesNA: '3',
+      goaliesIntl: '4',
+   } as const;
    const getRankings = async (
       type: '1' | '2' | '3' | '4',
    ): Promise<APIResponse<DraftRankings>> => {

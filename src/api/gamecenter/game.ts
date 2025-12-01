@@ -38,30 +38,7 @@ import {
    Year as YearAT,
 } from '#/utils/schemas.ts';
 import { route } from '#/utils/utils.ts';
-
-const _paths = {
-   schedule: 'schedule/{date}',
-   scheduleCalendar: 'schedule-calendar/{date}',
-   playoffBracket: 'playoff-bracket/{year}',
-   playoffSeries: 'playoff-series/{season}',
-   playoffSeriesSchedule: 'schedule/playoff-series/{season}/{seriesLetter}',
-   gamecenter: {
-      playByPlay: 'gamecenter/{gameId}/play-by-play',
-      reports: 'gamecenter/{gameId}/right-rail',
-      landing: 'gamecenter/{gameId}/landing',
-      boxscore: 'gamecenter/{gameId}/boxscore',
-   },
-   wsc: {
-      gameStory: 'wsc/game-story/{gameId}',
-      playByPlay: 'wsc/play-by-play/{gameId}',
-   },
-   pptReplay: {
-      goal: 'ppt-replay/goal/{gameId}/{eventId}',
-      event: 'ppt-replay/{gameId}/{eventId}',
-   },
-   whereToWatch: 'where-to-watch',
-   networkTVSchedule: 'network/tv-schedule/{date}',
-};
+import { _gamePaths as _paths } from './_paths.ts';
 
 /**
  * Get play-by-play data for a specific game

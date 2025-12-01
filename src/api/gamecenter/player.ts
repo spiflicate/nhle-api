@@ -17,17 +17,7 @@ import type {
 import type { GameType, Season } from '#/types/types.ts';
 import { BaseParams, isParseError, PlayerId } from '#/utils/schemas.ts';
 import { route } from '#/utils/utils.ts';
-
-const _paths = {
-   landing: 'player/{playerId}/landing',
-   gameLog: 'player/{playerId}/game-log/{season}/{gameType}',
-   spotlight: 'player-spotlight',
-   statsLeaders: {
-      skaters: 'skater-stats-leaders/{season}/{gameType}',
-      goalies: 'goalie-stats-leaders/{season}/{gameType}',
-   },
-   playerSearch: 'https://search.d3.nhle.com/api/v1/search/player',
-};
+import { _playerPaths as _paths } from './_paths.ts';
 
 const nhlPlayerSearch = createNHLClient(_paths.playerSearch);
 const searchUrlParams = { culture: 'en', q: '' };

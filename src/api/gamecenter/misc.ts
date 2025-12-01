@@ -29,15 +29,7 @@ import {
    SeriesParams,
 } from '#/utils/schemas.ts';
 import { route } from '#/utils/utils.ts';
-
-const _paths = {
-   season: 'season',
-   metaPlayoffSeries: 'meta/playoff-series/{year}/{seriesLetter}',
-   metaGame: 'meta/game/{gameId}',
-   postalLookup: 'postal-lookup/{postalCode}',
-   location: 'location',
-   partnerGame: 'partner-game/{countryCode}/now',
-};
+import { _miscPaths as _paths } from './_paths.ts';
 
 /**
  * Get list of all valid NHL seasons
@@ -59,6 +51,30 @@ export const meta = {
    game: metaGame,
    playoffSeries: metaPlayoffSeries,
 };
+
+/**
+ * Get meta information for a specific game
+ *
+ * @param gameId - The unique game identifier (10-digit format)
+ * @returns Promise resolving to game meta information
+ * @example
+ * ```ts
+ * meta.game(2023020001).then((data) => console.log(data));
+ * ```
+ */
+async function metaGame(gameId: GameId): Promise<APIResponse<GameMeta>> {
+   const parsedGameId = GameIdAT(gameId);
+   if (isParseError(parsedGameId)) {
+      return {
+         status: 'error',
+         error: new ValidationError(parsedGameId.summary, {
+            endpoint: _paths.metaGame,
+         }),
+      };
+   }
+   return nhlClient.get(route(_paths.metaGame, { gameId: parsedGameId }));
+}
+
 /**
  * Get meta information for a playoff series
  *
@@ -84,29 +100,6 @@ async function metaPlayoffSeries(
       };
    }
    return nhlClient.get(route(_paths.metaPlayoffSeries, parsed));
-}
-
-/**
- * Get meta information for a specific game
- *
- * @param gameId - The unique game identifier (10-digit format)
- * @returns Promise resolving to game meta information
- * @example
- * ```ts
- * meta.game(2023020001).then((data) => console.log(data));
- * ```
- */
-async function metaGame(gameId: GameId): Promise<APIResponse<GameMeta>> {
-   const parsedGameId = GameIdAT(gameId);
-   if (isParseError(parsedGameId)) {
-      return {
-         status: 'error',
-         error: new ValidationError(parsedGameId.summary, {
-            endpoint: _paths.metaGame,
-         }),
-      };
-   }
-   return nhlClient.get(route(_paths.metaGame, { gameId: parsedGameId }));
 }
 
 /**

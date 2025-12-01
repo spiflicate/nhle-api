@@ -13,15 +13,7 @@ import {
    TeamAbbrev as Team,
 } from '#/utils/schemas.ts';
 import { route } from '#/utils/utils.ts';
-
-const _paths = {
-   score: 'score/{date}',
-   scoreboard: {
-      now: 'scoreboard/now',
-      byTeam: 'scoreboard/{team}/now',
-      byDate: 'scoreboard/{date}',
-   },
-};
+import { _scorePaths as _paths } from './_paths.ts';
 
 /**
  * Get scores for a specific date
