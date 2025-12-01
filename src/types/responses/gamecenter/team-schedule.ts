@@ -2,7 +2,6 @@ import type { SeriesLetter, TeamAbbrev } from '#/types/types.ts';
 import type {
    CountryCode,
    Default,
-   DefaultWithTranslations,
    GameScheduleState,
    GameState,
    Market,
@@ -41,7 +40,7 @@ interface Game {
    season: number;
    gameType: number;
    gameDate: string;
-   venue: DefaultWithTranslations;
+   venue: Default;
    neutralSite: boolean;
    startTimeUTC: string;
    easternUTCOffset: string;
@@ -71,9 +70,9 @@ interface Game {
 
 interface Team {
    id: number;
-   commonName: DefaultWithTranslations;
-   placeName: DefaultWithTranslations;
-   placeNameWithPreposition: DefaultWithTranslations;
+   commonName: Default;
+   placeName: Default;
+   placeNameWithPreposition: Default;
    abbrev: TeamAbbrev;
    logo?: string;
    darkLogo?: string;
@@ -102,8 +101,8 @@ interface PeriodDescriptor {
 
 interface SpecialEvent {
    parentId: number;
-   name: DefaultWithTranslations;
-   lightLogoUrl?: DefaultWithTranslations;
+   name: Default;
+   lightLogoUrl?: Default;
 }
 
 interface SeriesStatus {
@@ -127,7 +126,7 @@ interface TvBroadcast {
 interface WinningGoal {
    playerId: number;
    firstInitial: Default;
-   lastName: DefaultWithTranslations;
+   lastName: Default;
 }
 
 interface AlternateBroadcast {

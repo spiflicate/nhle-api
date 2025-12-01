@@ -1,4 +1,4 @@
-import type { DefaultWithTranslations } from './common.ts';
+import type { Default } from './common.ts';
 
 export interface PlayoffSeriesMeta {
    seriesTitle: string;
@@ -11,8 +11,8 @@ interface Teams {
 }
 
 interface Seed {
-   name: DefaultWithTranslations;
-   commonName: DefaultWithTranslations;
+   name: Default;
+   commonName: Default;
    tricode: string;
    teamSlug: string;
 }
@@ -30,7 +30,7 @@ interface SeasonStates {
 }
 
 interface Team {
-   name: DefaultWithTranslations;
+   name: Default;
    tricode: string;
    teamId: number;
    teamSlug: string;

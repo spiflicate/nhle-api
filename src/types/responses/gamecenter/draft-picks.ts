@@ -1,16 +1,12 @@
 import type { TeamAbbrev } from '../../types.ts';
-import type {
-   Default,
-   DefaultWithTranslations,
-   PositionCode,
-} from './common.ts';
+import type { Default, PositionCode } from './common.ts';
 
 export interface DraftPicks {
    broadcastStartTimeUTC: string;
    draftYear: number;
    draftYears: number[];
    selectableRounds: number[];
-   state: 'over' | string;
+   state: string;
    picks: Pick[];
 }
 
@@ -20,9 +16,9 @@ interface Pick {
    overallPick: number;
    teamId: number;
    teamAbbrev: TeamAbbrev;
-   teamName: DefaultWithTranslations;
-   teamCommonName: DefaultWithTranslations;
-   teamPlaceNameWithPreposition: DefaultWithTranslations;
+   teamName: Default;
+   teamCommonName: Default;
+   teamPlaceNameWithPreposition: Default;
    displayAbbrev: Default;
    teamLogoLight: string;
    teamLogoDark: string;

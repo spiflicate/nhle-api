@@ -1,10 +1,12 @@
+import type { TeamAbbrev } from '#/types/types.ts';
 import type {
    CountryCode,
    Default,
-   DefaultWithTranslations,
+   GameScheduleState,
    GameState,
    Market,
    Position,
+   UTCOffset,
 } from './common.js';
 
 export interface GamecenterBoxscore {
@@ -12,15 +14,15 @@ export interface GamecenterBoxscore {
    season: number;
    gameType: number;
    limitedScoring: boolean;
-   gameDate: Date;
+   gameDate: string;
    venue: Default;
    venueLocation: Default;
-   startTimeUTC: Date;
-   easternUTCOffset: string;
-   venueUTCOffset: string;
+   startTimeUTC: string;
+   easternUTCOffset: UTCOffset;
+   venueUTCOffset: UTCOffset;
    tvBroadcasts: TvBroadcast[];
    gameState: GameState;
-   gameScheduleState: 'OK' | string;
+   gameScheduleState: GameScheduleState;
    periodDescriptor?: PeriodDescriptor;
    regPeriods: number;
    awayTeam: Team;
@@ -35,13 +37,13 @@ export interface GamecenterBoxscore {
 interface Team {
    id: number;
    commonName: Default;
-   abbrev: string;
+   abbrev: TeamAbbrev;
    score?: number;
    sog?: number;
    logo: string;
    darkLogo: string;
    placeName: Default;
-   placeNameWithPreposition: DefaultWithTranslations;
+   placeNameWithPreposition: Default;
    radioLink?: string;
 }
 
@@ -54,6 +56,7 @@ interface Clock {
 
 interface GameOutcome {
    lastPeriodType: string;
+   otPeriods?: number;
 }
 
 interface PeriodDescriptor {
@@ -76,7 +79,7 @@ interface PlayerByGameStatsTeam {
 interface Skater {
    playerId: number;
    sweaterNumber: number;
-   name: DefaultWithTranslations;
+   name: Default;
    position: Exclude<Position, 'G'>;
    goals: number;
    assists: number;
@@ -105,7 +108,7 @@ interface Defense extends Skater {
 interface Goalie {
    playerId: number;
    sweaterNumber: number;
-   name: DefaultWithTranslations;
+   name: Default;
    position: 'G';
    evenStrengthShotsAgainst: string;
    powerPlayShotsAgainst: string;
@@ -119,10 +122,12 @@ interface Goalie {
    goalsAgainst: number;
    toi: string;
    starter?: boolean;
-   decision?: string;
+   decision?: Decision;
    shotsAgainst: number;
    saves: number;
 }
+
+type Decision = 'W' | 'L' | 'O';
 
 interface Situation {
    homeTeam: SituationDetails;

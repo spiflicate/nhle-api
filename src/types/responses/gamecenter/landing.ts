@@ -1,24 +1,36 @@
-import type { Default, DefaultWithTranslations } from './common.ts';
-import type { GameState } from './GameState.ts';
+import type { TeamAbbrev } from '#/types/types.ts';
+import type {
+   Default,
+   DefendingSide,
+   GameScheduleState,
+   GameState,
+   GoalModifier,
+   PenaltyTypeCode,
+   Position,
+   ShotType,
+   Strength,
+   TvBroadcast,
+   UTCOffset,
+} from './common.ts';
 
 export interface GamecenterLanding {
    id: number;
    season: number;
    gameType: number;
    limitedScoring: boolean;
-   gameDate: Date;
+   gameDate: string;
    venue: Default;
    venueLocation: Default;
-   startTimeUTC: Date;
+   startTimeUTC: string;
    easternUTCOffset: UTCOffset;
    venueUTCOffset: UTCOffset;
    venueTimezone: string;
    periodDescriptor?: PeriodDescriptor;
    tvBroadcasts: TvBroadcast[];
    gameState: GameState;
-   gameScheduleState: 'OK';
-   awayTeam: LandingAwayTeam;
-   homeTeam: LandingHomeTeam;
+   gameScheduleState: GameScheduleState;
+   awayTeam: LandingTeam;
+   homeTeam: LandingTeam;
    shootoutInUse: boolean;
    maxPeriods: number;
    regPeriods: number;
@@ -32,12 +44,12 @@ export interface GamecenterLanding {
    situation?: Situation;
 }
 
-interface LandingAwayTeam {
+interface LandingTeam {
    id: number;
    commonName: Default;
-   abbrev: string;
-   placeName: DefaultWithTranslations;
-   placeNameWithPreposition: DefaultWithTranslations;
+   abbrev: TeamAbbrev;
+   placeName: Default;
+   placeNameWithPreposition: Default;
    score?: number;
    sog?: number;
    logo: string;
@@ -53,22 +65,6 @@ interface Clock {
    inIntermission: boolean;
 }
 
-type UTCOffset = '-05:00' | '-08:00' | '-06:00';
-
-interface LandingHomeTeam {
-   id: number;
-   commonName: DefaultWithTranslations;
-   abbrev: string;
-   placeName: Default;
-   placeNameWithPreposition: DefaultWithTranslations;
-   score?: number;
-   sog?: number;
-   logo: string;
-   darkLogo: string;
-   record?: string;
-   radioLink?: string;
-}
-
 interface Matchup {
    season: number;
    gameType: number;
@@ -81,14 +77,12 @@ interface Matchup {
 interface GoalieComparison {
    contextLabel: string;
    contextSeason: number;
-   homeTeam: {
-      teamTotals: TeamTotals;
-      leaders: TeamLeader[];
-   };
-   awayTeam: {
-      teamTotals: TeamTotals;
-      leaders: TeamLeader[];
-   };
+   homeTeam: ComparisonTeamDetails;
+   awayTeam: ComparisonTeamDetails;
+}
+interface ComparisonTeamDetails {
+   teamTotals: TeamTotals;
+   leaders: TeamLeader[];
 }
 
 interface TeamLeader {
@@ -106,8 +100,6 @@ interface TeamLeader {
    savePctg: number;
    shutouts: number;
 }
-
-type Position = 'G' | 'D' | 'R' | 'C' | 'L';
 
 interface TeamTotals {
    record: string;
@@ -127,7 +119,7 @@ interface GoalieSeasonStatsGoalie {
    playerId: number;
    teamId: number;
    sweaterNumber: number;
-   name: DefaultWithTranslations;
+   name: Default;
    gamesPlayed: number;
    wins: number;
    losses: number;
@@ -176,8 +168,8 @@ interface Skater {
    playerId: number;
    teamId: number;
    sweaterNumber: number;
-   name: DefaultWithTranslations;
-   position: Position;
+   name: Default;
+   position: Exclude<Position, 'G'>;
    gamesPlayed?: number;
    goals?: number;
    assists?: number;
@@ -202,19 +194,14 @@ interface PeriodDescriptor {
 }
 
 interface Situation {
-   homeTeam: SituationHomeTeam;
-   awayTeam: SituationAwayTeam;
+   homeTeam: SituationTeam;
+   awayTeam: SituationTeam;
    situationCode: string;
    timeRemaining: string;
    secondsRemaining: number;
 }
 
-interface SituationAwayTeam {
-   abbrev: string;
-   strength: number;
-}
-
-interface SituationHomeTeam {
+interface SituationTeam {
    abbrev: string;
    situationDescriptions?: string[];
    strength: number;
@@ -222,25 +209,25 @@ interface SituationHomeTeam {
 
 interface Summary {
    scoring: Scoring[];
-   shootout: any[];
+   shootout: unknown[];
    threeStars: ThreeStar[];
    penalties: SummaryPenalty[];
    iceSurface?: IceSurface;
 }
 
 interface IceSurface {
-   awayTeam: IceSurfaceAwayTeam;
-   homeTeam: IceSurfaceHomeTeam;
+   awayTeam: IceSurfaceTeam;
+   homeTeam: IceSurfaceTeam;
 }
 
-interface IceSurfaceAwayTeam {
-   forwards: Forward[];
-   defensemen: Defenseman[];
-   goalies: AwayTeamGoalie[];
-   penaltyBox: Defenseman[];
+interface IceSurfaceTeam {
+   forwards: IceSurfaceForward[];
+   defensemen: IceSurfaceDefense[];
+   goalies: IceSurfaceGoalie[];
+   penaltyBox: IceSurfacePlayer[];
 }
 
-interface Defenseman {
+interface IceSurfacePlayer {
    playerId: number;
    name: Default;
    sweaterNumber: number;
@@ -250,55 +237,36 @@ interface Defenseman {
    secondsRemaining?: number;
 }
 
-interface Forward {
-   playerId: number;
-   name: DefaultWithTranslations;
-   sweaterNumber: number;
-   positionCode: Position;
-   headshot: string;
-   totalSOI?: number;
+interface IceSurfaceForward extends IceSurfacePlayer {
+   positionCode: Exclude<Position, 'D'>;
 }
 
-interface AwayTeamGoalie {
-   playerId: number;
-   name: DefaultWithTranslations;
-   sweaterNumber: number;
-   positionCode: Position;
-   headshot: string;
-   totalSOI: number;
+interface IceSurfaceDefense extends IceSurfacePlayer {
+   positionCode: 'D';
 }
 
-interface IceSurfaceHomeTeam {
-   forwards: Defenseman[];
-   defensemen: Defenseman[];
-   goalies: Defenseman[];
-   penaltyBox: Defenseman[];
+interface IceSurfaceGoalie extends IceSurfacePlayer {
+   positionCode: 'G';
 }
 
 interface SummaryPenalty {
    periodDescriptor: PeriodDescriptor;
-   penalties: PenaltyPenalty[];
+   penalties: Penalty[];
 }
 
-interface PenaltyPenalty {
+interface Penalty {
    timeInPeriod: string;
-   type: 'MIN';
+   type: PenaltyTypeCode;
    duration: number;
-   committedByPlayer: CommittedByPlayer;
+   committedByPlayer: PenaltyPlayer;
    teamAbbrev: Default;
-   drawnBy?: DrawnBy;
+   drawnBy?: PenaltyPlayer;
    descKey: string;
 }
 
-interface CommittedByPlayer {
+interface PenaltyPlayer {
    firstName: Default;
    lastName: Default;
-   sweaterNumber: number;
-}
-
-interface DrawnBy {
-   firstName: DefaultWithTranslations;
-   lastName: DefaultWithTranslations;
    sweaterNumber: number;
 }
 
@@ -312,9 +280,9 @@ interface Goal {
    eventId: number;
    strength: Strength;
    playerId: number;
-   firstName: DefaultWithTranslations;
-   lastName: DefaultWithTranslations;
-   name: DefaultWithTranslations;
+   firstName: Default;
+   lastName: Default;
+   name: Default;
    teamAbbrev: Default;
    headshot: string;
    highlightClipSharingUrl?: string;
@@ -329,30 +297,24 @@ interface Goal {
    leadingTeamAbbrev?: Default;
    timeInPeriod: string;
    shotType: ShotType;
-   goalModifier: 'none';
-   assists: Assist[];
+   goalModifier: GoalModifier;
+   assists: AssistedBy[];
    pptReplayUrl: string;
-   homeTeamDefendingSide: HomeTeamDefendingSide;
+   homeTeamDefendingSide: DefendingSide;
    isHome: boolean;
 }
 
-interface Assist {
+interface AssistedBy {
    playerId: number;
-   firstName: DefaultWithTranslations;
-   lastName: DefaultWithTranslations;
-   name: DefaultWithTranslations;
+   firstName: Default;
+   lastName: Default;
+   name: Default;
    assistsToDate: number;
    sweaterNumber: number;
 }
 
-type HomeTeamDefendingSide = 'left' | 'right';
-
-type ShotType = 'wrist' | 'snap' | 'slap' | 'backhand';
-
-type Strength = 'ev' | 'pp' | 'sh';
-
 interface ThreeStar {
-   star: number;
+   star: 1 | 2 | 3;
    playerId: number;
    teamAbbrev: TeamAbbrev;
    headshot: string;
@@ -365,17 +327,3 @@ interface ThreeStar {
    goalsAgainstAverage?: number;
    savePctg?: number;
 }
-
-type TeamAbbrev = 'SJS' | 'LAK' | 'PIT';
-
-interface TvBroadcast {
-   id: number;
-   market: Market;
-   countryCode: CountryCode;
-   network: string;
-   sequenceNumber: number;
-}
-
-type CountryCode = 'US' | 'CA';
-
-type Market = 'H' | 'A' | 'N';

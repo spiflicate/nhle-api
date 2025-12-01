@@ -1,8 +1,4 @@
-import type {
-   DefaultWithTranslations,
-   PositionCode,
-   ShootsCatches,
-} from './common.ts';
+import type { Default, PositionCode, ShootsCatches } from './common.ts';
 
 export interface TeamProspects {
    forwards: Forward[];
@@ -13,8 +9,8 @@ export interface TeamProspects {
 interface PlayerBase {
    id: number;
    headshot: string;
-   firstName: DefaultWithTranslations;
-   lastName: DefaultWithTranslations;
+   firstName: Default;
+   lastName: Default;
    sweaterNumber?: number;
    shootsCatches: ShootsCatches;
    heightInInches: number;
@@ -22,9 +18,9 @@ interface PlayerBase {
    heightInCentimeters: number;
    weightInKilograms: number;
    birthDate: string;
-   birthCity?: DefaultWithTranslations;
+   birthCity?: Default;
    birthCountry: string;
-   birthStateProvince?: DefaultWithTranslations;
+   birthStateProvince?: Default;
 }
 
 interface Defenseman extends PlayerBase {

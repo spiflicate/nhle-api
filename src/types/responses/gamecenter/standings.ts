@@ -1,4 +1,4 @@
-import type { Default, DefaultWithTranslations } from './common.js';
+import type { Default } from './common.js';
 
 export interface NHLStandings {
    wildCardIndicator: boolean;
@@ -55,7 +55,7 @@ interface TeamStanding {
    leagueSequence: number;
    losses: number;
    otLosses: number;
-   placeName: DefaultWithTranslations;
+   placeName: Default;
    pointPctg: number;
    points: number;
    regulationPlusOtWinPctg: number;
@@ -78,8 +78,8 @@ interface TeamStanding {
    shootoutWins: number;
    streakCode: StreakCode;
    streakCount: number;
-   teamName: DefaultWithTranslations;
-   teamCommonName: DefaultWithTranslations;
+   teamName: Default;
+   teamCommonName: Default;
    teamAbbrev: Default;
    teamLogo: string;
    ties: number;
