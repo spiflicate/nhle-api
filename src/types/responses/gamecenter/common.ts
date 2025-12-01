@@ -2,6 +2,8 @@
  * Common types used in Gamecenter API responses
  */
 
+// TODO: check api responses for the global series games in sweden earlier this month between PIT and NSH
+
 type IncompleteOptions<T> = T | (string & {});
 
 /** GameState - The current state of the game. */

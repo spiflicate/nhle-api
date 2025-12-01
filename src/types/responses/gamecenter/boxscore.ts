@@ -75,11 +75,14 @@ interface PlayerByGameStatsTeam {
    defense: Defense[];
    goalies: Goalie[];
 }
-
-interface Skater {
+interface BasePlayer {
    playerId: number;
    sweaterNumber: number;
    name: Default;
+   position: Position;
+}
+
+interface Skater extends BasePlayer {
    position: Exclude<Position, 'G'>;
    goals: number;
    assists: number;
@@ -105,10 +108,7 @@ interface Defense extends Skater {
    position: 'D';
 }
 
-interface Goalie {
-   playerId: number;
-   sweaterNumber: number;
-   name: Default;
+interface Goalie extends BasePlayer {
    position: 'G';
    evenStrengthShotsAgainst: string;
    powerPlayShotsAgainst: string;
