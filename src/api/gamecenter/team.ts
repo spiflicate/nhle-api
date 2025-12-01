@@ -229,7 +229,7 @@ async function scheduleWeek(
    team: TeamAbbrev | string,
    date?: Date | string,
 ): Promise<APIResponse<TeamScheduleWeek>> {
-   const parsed = ScheduleParams({ team, date });
+   const parsed = ScheduleParams({ team, date, month: undefined });
    if (isParseError(parsed)) {
       return {
          status: 'error',
@@ -268,7 +268,7 @@ async function scheduleMonth(
    team: TeamAbbrev | string,
    date?: Date | string,
 ): Promise<APIResponse<TeamScheduleMonth>> {
-   const parsed = ScheduleParams({ team, month: date });
+   const parsed = ScheduleParams({ team, month: date, date: undefined });
    if (isParseError(parsed)) {
       return {
          status: 'error',
