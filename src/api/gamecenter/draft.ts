@@ -5,7 +5,7 @@
 
 import nhlClient from '#/client/index.ts';
 import type { APIResponse } from '#/client/types.ts';
-import { ValidationError } from '#/errors/index.ts';
+import { type NHLError, ValidationError } from '#/errors/index.ts';
 import type {
    DraftPicks,
    DraftRankings,
@@ -84,7 +84,7 @@ export function rankings(year?: Year): {
    skatersIntl: () => Promise<APIResponse<DraftRankings>>;
    goaliesNA: () => Promise<APIResponse<DraftRankings>>;
    goaliesIntl: () => Promise<APIResponse<DraftRankings>>;
-   all: () => Promise<APIResponse<DraftRankings>[]>;
+   all: () => Promise<APIResponse<DraftRankings[]>>;
 } {
    const DraftRankingsEnum = {
       skatersNA: '1',
@@ -141,12 +141,35 @@ export function rankings(year?: Year): {
        * Get all draft rankings (NA/Intl skaters and goalies)
        * @returns Promise resolving to array of all rankings
        */
-      all: async (): Promise<APIResponse<DraftRankings>[]> =>
-         Promise.all([
+      all: async (): Promise<APIResponse<DraftRankings[]>> => {
+         const unwrapAPIResponse = (
+            apiResponse: APIResponse<unknown>,
+         ): DraftRankings => {
+            if (apiResponse.status === 'success') {
+               return apiResponse.data as DraftRankings;
+            }
+            throw apiResponse.error;
+         };
+
+         const response = await Promise.all([
             getRankings(DraftRankingsEnum.skatersNA),
             getRankings(DraftRankingsEnum.skatersIntl),
             getRankings(DraftRankingsEnum.goaliesNA),
             getRankings(DraftRankingsEnum.goaliesIntl),
-         ]),
+         ]);
+         try {
+            const dataOnly = response.map((r) => unwrapAPIResponse(r));
+            const newResponse: APIResponse<DraftRankings[]> = {
+               status: 'success',
+               data: dataOnly,
+            };
+            return newResponse;
+         } catch (error) {
+            return {
+               status: 'error',
+               error: error as NHLError,
+            };
+         }
+      },
    };
 }
