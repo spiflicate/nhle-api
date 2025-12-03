@@ -1,4 +1,4 @@
-import type { Default } from './common.ts';
+import type { LocalizedText } from './common.ts';
 
 export interface PartnerGameInfo {
    currentOddsDate: string;
@@ -28,7 +28,7 @@ interface Game {
 
 interface Team {
    id: number;
-   name: Default;
+   name: LocalizedText;
    abbrev: string;
    logo: string;
    odds: Odd[];

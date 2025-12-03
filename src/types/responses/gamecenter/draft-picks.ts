@@ -1,5 +1,5 @@
 import type { TeamAbbrev } from '../../types.ts';
-import type { Default, PositionCode } from './common.ts';
+import type { LocalizedText, PositionCode } from './common.ts';
 
 export interface DraftPicks {
    broadcastStartTimeUTC: string;
@@ -16,15 +16,15 @@ interface Pick {
    overallPick: number;
    teamId: number;
    teamAbbrev: TeamAbbrev;
-   teamName: Default;
-   teamCommonName: Default;
-   teamPlaceNameWithPreposition: Default;
-   displayAbbrev: Default;
+   teamName: LocalizedText;
+   teamCommonName: LocalizedText;
+   teamPlaceNameWithPreposition: LocalizedText;
+   displayAbbrev: LocalizedText;
    teamLogoLight: string;
    teamLogoDark: string;
    teamPickHistory: string;
-   firstName: Default;
-   lastName: Default;
+   firstName: LocalizedText;
+   lastName: LocalizedText;
    positionCode: PositionCode;
    countryCode: string;
    height: number;

@@ -1,9 +1,9 @@
 import type { TeamAbbrev } from '../../types.ts';
 import type {
-   CountryCode,
-   Default,
-   Market,
+   HexColorCode,
+   LocalizedText,
    PositionCode,
+   TvBroadcast,
 } from './common.ts';
 
 export interface DraftTracker {
@@ -23,23 +23,13 @@ interface Pick {
    overallPick: number;
    teamId: number;
    teamAbbrev: TeamAbbrev;
-   teamFullName: Default;
-   teamCommonName: Default;
-   teamPlaceNameWithPreposition: Default;
+   teamFullName: LocalizedText;
+   teamCommonName: LocalizedText;
+   teamPlaceNameWithPreposition: LocalizedText;
    teamLogoLight: string;
    teamLogoDark: string;
    state: string;
-   lastName: Default;
-   firstName: Default;
+   lastName: LocalizedText;
+   firstName: LocalizedText;
    positionCode: PositionCode;
-}
-
-type HexColorCode = `#${string}`;
-
-interface TvBroadcast {
-   id: number;
-   market: Market;
-   countryCode: CountryCode;
-   network: string;
-   sequenceNumber: number;
 }

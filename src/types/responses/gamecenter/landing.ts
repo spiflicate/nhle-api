@@ -1,10 +1,10 @@
 import type { TeamAbbrev } from '#/types/types.ts';
 import type {
-   Default,
    DefendingSide,
    GameScheduleState,
    GameState,
    GoalModifier,
+   LocalizedText,
    PenaltyTypeCode,
    Position,
    ShotType,
@@ -19,8 +19,8 @@ export interface GamecenterLanding {
    gameType: number;
    limitedScoring: boolean;
    gameDate: string;
-   venue: Default;
-   venueLocation: Default;
+   venue: LocalizedText;
+   venueLocation: LocalizedText;
    startTimeUTC: string;
    easternUTCOffset: UTCOffset;
    venueUTCOffset: UTCOffset;
@@ -46,10 +46,10 @@ export interface GamecenterLanding {
 
 interface LandingTeam {
    id: number;
-   commonName: Default;
+   commonName: LocalizedText;
    abbrev: TeamAbbrev;
-   placeName: Default;
-   placeNameWithPreposition: Default;
+   placeName: LocalizedText;
+   placeNameWithPreposition: LocalizedText;
    score?: number;
    sog?: number;
    logo: string;
@@ -87,9 +87,9 @@ interface ComparisonTeamDetails {
 
 interface TeamLeader {
    playerId: number;
-   name: Default;
-   firstName: Default;
-   lastName: Default;
+   name: LocalizedText;
+   firstName: LocalizedText;
+   lastName: LocalizedText;
    sweaterNumber: number;
    headshot: string;
    positionCode: Position;
@@ -119,7 +119,7 @@ interface GoalieSeasonStatsGoalie {
    playerId: number;
    teamId: number;
    sweaterNumber: number;
-   name: Default;
+   name: LocalizedText;
    gamesPlayed: number;
    wins: number;
    losses: number;
@@ -147,9 +147,9 @@ interface SkaterComparisonLeader {
 
 interface Leader {
    playerId: number;
-   name: Default;
-   firstName: Default;
-   lastName: Default;
+   name: LocalizedText;
+   firstName: LocalizedText;
+   lastName: LocalizedText;
    sweaterNumber: number;
    positionCode: Position;
    headshot: string;
@@ -168,7 +168,7 @@ interface Skater {
    playerId: number;
    teamId: number;
    sweaterNumber: number;
-   name: Default;
+   name: LocalizedText;
    position: Exclude<Position, 'G'>;
    gamesPlayed?: number;
    goals?: number;
@@ -229,7 +229,7 @@ interface IceSurfaceTeam {
 
 interface IceSurfacePlayer {
    playerId: number;
-   name: Default;
+   name: LocalizedText;
    sweaterNumber: number;
    positionCode: Position;
    headshot: string;
@@ -259,14 +259,14 @@ interface Penalty {
    type: PenaltyTypeCode;
    duration: number;
    committedByPlayer: PenaltyPlayer;
-   teamAbbrev: Default;
+   teamAbbrev: LocalizedText;
    drawnBy?: PenaltyPlayer;
    descKey: string;
 }
 
 interface PenaltyPlayer {
-   firstName: Default;
-   lastName: Default;
+   firstName: LocalizedText;
+   lastName: LocalizedText;
    sweaterNumber: number;
 }
 
@@ -280,10 +280,10 @@ interface Goal {
    eventId: number;
    strength: Strength;
    playerId: number;
-   firstName: Default;
-   lastName: Default;
-   name: Default;
-   teamAbbrev: Default;
+   firstName: LocalizedText;
+   lastName: LocalizedText;
+   name: LocalizedText;
+   teamAbbrev: LocalizedText;
    headshot: string;
    highlightClipSharingUrl?: string;
    highlightClipSharingUrlFr?: string;
@@ -294,7 +294,7 @@ interface Goal {
    goalsToDate: number;
    awayScore: number;
    homeScore: number;
-   leadingTeamAbbrev?: Default;
+   leadingTeamAbbrev?: LocalizedText;
    timeInPeriod: string;
    shotType: ShotType;
    goalModifier: GoalModifier;
@@ -306,9 +306,9 @@ interface Goal {
 
 interface AssistedBy {
    playerId: number;
-   firstName: Default;
-   lastName: Default;
-   name: Default;
+   firstName: LocalizedText;
+   lastName: LocalizedText;
+   name: LocalizedText;
    assistsToDate: number;
    sweaterNumber: number;
 }
@@ -318,7 +318,7 @@ interface ThreeStar {
    playerId: number;
    teamAbbrev: TeamAbbrev;
    headshot: string;
-   name: Default;
+   name: LocalizedText;
    sweaterNo: number;
    position: Position;
    goals?: number;

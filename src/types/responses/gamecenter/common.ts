@@ -2,56 +2,33 @@
  * Common types used in Gamecenter API responses
  */
 
-// TODO: check api responses for the global series games in sweden earlier this month between PIT and NSH
-
-type IncompleteOptions<T> = T | (string & {});
-
-/** GameState - The current state of the game. */
+/** The current state of the game. */
 export type GameState = 'OFF' | 'FUT' | 'LIVE' | 'PRE' | 'CRIT' | 'FINAL';
 
-/** GameScheduleState - The current state of the game. */
-export type GameScheduleState = IncompleteOptions<'OK' | 'TBD' | 'CNCL'>;
+/** The current state of the game. */
+export type GameScheduleState = 'OK' | 'TBD' | 'CNCL' | (string & {});
 
-/** PeriodType - The type of period in the game. */
+/** The type of period in the game. */
 export type PeriodType = 'REG' | 'OT' | 'SO';
 
-/** PenaltyType - The type of penalty. (MIN = Minor, BEN = Bench, MAJ = Major) */
-export type PenaltyTypeCode = IncompleteOptions<'MIN' | 'BEN' | 'MAJ'>;
+/** The type of penalty. (MIN = Minor, BEN = Bench, MAJ = Major ...) */
+export type PenaltyTypeCode = 'MIN' | 'BEN' | 'MAJ' | (string & {});
 
-/** Market - The market for this broadcast. (H = Home, A = Away, N = National, S = Satellite Radio) */
+/** The market for this broadcast. (H = Home, A = Away, N = National, S = Satellite Radio) */
 export type Market = 'H' | 'A' | 'N' | 'S';
 
-/** CountryCode - The country code for this broadcast. (CA = Canada, US = United States) */
+/** The country code for this broadcast. (CA = Canada, US = United States) */
 export type CountryCode = 'CA' | 'US';
 
-/** PositionCode - The position code for a player. (C = Center, RW = Right Wing, LW = Left Wing, D = Defenseman, G = Goalie) */
-export type PositionCode = 'C' | 'LW' | 'RW' | 'D' | 'G';
+/** The position code for a player. (C = Center, L[W] = Left Wing, R[W] = Right Wing, D = Defenseman, G = Goalie) */
+export type Position = 'C' | 'LW' | 'L' | 'RW' | 'R' | 'D' | 'G';
 
-/** PositionCode - The position code for a player. (C = Center, R = Right, L = Left, D = Defenseman, G = Goalie) */
-export type Position = 'C' | 'L' | 'R' | 'D' | 'G';
+export type PositionCode = Position;
 
-/** ShootsCatches - Player's shooting/catching handedness. (L = Left, R = Right) */
+/** Player's shooting/catching handedness. (L = Left, R = Right) */
 export type ShootsCatches = 'L' | 'R';
 
-/** DefaultWith - An object containing a default string value as well as any translations to other languages. */
-export interface Default {
-   /** French */
-   fr?: string;
-   /** Czech */
-   cs?: string;
-   /** German */
-   de?: string;
-   /** Spanish */
-   es?: string;
-   /** Finnish */
-   fi?: string;
-   /** Slovak */
-   sk?: string;
-   /** Swedish */
-   sv?: string;
-   /** Additional languages */
-   [key: string]: string | undefined;
-}
+export type HexColorCode = `#${string}`;
 
 export type UTCOffset = `+${number}:${number}` | `-${number}:${number}`;
 
@@ -63,7 +40,7 @@ export type Strength = 'ev' | 'pp' | 'sh';
 
 export type ZoneCode = 'N' | 'D' | 'O';
 
-export type ShotType = IncompleteOptions<
+export type ShotType =
    | 'backhand'
    | 'bat'
    | 'between-legs'
@@ -74,17 +51,9 @@ export type ShotType = IncompleteOptions<
    | 'tip-in'
    | 'wrap-around'
    | 'wrist'
->;
+   | (string & {});
 
-export interface TvBroadcast {
-   id: number;
-   market: Market;
-   countryCode: CountryCode;
-   network: string;
-   sequenceNumber: number;
-}
-
-export type PenaltyDescKey = IncompleteOptions<
+export type PenaltyDescKey =
    | 'tripping'
    | 'hooking'
    | 'interference'
@@ -99,9 +68,9 @@ export type PenaltyDescKey = IncompleteOptions<
    | 'fighting'
    | 'minor'
    | 'cross-checking'
->;
+   | (string & {});
 
-export type Reason = IncompleteOptions<
+export type Reason =
    | 'blocked'
    | 'failed-bank-attempt'
    | 'wide-right'
@@ -134,4 +103,49 @@ export type Reason = IncompleteOptions<
    | 'chlg-league-missed-stoppage'
    | 'visitor-timeout'
    | 'official-injury'
->;
+   | (string & {});
+
+export type EventTypeDescKey =
+   | 'period-start'
+   | 'faceoff'
+   | 'blocked-shot'
+   | 'goal'
+   | 'hit'
+   | 'giveaway'
+   | 'missed-shot'
+   | 'shot-on-goal'
+   | 'stoppage'
+   | 'takeaway'
+   | 'penalty'
+   | 'period-end'
+   | 'delayed-penalty'
+   | 'game-end'
+   | (string & {});
+
+/** An object containing a default string an optional localized strings. */
+export interface LocalizedText {
+   /** French */
+   fr?: string;
+   /** Czech */
+   cs?: string;
+   /** German */
+   de?: string;
+   /** Spanish */
+   es?: string;
+   /** Finnish */
+   fi?: string;
+   /** Slovak */
+   sk?: string;
+   /** Swedish */
+   sv?: string;
+   /** Additional languages */
+   [key: string]: string | undefined;
+}
+
+export interface TvBroadcast {
+   id: number;
+   market: Market;
+   countryCode: CountryCode;
+   network: string;
+   sequenceNumber: number;
+}

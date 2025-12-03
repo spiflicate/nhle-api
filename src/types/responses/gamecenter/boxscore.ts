@@ -1,9 +1,9 @@
 import type { TeamAbbrev } from '#/types/types.ts';
 import type {
    CountryCode,
-   Default,
    GameScheduleState,
    GameState,
+   LocalizedText,
    Market,
    Position,
    UTCOffset,
@@ -15,8 +15,8 @@ export interface GamecenterBoxscore {
    gameType: number;
    limitedScoring: boolean;
    gameDate: string;
-   venue: Default;
-   venueLocation: Default;
+   venue: LocalizedText;
+   venueLocation: LocalizedText;
    startTimeUTC: string;
    easternUTCOffset: UTCOffset;
    venueUTCOffset: UTCOffset;
@@ -36,14 +36,14 @@ export interface GamecenterBoxscore {
 
 interface Team {
    id: number;
-   commonName: Default;
+   commonName: LocalizedText;
    abbrev: TeamAbbrev;
    score?: number;
    sog?: number;
    logo: string;
    darkLogo: string;
-   placeName: Default;
-   placeNameWithPreposition: Default;
+   placeName: LocalizedText;
+   placeNameWithPreposition: LocalizedText;
    radioLink?: string;
 }
 
@@ -78,7 +78,7 @@ interface PlayerByGameStatsTeam {
 interface BasePlayer {
    playerId: number;
    sweaterNumber: number;
-   name: Default;
+   name: LocalizedText;
    position: Position;
 }
 

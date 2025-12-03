@@ -1,4 +1,4 @@
-import type { Default } from './common.js';
+import type { LocalizedText } from './common.js';
 
 export interface NHLStandings {
    wildCardIndicator: boolean;
@@ -55,7 +55,7 @@ interface TeamStanding {
    leagueSequence: number;
    losses: number;
    otLosses: number;
-   placeName: Default;
+   placeName: LocalizedText;
    pointPctg: number;
    points: number;
    regulationPlusOtWinPctg: number;
@@ -78,9 +78,9 @@ interface TeamStanding {
    shootoutWins: number;
    streakCode: StreakCode;
    streakCount: number;
-   teamName: Default;
-   teamCommonName: Default;
-   teamAbbrev: Default;
+   teamName: LocalizedText;
+   teamCommonName: LocalizedText;
+   teamAbbrev: LocalizedText;
    teamLogo: string;
    ties: number;
    waiversSequence: number;
@@ -145,3 +145,24 @@ type DivisionName =
    | 'American';
 
 type StreakCode = 'W' | 'L' | 'OT' | 'T';
+
+export interface NHLStandingsSeason {
+   currentDate: string;
+   seasons: SeasonDetails[];
+}
+
+interface SeasonDetails {
+   id: number;
+   conferencesInUse: boolean;
+   divisionsInUse: boolean;
+   pointForOTlossInUse: boolean;
+   regulationWinsInUse: boolean;
+   /** Regulation and overtime wins in use for standings tie breaks */
+   rowInUse: boolean;
+   /** ISO 8601 date string */
+   standingsEnd: string;
+   /** ISO 8601 date string */
+   standingsStart: string;
+   tiesInUse: boolean;
+   wildcardInUse: boolean;
+}

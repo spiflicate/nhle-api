@@ -1,10 +1,15 @@
-import type { TeamAbbrev } from '#/types/types.ts';
+import type { TeamAbbrev } from '../../types.ts';
 import type {
-   Default,
+   DefendingSide,
+   EventTypeDescKey,
    GameScheduleState,
    GameState,
+   LocalizedText,
+   PenaltyDescKey,
    PenaltyTypeCode,
    PeriodType,
+   Reason,
+   ShotType,
    TvBroadcast,
    UTCOffset,
    ZoneCode,
@@ -16,8 +21,8 @@ export interface GamecenterPlayByPlay {
    gameType: number;
    limitedScoring: boolean;
    gameDate: string;
-   venue: Default;
-   venueLocation: Default;
+   venue: LocalizedText;
+   venueLocation: LocalizedText;
    startTimeUTC: string;
    easternUTCOffset: UTCOffset;
    venueUTCOffset: UTCOffset;
@@ -33,72 +38,59 @@ export interface GamecenterPlayByPlay {
    displayPeriod: number;
    maxPeriods: number;
    gameOutcome?: GameOutcome;
-   plays: Play[];
+   plays: Event[];
    rosterSpots: RosterSpot[];
    regPeriods: number;
    summary?: Summary;
    situation?: Situation;
 }
 
-export interface Team {
+interface Team {
    id: number;
-   commonName: Default;
+   commonName: LocalizedText;
    abbrev: TeamAbbrev;
    score: number;
    sog?: number;
    logo: string;
    darkLogo: string;
-   placeName: Default;
-   placeNameWithPreposition: Default;
+   placeName: LocalizedText;
+   placeNameWithPreposition: LocalizedText;
    radioLink?: string;
 }
 
-export interface Clock {
+interface Clock {
    timeRemaining: string;
    secondsRemaining: number;
    running: boolean;
    inIntermission: boolean;
 }
 
-export interface GameOutcome {
+interface GameOutcome {
    lastPeriodType: PeriodType;
    otPeriods?: number;
 }
 
-export interface GamecenterPlayByPlayHomeTeam {
-   id: number;
-   commonName: Default;
-   abbrev: TeamAbbrev;
-   score: number;
-   sog?: number;
-   logo: string;
-   darkLogo: string;
-   placeName: Default;
-   placeNameWithPreposition: Default;
-   radioLink?: string;
-}
-
-export interface PeriodDescriptor {
+interface PeriodDescriptor {
    number: number;
    periodType: PeriodType;
    maxRegulationPeriods: number;
 }
 
-export interface Play {
+interface Event {
    eventId: number;
    periodDescriptor: PeriodDescriptor;
    timeInPeriod: string;
    timeRemaining: string;
    situationCode: string;
-   homeTeamDefendingSide: HomeTeamDefendingSide;
+   homeTeamDefendingSide: DefendingSide;
    typeCode: number;
-   typeDescKey: TypeDescKey;
+   typeDescKey: EventTypeDescKey;
    sortOrder: number;
    details?: Details;
    pptReplayUrl?: string;
 }
 
-export interface Details {
+interface Details {
    eventOwnerTeamId?: number;
    losingPlayerId?: number;
    winningPlayerId?: number;
@@ -138,97 +130,17 @@ export interface Details {
    servedByPlayerId?: number;
 }
 
-export type PenaltyDescKey =
-   | 'tripping'
-   | 'hooking'
-   | 'interference'
-   | 'high-sticking'
-   | 'roughing'
-   | 'unsportsmanlike-conduct'
-   | 'slashing'
-   | 'delaying-game-puck-over-glass'
-   | 'holding'
-   | 'holding-the-stick'
-   | 'too-many-men-on-the-ice'
-   | 'fighting'
-   | 'minor'
-   | 'cross-checking';
-
-export type Reason =
-   | 'blocked'
-   | 'failed-bank-attempt'
-   | 'wide-right'
-   | 'goalie-stopped-after-sog'
-   | 'offside'
-   | 'teammate-blocked'
-   | 'icing'
-   | 'puck-in-netting'
-   | 'wide-left'
-   | 'high-and-wide-left'
-   | 'puck-frozen'
-   | 'above-crossbar'
-   | 'tv-timeout'
-   | 'hand-pass'
-   | 'skater-puck-frozen'
-   | 'high-stick'
-   | 'high-and-wide-right'
-   | 'hit-crossbar'
-   | 'puck-in-benches'
-   | 'hit-right-post'
-   | 'short'
-   | 'referee-or-linesman'
-   | 'puck-in-crowd'
-   | 'hit-left-post'
-   | 'player-equipment'
-   | 'net-dislodged-defensive-skater'
-   | 'home-timeout'
-   | 'chlg-hm-goal-interference'
-   | 'video-review'
-   | 'chlg-league-missed-stoppage'
-   | 'visitor-timeout'
-   | 'official-injury';
-
-export type ShotType =
-   | 'wrist'
-   | 'tip-in'
-   | 'slap'
-   | 'snap'
-   | 'deflected'
-   | 'backhand'
-   | 'poke'
-   | 'bat'
-   | 'between-legs'
-   | 'wrap-around';
-
-export type HomeTeamDefendingSide = 'left' | 'right';
-
-export type TypeDescKey =
-   | 'period-start'
-   | 'faceoff'
-   | 'blocked-shot'
-   | 'goal'
-   | 'hit'
-   | 'giveaway'
-   | 'missed-shot'
-   | 'shot-on-goal'
-   | 'stoppage'
-   | 'takeaway'
-   | 'penalty'
-   | 'period-end'
-   | 'delayed-penalty'
-   | 'game-end';
-
-export interface RosterSpot {
+interface RosterSpot {
    teamId: number;
    playerId: number;
-   firstName: Default;
-   lastName: Default;
+   firstName: LocalizedText;
+   lastName: LocalizedText;
    sweaterNumber: number;
    positionCode: Position;
    headshot: string;
 }
 
-export interface Situation {
+interface Situation {
    homeTeam: Team;
    awayTeam: Team;
    situationCode: string;
@@ -236,31 +148,31 @@ export interface Situation {
    secondsRemaining: number;
 }
 
-export interface Team {
+interface Team {
    abbrev: TeamAbbrev;
    strength: number;
    situationDescriptions?: string[];
 }
 
-export interface Summary {
+interface Summary {
    iceSurface?: IceSurface;
 }
 
-export interface IceSurface {
+interface IceSurface {
    awayTeam: IceSurfaceAwayTeam;
    homeTeam: IceSurfaceHomeTeam;
 }
 
-export interface IceSurfaceAwayTeam {
+interface IceSurfaceAwayTeam {
    forwards: GoalieElement[];
    defensemen: PenaltyBoxElement[];
    goalies: GoalieElement[];
    penaltyBox: PenaltyBoxElement[];
 }
 
-export interface PenaltyBoxElement {
+interface PenaltyBoxElement {
    playerId: number;
-   name: Default;
+   name: LocalizedText;
    sweaterNumber: number;
    positionCode: Position;
    headshot: string;
@@ -268,34 +180,34 @@ export interface PenaltyBoxElement {
    secondsRemaining?: number;
 }
 
-export interface GoalieElement {
+interface GoalieElement {
    playerId: number;
-   name: Default;
+   name: LocalizedText;
    sweaterNumber: number;
    positionCode: Position;
    headshot: string;
    totalSOI?: number;
 }
 
-export interface IceSurfaceHomeTeam {
+interface IceSurfaceHomeTeam {
    forwards: PurpleForward[];
    defensemen: PurpleDefenseman[];
    goalies: GoalieElement[];
    penaltyBox: PenaltyBoxElement[];
 }
 
-export interface PurpleDefenseman {
+interface PurpleDefenseman {
    playerId: number;
-   name: Default;
+   name: LocalizedText;
    sweaterNumber: number;
    positionCode: ZoneCode;
    headshot: string;
    totalSOI?: number;
 }
 
-export interface PurpleForward {
+interface PurpleForward {
    playerId: number;
-   name: Default;
+   name: LocalizedText;
    sweaterNumber: number;
    positionCode: Position;
    headshot: string;

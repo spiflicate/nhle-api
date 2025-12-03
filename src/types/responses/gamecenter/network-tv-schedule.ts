@@ -5,14 +5,14 @@ export interface NetworkTVSchedule {
    broadcasts: Broadcast[];
 }
 
-export interface Broadcast {
+interface Broadcast {
    startTime: string;
    endTime: string;
    durationSeconds: number;
    title: string;
    description: string;
    houseNumber: string;
-   broadcastType: 'HD' | string;
-   broadcastStatus: 'LIVE' | '' | string;
+   broadcastType: 'HD' | (string & {});
+   broadcastStatus: 'LIVE' | '' | (string & {});
    broadcastImageUrl: string;
 }
