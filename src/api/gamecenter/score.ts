@@ -5,7 +5,7 @@
 import nhlClient from '#/client/index.ts';
 import type { APIResponse } from '#/client/types.ts';
 import { ValidationError } from '#/errors/index.ts';
-import type { NHLScore, NHLScoreboard, TeamAbbrev } from '#/types/index.ts';
+import type { Score, Scoreboard, TeamAbbrev } from '#/types/index.ts';
 import { getCurrentDate } from '#/utils/date.ts';
 import {
    isParseError,
@@ -30,7 +30,7 @@ import { _scorePaths as _paths } from './_paths.ts';
  */
 export async function score(
    date?: Date | string,
-): Promise<APIResponse<NHLScore>> {
+): Promise<APIResponse<Score>> {
    const parsed = NHLDate(date ?? getCurrentDate());
    if (isParseError(parsed)) {
       return {
@@ -51,8 +51,8 @@ export async function score(
  * scoreboard().then((data) => console.log(data));
  * ```
  */
-export async function scoreboard(): Promise<APIResponse<NHLScoreboard>> {
-   return nhlClient.get<NHLScoreboard>(_paths.scoreboard.now);
+export async function scoreboard(): Promise<APIResponse<Scoreboard>> {
+   return nhlClient.get<Scoreboard>(_paths.scoreboard.now);
 }
 
 /**
@@ -66,7 +66,7 @@ export async function scoreboard(): Promise<APIResponse<NHLScoreboard>> {
  */
 scoreboard.team = async (
    team: TeamAbbrev,
-): Promise<APIResponse<NHLScoreboard>> => {
+): Promise<APIResponse<Scoreboard>> => {
    const parsed = Team(team);
    if (isParseError(parsed)) {
       return {
@@ -76,7 +76,7 @@ scoreboard.team = async (
          }),
       };
    }
-   return nhlClient.get<NHLScoreboard>(
+   return nhlClient.get<Scoreboard>(
       route(_paths.scoreboard.byTeam, { team: parsed }),
    );
 };
@@ -92,7 +92,7 @@ scoreboard.team = async (
  */
 scoreboard.date = async (
    date: Date | string,
-): Promise<APIResponse<NHLScoreboard>> => {
+): Promise<APIResponse<Scoreboard>> => {
    const parsed = NHLDate(date);
    if (isParseError(parsed)) {
       return {
@@ -102,7 +102,7 @@ scoreboard.date = async (
          }),
       };
    }
-   return nhlClient.get<NHLScoreboard>(
+   return nhlClient.get<Scoreboard>(
       route(_paths.scoreboard.byDate, { date: parsed }),
    );
 };

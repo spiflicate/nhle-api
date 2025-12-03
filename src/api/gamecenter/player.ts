@@ -13,7 +13,7 @@ import type {
    PlayerSearchResult,
    PlayerSpotlight,
    SkaterStatsLeaders,
-} from '#/types/responses/gamecenter/index.ts';
+} from '#/types/index.ts';
 import type { GameType, Season } from '#/types/types.ts';
 import { BaseParams, isParseError, PlayerId } from '#/utils/schemas.ts';
 import { route } from '#/utils/utils.ts';

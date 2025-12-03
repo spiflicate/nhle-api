@@ -10,6 +10,7 @@ import type {
    GamecenterLanding,
    GamecenterPlayByPlay,
    GamecenterReports,
+   GameId,
    LeagueSchedule,
    NetworkTVSchedule,
    PlayoffBracket,
@@ -18,11 +19,13 @@ import type {
    PPTReplayEvent,
    PPTReplayGoal,
    ScheduleCalendar,
+   Season,
+   SeriesLetter,
    WhereToWatch,
    WSCGameStory,
    WSCPlayByPlay,
-} from '#/types/responses/gamecenter/index.ts';
-import type { GameId, Season, SeriesLetter, Year } from '#/types/types.ts';
+   Year,
+} from '#/types/index.ts';
 import {
    getCurrentDate,
    getCurrentSeason,
