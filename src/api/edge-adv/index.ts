@@ -10,7 +10,7 @@
  * ========================================================================
  */
 
-export * from './goalies.ts';
-export * from './skaters.ts';
+export * as goalies from './goalies.ts';
+export * as skaters from './skaters.ts';
 export * from './summary.ts';
-export * from './teams.ts';
+export * as teams from './teams.ts';

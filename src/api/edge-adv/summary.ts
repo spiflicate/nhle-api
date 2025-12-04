@@ -25,4 +25,6 @@ const _paths = {
  * insights from the previous days games.
  * @returns A promise that resolves to the "by the numbers" data.
  */
-export const byTheNumbers = () => nhlClient.get(_paths.byTheNumbers);
+export async function byTheNumbers() {
+   return nhlClient.get(_paths.byTheNumbers);
+}
