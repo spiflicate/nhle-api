@@ -46,7 +46,7 @@ export const _gamePaths = {
    schedule: 'schedule/{date}',
    scheduleCalendar: 'schedule-calendar/{date}',
    playoffBracket: 'playoff-bracket/{year}',
-   playoffSeries: 'playoff-series/{season}',
+   playoffSeries: 'playoff-series/carousel/{season}',
    playoffSeriesSchedule: 'schedule/playoff-series/{season}/{seriesLetter}',
    gamecenter: {
       playByPlay: 'gamecenter/{gameId}/play-by-play',
