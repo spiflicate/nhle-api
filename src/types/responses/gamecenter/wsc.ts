@@ -7,7 +7,6 @@ import type {
    PenaltyTypeCode,
    PeriodType,
    PositionCode,
-   PositionCode,
    Reason,
    ShotType,
    Strength,

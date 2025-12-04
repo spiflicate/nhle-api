@@ -8,7 +8,6 @@ import type {
    PenaltyTypeCode,
    PeriodType,
    PositionCode,
-   PositionCode,
    ShotType,
    Strength,
    TvBroadcast,
