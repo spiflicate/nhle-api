@@ -58,7 +58,7 @@ export async function playByPlay(
    const parsedGameId = GameIdAT(gameId);
    if (isParseError(parsedGameId)) {
       return {
-         status: 'error',
+         success: false,
          error: new ValidationError(parsedGameId.summary, {
             endpoint: _paths.gamecenter.playByPlay,
          }),
@@ -105,7 +105,7 @@ export async function reports(
    const parsedGameId = GameIdAT(gameId);
    if (isParseError(parsedGameId)) {
       return {
-         status: 'error',
+         success: false,
          error: new ValidationError(parsedGameId.summary, {
             endpoint: _paths.gamecenter.reports,
          }),
@@ -130,7 +130,7 @@ export async function landing(
    const parsedGameId = GameIdAT(gameId);
    if (isParseError(parsedGameId)) {
       return {
-         status: 'error',
+         success: false,
          error: new ValidationError(parsedGameId.summary, {
             endpoint: _paths.gamecenter.landing,
          }),
@@ -155,7 +155,7 @@ export async function boxscore(
    const parsedGameId = GameIdAT(gameId);
    if (isParseError(parsedGameId)) {
       return {
-         status: 'error',
+         success: false,
          error: new ValidationError(parsedGameId.summary, {
             endpoint: _paths.gamecenter.boxscore,
          }),
@@ -190,7 +190,7 @@ async function wscGameStory(
    const parsedGameId = GameIdAT(gameId);
    if (isParseError(parsedGameId)) {
       return {
-         status: 'error',
+         success: false,
          error: new ValidationError(parsedGameId.summary, {
             endpoint: _paths.wsc.gameStory,
          }),
@@ -216,7 +216,7 @@ async function wscPlayByPlay(
    const parsedGameId = GameIdAT(gameId);
    if (isParseError(parsedGameId)) {
       return {
-         status: 'error',
+         success: false,
          error: new ValidationError(parsedGameId.summary, {
             endpoint: _paths.wsc.playByPlay,
          }),
@@ -253,7 +253,7 @@ async function pptReplayGoal(
    const parsed = GameIdAndEventId({ gameId, eventId });
    if (isParseError(parsed)) {
       return {
-         status: 'error',
+         success: false,
          error: new ValidationError(parsed.summary, {
             endpoint: _paths.pptReplay.goal,
          }),
@@ -279,7 +279,7 @@ async function pptReplayEvent(
    const parsed = GameIdAndEventId({ gameId, eventId });
    if (isParseError(parsed)) {
       return {
-         status: 'error',
+         success: false,
          error: new ValidationError(parsed.summary, {
             endpoint: _paths.pptReplay.event,
          }),
@@ -307,7 +307,7 @@ export async function schedule(
    const parsedDate = NHLDate(date ?? getCurrentDate());
    if (isParseError(parsedDate)) {
       return {
-         status: 'error',
+         success: false,
          error: new ValidationError(parsedDate.summary, {
             endpoint: _paths.schedule,
          }),
@@ -331,7 +331,7 @@ export async function scheduleCalendar(
    const parsedDate = NHLDate(date);
    if (isParseError(parsedDate)) {
       return {
-         status: 'error',
+         success: false,
          error: new ValidationError(parsedDate.summary, {
             endpoint: _paths.scheduleCalendar,
          }),
@@ -357,7 +357,7 @@ export async function playoffBracket(
    const parsedYear = YearAT(year ?? getCurrentYear());
    if (isParseError(parsedYear)) {
       return {
-         status: 'error',
+         success: false,
          error: new ValidationError(parsedYear.summary, {
             endpoint: _paths.playoffBracket,
          }),
@@ -381,7 +381,7 @@ export async function playoffSeries(
    const parsedSeason = SeasonAT(season ?? getCurrentSeason());
    if (isParseError(parsedSeason)) {
       return {
-         status: 'error',
+         success: false,
          error: new ValidationError(parsedSeason.summary, {
             endpoint: _paths.playoffSeries,
          }),
@@ -413,7 +413,7 @@ export async function playoffSeriesSchedule(
 
    if (isParseError(parsed)) {
       return {
-         status: 'error',
+         success: false,
          error: new ValidationError(parsed.summary, {
             endpoint: _paths.playoffSeriesSchedule,
          }),
@@ -451,7 +451,7 @@ export async function networkTVSchedule(
    const parsedDate = NHLDate(date ?? getCurrentDate());
    if (isParseError(parsedDate)) {
       return {
-         status: 'error',
+         success: false,
          error: new ValidationError(parsedDate.summary, {
             endpoint: _paths.networkTVSchedule,
          }),

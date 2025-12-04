@@ -43,7 +43,7 @@ export async function picks(
    const parsed = DraftParams({ year, round });
    if (isParseError(parsed)) {
       return {
-         status: 'error',
+         success: false,
          error: new ValidationError(parsed.summary, {
             endpoint: _paths.draftPicks.byYearAndRound,
          }),
@@ -98,7 +98,7 @@ export function rankings(year?: Year): {
       const parsedYear = YearType(year ?? getCurrentYear());
       if (isParseError(parsedYear)) {
          return {
-            status: 'error',
+            success: false,
             error: new ValidationError(parsedYear.summary, {
                endpoint: _paths.draftRankings,
             }),
@@ -160,13 +160,13 @@ export function rankings(year?: Year): {
          try {
             const dataOnly = response.map((r) => unwrapAPIResponse(r));
             const newResponse: APIResponse<DraftRankings[]> = {
-               status: 'success',
+               success: true,
                data: dataOnly,
             };
             return newResponse;
          } catch (error) {
             return {
-               status: 'error',
+               success: false,
                error: error as NHLError,
             };
          }

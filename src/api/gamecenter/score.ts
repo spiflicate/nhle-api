@@ -34,7 +34,7 @@ export async function score(
    const parsed = NHLDate(date ?? getCurrentDate());
    if (isParseError(parsed)) {
       return {
-         status: 'error',
+         success: false,
          error: new ValidationError(parsed.summary, {
             endpoint: _paths.score,
          }),
@@ -70,7 +70,7 @@ scoreboard.team = async (
    const parsed = Team(team);
    if (isParseError(parsed)) {
       return {
-         status: 'error',
+         success: false,
          error: new ValidationError(parsed.summary, {
             endpoint: _paths.scoreboard.byTeam,
          }),
@@ -96,7 +96,7 @@ scoreboard.date = async (
    const parsed = NHLDate(date);
    if (isParseError(parsed)) {
       return {
-         status: 'error',
+         success: false,
          error: new ValidationError(parsed.summary, {
             endpoint: _paths.scoreboard.byDate,
          }),

@@ -47,7 +47,7 @@ export async function rosterSeasons(
    const parsed = TeamAbbrevAT(team);
    if (isParseError(parsed)) {
       return {
-         status: 'error',
+         success: false,
          error: new ValidationError(parsed.summary, {
             endpoint: _paths.rosterSeasons,
          }),
@@ -73,7 +73,7 @@ export async function roster(
    const parsed = TeamAndSeasonParams({ team, season });
    if (isParseError(parsed)) {
       return {
-         status: 'error',
+         success: false,
          error: new ValidationError(parsed.summary, {
             endpoint: _paths.roster,
          }),
@@ -97,7 +97,7 @@ export async function prospects(
    const parsed = TeamAbbrevAT(team);
    if (isParseError(parsed)) {
       return {
-         status: 'error',
+         success: false,
          error: new ValidationError(parsed.summary, {
             endpoint: _paths.prospects,
          }),
@@ -128,7 +128,7 @@ export async function stats(
    const parsed = Parser({ team, season, gameType });
    if (isParseError(parsed)) {
       return {
-         status: 'error',
+         success: false,
          error: new ValidationError(parsed.summary, {
             endpoint: _paths.clubStats,
          }),
@@ -154,7 +154,7 @@ export async function statsSeason(
    const parsed = TeamAbbrevAT(team);
    if (isParseError(parsed)) {
       return {
-         status: 'error',
+         success: false,
          error: new ValidationError(parsed.summary, {
             endpoint: _paths.clubStatsSeason,
          }),
@@ -178,7 +178,7 @@ export async function standings(
    const parsed = NHLDate(date ?? getCurrentDate());
    if (isParseError(parsed)) {
       return {
-         status: 'error',
+         success: false,
          error: new ValidationError(parsed.summary, {
             endpoint: _paths.standings,
          }),
@@ -232,7 +232,7 @@ async function scheduleWeek(
    const parsed = ScheduleParams({ team, date, month: undefined });
    if (isParseError(parsed)) {
       return {
-         status: 'error',
+         success: false,
          error: new ValidationError(parsed.summary, {
             endpoint: _paths.clubSchedule.week,
          }),
@@ -271,7 +271,7 @@ async function scheduleMonth(
    const parsed = ScheduleParams({ team, month: date, date: undefined });
    if (isParseError(parsed)) {
       return {
-         status: 'error',
+         success: false,
          error: new ValidationError(parsed.summary, {
             endpoint: _paths.clubSchedule.month,
          }),
@@ -308,7 +308,7 @@ async function scheduleSeason(
    const parsed = TeamAndSeasonParams({ team, season });
    if (isParseError(parsed)) {
       return {
-         status: 'error',
+         success: false,
          error: new ValidationError(parsed.summary, {
             endpoint: _paths.clubSchedule.season,
          }),

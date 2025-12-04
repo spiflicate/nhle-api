@@ -66,7 +66,7 @@ async function metaGame(gameId: GameId): Promise<APIResponse<GameMeta>> {
    const parsedGameId = GameIdAT(gameId);
    if (isParseError(parsedGameId)) {
       return {
-         status: 'error',
+         success: false,
          error: new ValidationError(parsedGameId.summary, {
             endpoint: _paths.metaGame,
          }),
@@ -93,7 +93,7 @@ async function metaPlayoffSeries(
    const parsed = SeriesParams({ year, seriesLetter });
    if (isParseError(parsed)) {
       return {
-         status: 'error',
+         success: false,
          error: new ValidationError(parsed.summary, {
             endpoint: _paths.metaPlayoffSeries,
          }),
@@ -119,7 +119,7 @@ export async function postalLookup(
    const parsedPostalCode = PostalCodeAT(postalCode);
    if (isParseError(parsedPostalCode)) {
       return {
-         status: 'error',
+         success: false,
          error: new ValidationError(parsedPostalCode.summary, {
             endpoint: _paths.postalLookup,
          }),
@@ -160,7 +160,7 @@ export async function partnerGame(
    const parsedCountryCode = CountryCodeAT(countryCode);
    if (isParseError(parsedCountryCode)) {
       return {
-         status: 'error',
+         success: false,
          error: new ValidationError(parsedCountryCode.summary, {
             endpoint: _paths.partnerGame,
          }),

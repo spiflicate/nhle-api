@@ -122,17 +122,17 @@ export class NHLClient {
                endpoint: url,
             });
             this.errorHandler.log(error);
-            return { status: 'error', error };
+            return { success: false, error };
          }
 
-         return { data: (await response.json()) as T, status: 'success' };
+         return { data: (await response.json()) as T, success: true };
       } catch (error) {
          clearTimeout(timeoutId);
 
          // If it's already an NHLError, return it
          if (error instanceof NHLError) {
             this.errorHandler.log(error);
-            return { status: 'error', error };
+            return { success: false, error };
          }
 
          // Handle AbortError (timeout)
@@ -154,7 +154,7 @@ export class NHLClient {
          }
 
          this.errorHandler.log(nhlError);
-         return { status: 'error', error: nhlError };
+         return { success: false, error: nhlError };
       }
    }
 

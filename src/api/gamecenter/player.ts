@@ -37,7 +37,7 @@ export async function landing(
    const parsedPlayerId = PlayerId(playerId);
    if (isParseError(parsedPlayerId)) {
       return {
-         status: 'error',
+         success: false,
          error: new ValidationError(parsedPlayerId.summary, {
             endpoint: _paths.landing,
          }),
@@ -70,7 +70,7 @@ export async function gameLog(
    const parsed = Parser({ playerId, season, gameType });
    if (isParseError(parsed)) {
       return {
-         status: 'error',
+         success: false,
          error: new ValidationError(parsed.summary, {
             endpoint: _paths.gameLog,
          }),
@@ -134,7 +134,7 @@ async function statsLeadersSkaters(
    const parsed = BaseParams({ season, gameType });
    if (isParseError(parsed)) {
       return {
-         status: 'error',
+         success: false,
          error: new ValidationError(parsed.summary, {
             endpoint: _paths.statsLeaders.skaters,
          }),
@@ -160,7 +160,7 @@ async function statsLeadersGoalies(
    const parsed = BaseParams({ season, gameType });
    if (isParseError(parsed)) {
       return {
-         status: 'error',
+         success: false,
          error: new ValidationError(parsed.summary, {
             endpoint: _paths.statsLeaders.goalies,
          }),

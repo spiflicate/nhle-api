@@ -53,8 +53,8 @@ export interface NHLApiResponse<T> {
 }
 
 export type APIResponse<T> =
-   | { status: 'success'; data: T }
-   | { status: 'error'; error: NHLError };
+   | { success: true; data: T }
+   | { success: false; error: NHLError };
 
 /**
  * NHL API error response structure
