@@ -6,7 +6,7 @@ import type {
    LocalizedText,
    PenaltyTypeCode,
    PeriodType,
-   Position,
+   PositionCode,
    PositionCode,
    Reason,
    ShotType,
@@ -91,7 +91,7 @@ interface Goalie {
    lastName: LocalizedText;
    sweaterNumber: number;
    headshot: string;
-   positionCode: Position;
+   positionCode: PositionCode;
    gamesPlayed?: number;
    seasonPoints?: number;
    record?: string;
@@ -218,7 +218,7 @@ interface ThreeStar {
    headshot: string;
    name: string;
    sweaterNo: number;
-   position: Position;
+   position: PositionCode;
    goals?: number;
    assists?: number;
    points?: number;

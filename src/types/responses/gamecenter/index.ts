@@ -27,6 +27,4 @@ export * from './team-stats.ts';
 export * from './where-to-watch.ts';
 export * from './wsc.ts';
 
-export type NHLSeasons = Record<string, unknown>;
-
 export type PlayerSearchResult = Record<string, unknown>;

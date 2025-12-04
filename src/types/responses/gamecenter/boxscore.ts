@@ -1,11 +1,10 @@
-import type { TeamAbbrev } from '#/types/types.ts';
+import type { TeamAbbrev } from '../../types.ts';
 import type {
-   CountryCode,
    GameScheduleState,
    GameState,
    LocalizedText,
-   Market,
-   Position,
+   PositionCode,
+   TvBroadcast,
    UTCOffset,
 } from './common.js';
 
@@ -79,11 +78,11 @@ interface BasePlayer {
    playerId: number;
    sweaterNumber: number;
    name: LocalizedText;
-   position: Position;
+   position: PositionCode;
 }
 
 interface Skater extends BasePlayer {
-   position: Exclude<Position, 'G'>;
+   position: Exclude<PositionCode, 'G'>;
    goals: number;
    assists: number;
    points: number;
@@ -101,7 +100,7 @@ interface Skater extends BasePlayer {
 }
 
 interface Forward extends Skater {
-   position: Exclude<Position, 'D' | 'G'>;
+   position: Exclude<PositionCode, 'D' | 'G'>;
 }
 
 interface Defense extends Skater {
@@ -139,16 +138,8 @@ interface Situation {
 
 interface SituationDetails {
    abbrev: string;
-   situationDescriptions: string[];
+   situationDescriptions?: string[];
    strength: number;
 }
 
 type Summary = Record<string, unknown>;
-
-interface TvBroadcast {
-   id: number;
-   market: Market;
-   countryCode: CountryCode;
-   network: string;
-   sequenceNumber: number;
-}

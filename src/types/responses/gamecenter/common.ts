@@ -11,6 +11,16 @@ export type GameScheduleState = 'OK' | 'TBD' | 'CNCL' | (string & {});
 /** The type of period in the game. */
 export type PeriodType = 'REG' | 'OT' | 'SO';
 
+/** Abbreviated day of the week. (MON = Monday, TUE = Tuesday ...) */
+export type DayAbbrev =
+   | 'MON'
+   | 'TUE'
+   | 'WED'
+   | 'THU'
+   | 'FRI'
+   | 'SAT'
+   | 'SUN';
+
 /** The type of penalty. (MIN = Minor, BEN = Bench, MAJ = Major ...) */
 export type PenaltyTypeCode = 'MIN' | 'BEN' | 'MAJ' | (string & {});
 
@@ -21,9 +31,7 @@ export type Market = 'H' | 'A' | 'N' | 'S';
 export type CountryCode = 'CA' | 'US';
 
 /** The position code for a player. (C = Center, L[W] = Left Wing, R[W] = Right Wing, D = Defenseman, G = Goalie) */
-export type Position = 'C' | 'LW' | 'L' | 'RW' | 'R' | 'D' | 'G';
-
-export type PositionCode = Position;
+export type PositionCode = 'C' | 'LW' | 'L' | 'RW' | 'R' | 'D' | 'G';
 
 /** Player's shooting/catching handedness. (L = Left, R = Right) */
 export type ShootsCatches = 'L' | 'R';
@@ -124,6 +132,8 @@ export type EventTypeDescKey =
 
 /** An object containing a default string an optional localized strings. */
 export interface LocalizedText {
+   /** Default */
+   default: string;
    /** French */
    fr?: string;
    /** Czech */
@@ -138,8 +148,6 @@ export interface LocalizedText {
    sk?: string;
    /** Swedish */
    sv?: string;
-   /** Additional languages */
-   [key: string]: string | undefined;
 }
 
 export interface TvBroadcast {

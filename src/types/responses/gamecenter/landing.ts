@@ -6,7 +6,9 @@ import type {
    GoalModifier,
    LocalizedText,
    PenaltyTypeCode,
-   Position,
+   PeriodType,
+   PositionCode,
+   PositionCode,
    ShotType,
    Strength,
    TvBroadcast,
@@ -92,7 +94,7 @@ interface TeamLeader {
    lastName: LocalizedText;
    sweaterNumber: number;
    headshot: string;
-   positionCode: Position;
+   positionCode: PositionCode;
    gamesPlayed: number;
    seasonPoints: number;
    record: string;
@@ -151,7 +153,7 @@ interface Leader {
    firstName: LocalizedText;
    lastName: LocalizedText;
    sweaterNumber: number;
-   positionCode: Position;
+   positionCode: PositionCode;
    headshot: string;
    value: number;
 }
@@ -169,7 +171,7 @@ interface Skater {
    teamId: number;
    sweaterNumber: number;
    name: LocalizedText;
-   position: Exclude<Position, 'G'>;
+   position: Exclude<PositionCode, 'G'>;
    gamesPlayed?: number;
    goals?: number;
    assists?: number;
@@ -189,7 +191,7 @@ interface Skater {
 
 interface PeriodDescriptor {
    number: number;
-   periodType: 'REG';
+   periodType: PeriodType;
    maxRegulationPeriods: number;
 }
 
@@ -231,14 +233,14 @@ interface IceSurfacePlayer {
    playerId: number;
    name: LocalizedText;
    sweaterNumber: number;
-   positionCode: Position;
+   positionCode: PositionCode;
    headshot: string;
    totalSOI?: number;
    secondsRemaining?: number;
 }
 
 interface IceSurfaceForward extends IceSurfacePlayer {
-   positionCode: Exclude<Position, 'D'>;
+   positionCode: Exclude<PositionCode, 'D'>;
 }
 
 interface IceSurfaceDefense extends IceSurfacePlayer {
@@ -320,7 +322,7 @@ interface ThreeStar {
    headshot: string;
    name: LocalizedText;
    sweaterNo: number;
-   position: Position;
+   position: PositionCode;
    goals?: number;
    assists?: number;
    points?: number;

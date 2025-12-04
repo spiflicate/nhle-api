@@ -1,4 +1,7 @@
+import type { Season } from '../../types.ts';
 import type { LocalizedText } from './common.ts';
+
+export type NHLSeasons = Array<Season>;
 
 export interface PlayoffSeriesMeta {
    seriesTitle: string;

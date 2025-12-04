@@ -4,7 +4,7 @@ import type {
    GameState,
    HexColorCode,
    LocalizedText,
-   Position,
+   PositionCode,
    TvBroadcast,
    UTCOffset,
 } from './common.ts';
@@ -67,7 +67,7 @@ interface TeamLeader {
    headshot: string;
    teamAbbrev: TeamAbbrev;
    sweaterNumber: number;
-   position: Position;
+   position: PositionCode;
    category: LeaderCategory;
    value: number;
 }
