@@ -87,7 +87,7 @@ export async function gameLog(
  * spotlight().then((data) => console.log(data));
  * ```
  */
-export async function spotlight(): Promise<APIResponse<PlayerSpotlight>> {
+export async function spotlight(): Promise<APIResponse<PlayerSpotlight[]>> {
    return nhlClient.get(_paths.spotlight);
 }
 
