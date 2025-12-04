@@ -102,7 +102,7 @@ export async function spotlight(): Promise<APIResponse<PlayerSpotlight[]>> {
  */
 export async function search(
    query: string,
-): Promise<APIResponse<PlayerSearchResult>> {
+): Promise<APIResponse<PlayerSearchResult[] | undefined>> {
    return nhlPlayerSearch.get('', {
       ...searchUrlParams,
       q: query,

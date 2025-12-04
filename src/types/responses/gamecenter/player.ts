@@ -1,5 +1,26 @@
 import type { TeamAbbrev } from '../../types.ts';
-import type { LocalizedText } from './common.ts';
+import type { LocalizedText, PositionCode } from './common.ts';
+
+export interface PlayerSearchResult {
+   playerId: string;
+   name: string;
+   positionCode: PositionCode;
+   teamId: string | null;
+   teamAbbrev: string | null;
+   lastTeamId: string | null;
+   lastTeamAbbrev: string | null;
+   lastSeasonId: string | null;
+   sweaterNumber: number | null;
+   active: boolean;
+   height: string | null;
+   heightInInches: number | null;
+   heightInCentimeters: number | null;
+   weightInPounds: number | null;
+   weightInKilograms: number | null;
+   birthCity: string | null;
+   birthStateProvince: string | null;
+   birthCountry: string | null;
+}
 
 export interface PlayerSpotlight {
    playerId: number;
