@@ -1,153 +1,230 @@
 # NHLe API Library
 
-A TypeScript wrapper for the NHLe API with simple, composable functions and full type safety.
+A modern TypeScript wrapper around the public NHL GameCenter and EdgeStats APIs with simple, composable functions and strong TypeScript typing.
 
 ## Overview
 
-Access NHLe game data, player statistics, and team information through a clean, functional API. Built with TypeScript for complete type safety and designed for ease of use.
+The library exposes a small, functional surface over the NHL "Game Center" and related APIs and ships with rich response types for all Game Center endpoints.
+
+- Written in TypeScript and published as ESM/CJS
+- Thin functional wrappers over official NHL API routes
+- Fully-typed Game Center responses (game, team, player, draft, misc)
+- Simple environment-based configuration for timeouts, language and logging
 
 ## Installation
-
-To install the package, run:
 
 ```bash
 npm install nhle-api
 ```
 
-## Usage
+The package ships both ESM and CJS builds; use standard `import`/`require` according to your toolchain.
 
-Here are some basic examples of how to use the NHLe API library:
+## Quick Start
 
-```typescript
-import { gc } from "nhle-api";
+The primary entrypoint is the Game Center API namespace `gc`:
+
+```ts
+import { gc } from 'nhle-api';
 
 // Get game landing page data
 const gameInfo = await gc.game.landing(2023020001);
-console.log(gameInfo);
 
 // Get live play-by-play
 const playByPlay = await gc.game.playByPlay(2023020001);
-console.log(playByPlay);
 
 // Get boxscore
 const boxscore = await gc.game.boxscore(2023020001);
-console.log(boxscore);
 
 // Get today's scores
 const scores = await gc.score(new Date());
-console.log(scores);
 
 // Get current scoreboard
 const scoreboard = await gc.scoreboard();
-console.log(scoreboard);
 
 // Get team roster
-const roster = await gc.team.roster("TOR");
-console.log(roster);
+const roster = await gc.team.roster('TOR');
 
-// Get player information
-const player = await gc.player.landing(8478402); // Connor McDavid
-console.log(player);
+// Get player landing page (Connor McDavid)
+const player = await gc.player.landing(8478402);
 ```
 
 ## Configuration
 
-The library supports simple configuration through environment variables:
+Basic behavior is configured via environment variables and the exported `envConfig` helper from `config/env`:
 
 ```bash
-# Set request timeout (in milliseconds, default: 5000)
+# Request timeout in milliseconds (default: 5000)
 export NHLE_API_TIMEOUT=10000
 
-# Set language for responses (en or fr, default: en)
+# Language for responses ("en" or "fr", default: "en")
 export NHLE_API_LANGUAGE=en
 
-# Set logging level (silent, error, warn, info, debug; default: warn)
+# Logging level: silent | error | warn | info | debug (default: "warn")
 export NHLE_API_LOGLEVEL=debug
 ```
 
-For more details, see [Environment Configuration Documentation](docs/ENVIRONMENT_CONFIG.md).
+You can inspect the resolved configuration at runtime:
 
-## API Reference
+```ts
+import { envConfig, logEnvConfig } from 'nhle-api';
 
-### Gamecenter API (`gc`)
+console.log(envConfig.timeout, envConfig.language, envConfig.logLevel);
+logEnvConfig(); // logs only variables that are explicitly set
+```
 
-The primary API for accessing NHL game data, scores, team and player information (live and historical).
+See `docs/ENVIRONMENT_CONFIG.md` for more details.
 
-#### `gc.game` - Game Data
+## Top-Level Exports
 
-- `playByPlay(gameId)` - Get play-by-play data for a game
-- `boxscore(gameId)` - Get boxscore for a game
-- `landing(gameId)` - Get landing page data for a game
-- `reports(gameId)` - Get game reports (right rail data)
-- `schedule(date?)` - Get schedule for a specific date (defaults to today)
-- `scheduleCalendar(date?)` - Get schedule calendar for a specific date
-- `playoffBracket(year?)` - Get playoff bracket for a year
-- `playoffSeries(season?)` - Get playoff series for a season
-- `playoffSeriesSchedule(season, seriesLetter)` - Get schedule for a playoff series
-- `whereToWatch()` - Get where to watch information
-- `networkTVSchedule(date?)` - Get network TV schedule
-- `wsc.gameStory(gameId)` - Get game story (web service)
-- `wsc.playByPlay(gameId)` - Get play-by-play (web service)
-- `pptReplay.goal(gameId, eventId)` - Get goal replay data
-- `pptReplay.event(date?)` - Get replay events for a date
+The package root `nhle-api` re-exports the main API namespaces, configuration utilities, constants, and public types:
 
-#### `gc.score` - Scores & Scoreboards
+```ts
+// Game Center API (fully typed)
+import { gc } from 'nhle-api';
 
-- `score(date?)` - Get scores for a specific date (defaults to today)
-- `scoreboard()` - Get current scoreboard
+// Edge Advanced stats (in progress, API surface may change)
+import { adv } from 'nhle-api';
 
-#### `gc.team` - Team Data
+// Environment configuration helpers
+import { envConfig, logEnvConfig } from 'nhle-api';
 
-- `roster(teamCode, season?)` - Get team roster
-- `rosterSeasons(teamCode)` - Get available roster seasons
-- `prospects(teamCode)` - Get team prospects
-- `clubStats(teamCode, season?)` - Get club stats
-- `clubStatsSeason(teamCode)` - Get club stats season
-- `standings(date?)` - Get standings for a date
-- `standingsSeason()` - Get standings by season
-- `schedule.now(teamCode)` - Get team's current schedule
-- `schedule.month(teamCode, month)` - Get team's schedule for a month
-- `schedule.season(teamCode, season)` - Get team's schedule for a season
+// Shared type exports (Game Center response types, parameter types, etc.)
+import type { GameLandingResponse } from 'nhle-api';
+```
 
-#### `gc.player` - Player Data
+### Notes on Edge APIs
 
-- `landing(playerId)` - Get player landing page data
-- `gameLog(playerId, season?, gameType?)` - Get player game log
-- `spotlight()` - Get featured players
-- `search(query)` - Search for players
-- `statsLeaders.season(season?, gameType?, category?, limit?)` - Get season stats leaders
-- `statsLeaders.current(gameType?, category?, limit?)` - Get current stats leaders
+- `adv` (Edge Advanced) is available but still considered in development, but ready for preliminary use.
+- The `stats` (Edge Stats) namespace is not exported at the moment and will be introduced in a future release once implementation is ready.
 
-#### `gc.draft` - Draft Data
+## Game Center API (`gc`)
 
-- `picks(year?)` - Get draft picks for a year
-- `tracker()` - Get draft tracker
-- `rankings(year?)` - Get draft rankings
+`gc` is the primary namespace for accessing live and historical NHL data.
 
-#### `gc.misc` - Miscellaneous
+### `gc.game` – Game Data
 
-- `seasons()` - Get all NHL seasons
-- `meta.game(gameId)` - Get game metadata
-- `meta.gameVideo(gameId)` - Get game video metadata
-- `postalLookup(postalCode)` - Lookup location by postal code
-- `location()` - Get current location info
-- `partnerGame(country, date?)` - Get partner game information
+- `playByPlay(gameId)` – Full live play-by-play event stream
+- `boxscore(gameId)` – Boxscore and team/player stats for a game
+- `landing(gameId)` – Game landing page data (summary, lines, etc.)
+- `reports(gameId)` – Game reports / right-rail data
+- `schedule(date?)` – Schedule for a given date (defaults to today)
+- `scheduleCalendar(date?)` – Calendar-style schedule for a date
+- `playoffBracket(year?)` – Playoff bracket for a given year
+- `playoffSeries(season?)` – Playoff series information for a season
+- `playoffSeriesSchedule(season, seriesLetter)` – Schedule for a playoff series
+- `whereToWatch()` – Regional broadcast / streaming info
+- `networkTVSchedule(date?)` – National TV schedule
+- `wsc.gameStory(gameId)` – Game story from the web service collection
+- `wsc.playByPlay(gameId)` – Play-by-play from the web service collection
+- `pptReplay.goal(gameId, eventId)` – Goal replay data for a specific event
+- `pptReplay.event(date?)` – Replay events for a given date (does not appear to be functional at this time)
 
-### Edge Stats API (`stats`) - _In Development_
+### `gc.score` – Scores & Scoreboards
 
-Historical and current NHL statistics (functionality being finalized)
+- `score(date?)` – Scores for a given date (defaults to today)
+- `scoreboard()` – Current live scoreboard
 
-### Edge Advanced API (`adv`) - _In Development_
+### `gc.team` – Team Data
 
-Advanced analytics endpoints (functionality being finalized)
+- `roster(teamCode, season?)` – Team roster for a given season
+- `rosterSeasons(teamCode)` – Available roster seasons for a team
+- `prospects(teamCode)` – Team prospects
+- `clubStats(teamCode, season?)` – Club stats for a team/season
+- `clubStatsSeason(teamCode)` – Season-level club stats
+- `standings(date?)` – Standings for a given date
+- `standingsSeason()` – Season standings
+- `schedule.now(teamCode)` – Current schedule segment for a team
+- `schedule.month(teamCode, month)` – Team schedule for a given month
+- `schedule.season(teamCode, season)` – Full season schedule for a team
+
+### `gc.player` – Player Data
+
+- `landing(playerId)` – Player landing page data
+- `gameLog(playerId, season?, gameType?)` – Game log for a player
+- `spotlight()` – Featured players (spotlight carousel)
+- `search(query)` – Player search
+- `statsLeaders.season(season?, gameType?, category?, limit?)` – Season stat leaders
+- `statsLeaders.current(gameType?, category?, limit?)` – Current stat leaders
+
+### `gc.draft` – Draft Data
+
+- `picks(year?)` – Draft picks for a given year
+- `tracker()` – Draft tracker
+- `rankings(year?)` – Draft rankings (all, NA/International, skaters/goalies)
+
+### `gc.misc` – Miscellaneous
+
+- `seasons()` – All NHL seasons
+- `meta.game(gameId)` – Game metadata
+- `meta.gameVideo(gameId)` – Game video metadata
+- `postalLookup(postalCode)` – Postal/ZIP lookup (location info)
+- `location()` – Location info for current context
+- `partnerGame(country, date?)` – Partner game information
+
+## Types
+
+The library exports strongly-typed response shapes and parameter types for all Game Center endpoints from the `types` bundle:
+
+- Response types for `gc.game.*`, `gc.team.*`, `gc.player.*`, `gc.draft.*`, `gc.misc.*`
+- Common enums and helper types (position codes, team codes, schedule state, etc.)
+
+
+
+### Error Handling and `NHLError`
+
+Under the hood, low-level HTTP requests use a shared `NHLClient` and `ErrorHandler` which normalize HTTP/network failures into a single `NHLError` shape.
+
+- All non-2xx responses and network/timeout failures are converted to an `NHLError` instance.
+- Errors are categorized (client/server/network) with optional context (endpoint, method, status code).
+- High-level helpers expose these via the `APIResponse<T>` union so you can safely branch on `status` without catching exceptions.
+
+Typical usage pattern:
+
+```ts
+import { gc } from 'nhle-api';
+import type { APIResponse, GamecenterLanding } from 'nhle-api';
+
+const result: APIResponse<GamecenterLanding> = await gc.game.landing(2023020001);
+
+if (result.success) {
+   console.log(result.data);
+} else {
+   // NHLError instance with rich metadata
+   console.error(result.error.message);
+}
+```
+
+## Roadmap / Status
+
+- ✅ Game Center endpoints fully wired with response types
+- ✅ Environment configuration utilities (`envConfig`, `logEnvConfig`)
+- ✅ Error handling via `NHLError` and structured error responses internally
+- 🚧 Edge Advanced (`adv`) API surface and types are in development
+- ⏳ Edge Stats (`stats`) API will be added in a future minor release
+
+For a detailed list of changes and recent work on response types and endpoint coverage, see `CHANGELOG.md`.
 
 ## Docs
 
-- [Environment Configuration](docs/ENVIRONMENT_CONFIG.md) - Configure timeouts, language, and base URLs
-- [Query Builder Guide](docs/QUERY_BUILDER_GUIDE.md) - Advanced query building for stats API
+- [Environment Configuration](docs/ENVIRONMENT_CONFIG.md) - Environment configuration and default values
+- [Query Builder Guide](docs/QUERY_BUILDER_GUIDE.md) - Cayenne query builder for stats APIs
+
+## Contributing
+
+This project is still evolving and feedback is very welcome.
+
+- **Bug reports / issues:** If an endpoint returns unexpected data, response parsing fails, or types don’t match the real API, please open a GitHub issue with the endpoint, parameters, and (sanitized) sample payloads if possible.
+- **Type improvements:** PRs or issues that improve response coverage, fix missing/incorrect fields, or refine enums and unions are particularly helpful.
+- **JSDoc / docs:** Additions or corrections to JSDoc on public types and functions, or clarifications to the guides in `docs/`, are also very much appreciated.
+
+Before filing an issue, check the `CHANGELOG.md` for recent changes and breaking notes, and include the library version you’re using.
 
 ## Support
 
 If you find this library helpful, consider supporting its development:
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/R6R01DV0JD)
+
+## License
+
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
