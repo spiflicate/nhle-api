@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.3] - 2025-12-03
+
+### Added
+
+- Expanded Game Center response type coverage (player, team, and game detail structures), completing response types for all endpoints
+
+### Changed
+
+- Updated internal API import paths for game, player, and score modules to align with path consolidation work
+
+### Fixed
+
+- Corrected `playoffSeries` path to include missing `carousel` segment
+- Updated player spotlight endpoint return type to use an array of `PlayerSpotlight`
+- Removed duplicate `PositionCode` import from Game Center types
+
 ## [0.5.2] - 2025-12-01
 
 ### Release Notes
