@@ -1,5 +1,9 @@
 # NHLe API Library
 
+[![npm version](https://img.shields.io/npm/v/nhle-api.svg)](https://www.npmjs.com/package/nhle-api)
+[![npm downloads](https://img.shields.io/npm/dm/nhle-api.svg)](https://www.npmjs.com/package/nhle-api)
+[![license](https://img.shields.io/github/license/spiflicate/nhle-api.svg)](LICENSE)
+
 A modern TypeScript wrapper around the public NHL GameCenter and EdgeStats APIs with simple, composable functions and strong TypeScript typing.
 
 ## Overview
