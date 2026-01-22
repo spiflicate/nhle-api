@@ -145,7 +145,7 @@ export function rankings(year?: Year): {
          const unwrapAPIResponse = (
             apiResponse: APIResponse<unknown>,
          ): DraftRankings => {
-            if (apiResponse.status === 'success') {
+            if (apiResponse.success) {
                return apiResponse.data as DraftRankings;
             }
             throw apiResponse.error;
