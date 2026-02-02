@@ -21,6 +21,7 @@
 
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import * as game from '#/api/gamecenter/game.ts';
+import { ValidationError } from '#/errors/index.ts';
 import { testData } from '../../test-utils.ts';
 
 describe('Game Module', () => {
@@ -138,11 +139,12 @@ describe('Game Module', () => {
       });
 
       test('playByPlay should reject invalid game ID', async () => {
-         try {
-            await game.playByPlay('invalid');
-            expect.unreachable();
-         } catch {
-            // Expected to throw for invalid ID
+         const result = await game.playByPlay(
+            'invalid' as unknown as number,
+         );
+         expect(result.success).toBeFalse();
+         if (!result.success) {
+            expect(result.error).toBeInstanceOf(ValidationError);
          }
       });
 
@@ -161,11 +163,10 @@ describe('Game Module', () => {
       });
 
       test('reports should reject invalid game ID', async () => {
-         try {
-            await game.reports('invalid');
-            expect.unreachable();
-         } catch {
-            // Expected to throw for invalid ID
+         const result = await game.reports('invalid' as unknown as number);
+         expect(result.success).toBeFalse();
+         if (!result.success) {
+            expect(result.error).toBeInstanceOf(ValidationError);
          }
       });
 
@@ -184,11 +185,10 @@ describe('Game Module', () => {
       });
 
       test('landing should reject invalid game ID', async () => {
-         try {
-            await game.landing('invalid');
-            expect.unreachable();
-         } catch {
-            // Expected to throw for invalid ID
+         const result = await game.landing('invalid' as unknown as number);
+         expect(result.success).toBeFalse();
+         if (!result.success) {
+            expect(result.error).toBeInstanceOf(ValidationError);
          }
       });
 
@@ -207,11 +207,10 @@ describe('Game Module', () => {
       });
 
       test('boxscore should reject invalid game ID', async () => {
-         try {
-            await game.boxscore('invalid');
-            expect.unreachable();
-         } catch {
-            // Expected to throw for invalid ID
+         const result = await game.boxscore('invalid' as unknown as number);
+         expect(result.success).toBeFalse();
+         if (!result.success) {
+            expect(result.error).toBeInstanceOf(ValidationError);
          }
       });
    });
@@ -227,11 +226,12 @@ describe('Game Module', () => {
       });
 
       test('gameStory should reject invalid game ID', async () => {
-         try {
-            await game.wsc.gameStory('invalid' as unknown as number);
-            expect.unreachable();
-         } catch {
-            // Expected to throw for invalid ID
+         const result = await game.wsc.gameStory(
+            'invalid' as unknown as number,
+         );
+         expect(result.success).toBeFalse();
+         if (!result.success) {
+            expect(result.error).toBeInstanceOf(ValidationError);
          }
       });
 
@@ -245,11 +245,12 @@ describe('Game Module', () => {
       });
 
       test('playByPlay should reject invalid game ID', async () => {
-         try {
-            await game.wsc.playByPlay('invalid' as unknown as number);
-            expect.unreachable();
-         } catch {
-            // Expected to throw for invalid ID
+         const result = await game.wsc.playByPlay(
+            'invalid' as unknown as number,
+         );
+         expect(result.success).toBeFalse();
+         if (!result.success) {
+            expect(result.error).toBeInstanceOf(ValidationError);
          }
       });
    });
@@ -268,47 +269,46 @@ describe('Game Module', () => {
       });
 
       test('goal should reject invalid game ID', async () => {
-         try {
-            await game.pptReplay.goal('invalid' as unknown as number, 123);
-            expect.unreachable();
-         } catch {
-            // Expected to throw for invalid ID
+         const result = await game.pptReplay.goal(
+            'invalid' as unknown as number,
+            123,
+         );
+         expect(result.success).toBeFalse();
+         if (!result.success) {
+            expect(result.error).toBeInstanceOf(ValidationError);
          }
       });
 
       test('goal should reject invalid event ID', async () => {
-         try {
-            await game.pptReplay.goal(
-               2023020001,
-               'invalid' as unknown as number,
-            );
-            expect.unreachable();
-         } catch {
-            // Expected to throw for invalid ID
+         const result = await game.pptReplay.goal(
+            2023020001,
+            'invalid' as unknown as number,
+         );
+         expect(result.success).toBeFalse();
+         if (!result.success) {
+            expect(result.error).toBeInstanceOf(ValidationError);
          }
       });
 
-      test('event should fetch event replay data with valid date', async () => {
-         const date = '2023-10-10';
-         const result = await game.pptReplay.event(date);
+      test('event should fetch event replay data from the event for a specific game', async () => {
+         const gameId = '2025020022';
+         const eventId = '12';
+         const result = await game.pptReplay.event(gameId, eventId);
          expect(result).toBeDefined();
          expect(typeof result).toBe('object');
          expect(mockCalls[0]).toContain('ppt-replay');
-         expect(mockCalls[0]).toContain(date);
-      });
-
-      test('event should accept Date object', async () => {
-         const date = new Date('2023-10-10');
-         await game.pptReplay.event(date);
-         expect(mockCalls[0]).toContain('ppt-replay');
+         expect(mockCalls[0]).toContain(gameId);
+         expect(mockCalls[0]).toContain(eventId);
       });
 
       test('event should reject invalid date', async () => {
-         try {
-            await game.pptReplay.event('invalid-date');
-            expect.unreachable();
-         } catch {
-            // Expected to throw for invalid date
+         const result = await game.pptReplay.event(
+            'invalid-game-id',
+            'invalid-event-id',
+         );
+         expect(result.success).toBeFalse();
+         if (!result.success) {
+            expect(result.error).toBeInstanceOf(ValidationError);
          }
       });
    });
@@ -436,7 +436,7 @@ describe('Game Module', () => {
          expect(result).toBeDefined();
          expect(typeof result).toBe('object');
          expect(mockCalls[0]).toContain(
-            `playoff-series/${testData.seasonId}`,
+            `playoff-series/carousel/${testData.seasonId}`,
          );
       });
 
@@ -455,7 +455,10 @@ describe('Game Module', () => {
       });
 
       test('playoffSeriesSchedule should fetch playoff series schedule', async () => {
-         const result = await game.playoffSeriesSchedule('A', testData.seasonId);
+         const result = await game.playoffSeriesSchedule(
+            'A',
+            testData.seasonId,
+         );
          expect(result).toBeDefined();
          expect(typeof result).toBe('object');
          expect(mockCalls[0]).toContain('schedule/playoff-series');
@@ -470,20 +473,25 @@ describe('Game Module', () => {
       });
 
       test('playoffSeriesSchedule should reject invalid series letter', async () => {
-         try {
-            await game.playoffSeriesSchedule('Z', testData.seasonId);
-            expect.unreachable();
-         } catch {
-            // Expected to throw for invalid series letter (must be A-O)
+         const invalidSeriesLetter = 'Z';
+         const result = await game.playoffSeriesSchedule(
+            invalidSeriesLetter,
+            testData.seasonId,
+         );
+         expect(result.success).toBeFalse();
+         if (!result.success) {
+            expect(result.error).toBeInstanceOf(ValidationError);
          }
       });
 
       test('playoffSeriesSchedule should reject invalid season', async () => {
-         try {
-            await game.playoffSeriesSchedule('A', 'invalid-season');
-            expect.unreachable();
-         } catch {
-            // Expected to throw for invalid season
+         const result = await game.playoffSeriesSchedule(
+            'A',
+            'invalid-season',
+         );
+         expect(result.success).toBeFalse();
+         if (!result.success) {
+            expect(result.error).toBeInstanceOf(ValidationError);
          }
       });
    });
