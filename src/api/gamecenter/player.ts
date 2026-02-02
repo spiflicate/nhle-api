@@ -63,6 +63,16 @@ export async function gameLog(
    playerId: number | string,
    season?: Season,
    gameType?: GameType,
+): Promise<APIResponse<PlayerGameLog>>;
+export async function gameLog(
+   playerId: number | string,
+   season?: Season,
+   gameType?: number | string,
+): Promise<APIResponse<PlayerGameLog>>;
+export async function gameLog(
+   playerId: number | string,
+   season?: Season,
+   gameType?: GameType | number | string,
 ): Promise<APIResponse<PlayerGameLog>> {
    const Parser = BaseParams.merge({
       playerId: PlayerId,

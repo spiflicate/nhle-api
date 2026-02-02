@@ -1,3 +1,4 @@
+// biome-ignore-all lint/suspicious/noExplicitAny: used for testing utilities
 /**
  * Test utilities for edge-stats API tests
  * Provides helpers for mocking and testing

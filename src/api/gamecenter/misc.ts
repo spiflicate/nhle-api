@@ -89,6 +89,14 @@ async function metaGame(gameId: GameId): Promise<APIResponse<GameMeta>> {
 async function metaPlayoffSeries(
    seriesLetter: SeriesLetter,
    year?: Year,
+): Promise<APIResponse<PlayoffSeriesMeta>>;
+async function metaPlayoffSeries(
+   seriesLetter: string,
+   year?: Year,
+): Promise<APIResponse<PlayoffSeriesMeta>>;
+async function metaPlayoffSeries(
+   seriesLetter: SeriesLetter | string,
+   year?: Year,
 ): Promise<APIResponse<PlayoffSeriesMeta>> {
    const parsed = SeriesParams({ year, seriesLetter });
    if (isParseError(parsed)) {
