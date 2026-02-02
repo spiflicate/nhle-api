@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import { skaters } from '#/api/edge-stats/skaters.ts';
-import { MockResponseFactory, testData } from '../test-utils.ts';
+import { MockResponseFactory, testData } from '../../test-utils.ts';
 
 describe('Skaters Module', () => {
    let originalFetch: typeof globalThis.fetch;

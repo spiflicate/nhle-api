@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import { draft, games, seasons } from '#/api/edge-stats/season-game.ts';
-import { MockResponseFactory, testData } from '../test-utils.ts';
+import { MockResponseFactory } from '../../test-utils.ts';
 
 describe('Season/Game/Draft Modules', () => {
    let originalFetch: typeof globalThis.fetch;
@@ -81,7 +81,7 @@ describe('Season/Game/Draft Modules', () => {
       });
 
       test('should fetch game metadata', async () => {
-         const result = await games.getMeta('en');
+         const result = await games.get('en');
          expect(result).toBeDefined();
          expect(mockCalls[0]).toContain('/game/meta');
       });

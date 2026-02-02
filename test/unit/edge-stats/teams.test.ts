@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
-import { goalies } from '#/api/edge-stats/goalies.ts';
-import { MockResponseFactory, testData } from '../test-utils.ts';
+import { teams } from '#/api/edge-stats/teams.ts';
+import { MockResponseFactory, testData } from '../../test-utils.ts';
 
-describe('Goalies Module', () => {
+describe('Teams Module', () => {
    let originalFetch: typeof globalThis.fetch;
    let mockCalls: Array<string> = [];
 
@@ -13,32 +13,32 @@ describe('Goalies Module', () => {
       globalThis.fetch = (async (url: string) => {
          mockCalls.push(String(url));
 
-         if (url.includes('/leaders/goalies')) {
+         if (
+            url.includes('/team/summary') ||
+            url.includes('/team/detailed')
+         ) {
             return {
                ok: true,
                json: async () =>
                   MockResponseFactory.paginatedResponse([
-                     MockResponseFactory.goalieStats(),
+                     MockResponseFactory.teamStats(),
                   ]),
             } as Response;
          }
 
-         if (url.includes('/milestones/goalies')) {
+         if (url.includes('/team/id/')) {
             return {
                ok: true,
-               json: async () =>
-                  MockResponseFactory.paginatedResponse([
-                     MockResponseFactory.goalieStats(),
-                  ]),
+               json: async () => MockResponseFactory.team(),
             } as Response;
          }
 
-         if (url.includes('/goalie')) {
+         if (url.includes('/team')) {
             return {
                ok: true,
                json: async () =>
                   MockResponseFactory.paginatedResponse([
-                     MockResponseFactory.goalieStats(),
+                     MockResponseFactory.team(),
                   ]),
             } as Response;
          }
@@ -56,31 +56,30 @@ describe('Goalies Module', () => {
       mockCalls = [];
    });
 
-   test('getLeaders should fetch goalie leaders with attribute', async () => {
-      const result = await goalies.getLeaders('wins', 'en');
+   test('getAll should fetch all teams', async () => {
+      const result = await teams.getAll('en');
       expect(result).toBeDefined();
       expect(result.data).toBeInstanceOf(Array);
-      expect(mockCalls[0]).toContain('/leaders/goalies/wins');
+      expect(mockCalls[0]).toContain('/team');
    });
 
-   test('getMilestones should fetch goalie milestones', async () => {
-      const result = await goalies.getMilestones('en');
+   test('getById should fetch team by ID', async () => {
+      const result = await teams.getById(testData.teamId, 'en');
       expect(result).toBeDefined();
-      expect(result.data).toBeInstanceOf(Array);
-      expect(mockCalls[0]).toContain('/milestones/goalies');
+      expect(mockCalls[0]).toContain(`/team/id/${testData.teamId}`);
    });
 
    test('getStatsWithParams should fetch with custom params', async () => {
-      const result = await goalies.getStatsWithParams('summary', {
+      const result = await teams.getStatsWithParams('summary', {
          cayenneExp: 'seasonId=20232024',
       });
       expect(result).toBeDefined();
       expect(result.data).toBeInstanceOf(Array);
-      expect(mockCalls[0]).toContain('/goalie/summary');
+      expect(mockCalls[0]).toContain('/team/summary');
    });
 
    test('getStatsWithBuilder should accept query builder callback', async () => {
-      const result = await goalies.getStatsWithBuilder('summary', (q) => ({
+      const result = await teams.getStatsWithBuilder('summary', (q) => ({
          cayenneExp: q.equals('seasonId', '20232024').build(),
       }));
       expect(result).toBeDefined();
@@ -88,7 +87,7 @@ describe('Goalies Module', () => {
    });
 
    test('getStatsWithFilters should accept high-level filters', async () => {
-      const result = await goalies.getStatsWithFilters('summary', {
+      const result = await teams.getStatsWithFilters('summary', {
          seasonId: '20232024',
       });
       expect(result).toBeDefined();
@@ -96,31 +95,31 @@ describe('Goalies Module', () => {
    });
 
    test('getStatsWithFilters should handle sorting options', async () => {
-      const result = await goalies.getStatsWithFilters(
+      const result = await teams.getStatsWithFilters(
          'summary',
          { seasonId: '20232024' },
-         { sortBy: 'wins', direction: 'desc' },
+         { sortBy: 'points', direction: 'desc' },
       );
       expect(result).toBeDefined();
    });
 
    test('getStatsWithFilters should handle pagination options', async () => {
-      const result = await goalies.getStatsWithFilters(
+      const result = await teams.getStatsWithFilters(
          'summary',
          { seasonId: '20232024' },
          undefined,
-         { limit: 50, start: 25 },
+         { limit: 32, start: 0 },
       );
       expect(result).toBeDefined();
    });
 
    test('should support multiple languages', async () => {
-      await goalies.getLeaders('wins', 'fr');
-      expect(mockCalls[0]).toContain('/fr/');
+      await teams.getAll('fr');
+      expect(mockCalls[0]).toContain('/fr/team');
    });
 
    test('should return paginated response structure', async () => {
-      const result = await goalies.getStatsWithParams('summary', {
+      const result = await teams.getStatsWithParams('summary', {
          cayenneExp: 'seasonId=20232024',
       });
       expect(result.data).toBeDefined();

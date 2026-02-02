@@ -7,7 +7,7 @@ import {
    server,
    shiftCharts,
 } from '#/api/edge-stats/misc.ts';
-import { MockResponseFactory } from '../test-utils.ts';
+import { MockResponseFactory } from '../../test-utils.ts';
 
 describe('Misc Modules', () => {
    let originalFetch: typeof globalThis.fetch;
