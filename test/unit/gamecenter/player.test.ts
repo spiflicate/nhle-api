@@ -13,6 +13,7 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import * as player from '#/api/gamecenter/player.ts';
 import { testData } from '../../test-utils.ts';
+import { expectValidationError } from './test-utils.ts';
 
 describe('Player Module', () => {
    let originalFetch: typeof globalThis.fetch;
@@ -129,18 +130,14 @@ describe('Player Module', () => {
          expect(mockCalls[0]).toContain('player/');
       });
 
-      test('player.gameLog should handle string game type', async () => {
-         await player.gameLog(testData.playerId, 20232024, '2');
+      test('player.gameLog should handle number season and number game type', async () => {
+         await player.gameLog(testData.playerId, 20232024, 2);
          expect(mockCalls[0]).toContain('player/');
       });
 
       test('player.gameLog should reject invalid player ID', async () => {
-         try {
-            await player.gameLog('invalid');
-            expect.unreachable();
-         } catch {
-            // Expected to throw for invalid ID
-         }
+         const result = await player.gameLog('invalid');
+         expectValidationError(result);
       });
    });
 
@@ -186,8 +183,8 @@ describe('Player Module', () => {
          expect(mockCalls[0]).toContain('skater-stats-leaders');
       });
 
-      test('statsLeaders.skaters should handle string game type', async () => {
-         await player.statsLeaders.skaters(20232024, '2');
+      test('statsLeaders.skaters should handle number game type', async () => {
+         await player.statsLeaders.skaters(20232024, 2);
          expect(mockCalls[0]).toContain('skater-stats-leaders');
       });
 
@@ -213,8 +210,8 @@ describe('Player Module', () => {
          expect(mockCalls[0]).toContain('goalie-stats-leaders');
       });
 
-      test('statsLeaders.goalies should handle string game type', async () => {
-         await player.statsLeaders.goalies(20232024, '2');
+      test('statsLeaders.goalies should handle number game type', async () => {
+         await player.statsLeaders.goalies(20232024, 2);
          expect(mockCalls[0]).toContain('goalie-stats-leaders');
       });
    });

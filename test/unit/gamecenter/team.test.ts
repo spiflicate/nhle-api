@@ -14,11 +14,9 @@
  */
 
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
-import { type } from 'arktype';
 import * as team from '#/api/gamecenter/team.ts';
-import type { APIResponse } from '#/client/types.ts';
-import { ValidationError } from '#/errors/index.ts';
 import { getCurrentDate, getCurrentSeason } from '#/utils/date.ts';
+import { expectSuccess, expectValidationError } from './test-utils.ts';
 
 describe('Team Module', () => {
    let originalFetch: typeof globalThis.fetch;
@@ -106,21 +104,6 @@ describe('Team Module', () => {
       globalThis.fetch = originalFetch;
       mockCalls = [];
    });
-
-   const expectSuccess = (result: APIResponse<unknown>) => {
-      expect(result).toBeDefined();
-      expect(typeof result).toBe('object');
-      expect(result.status).toBe('success');
-   };
-   const expectValidationError = (result: APIResponse<unknown>) => {
-      expect(result).toBeDefined();
-      expect(result.status).toBe('error');
-      if (result.status === 'success') {
-         expect.unreachable('Expected error but got success');
-      }
-      expect(result.error).toBeDefined();
-      expect(result.error).toBeInstanceOf(ValidationError);
-   };
 
    test('rosterSeasons should fetch roster seasons for a team', async () => {
       const teamParam = 'TOR';

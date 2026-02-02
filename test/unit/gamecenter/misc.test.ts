@@ -12,16 +12,8 @@
 
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import * as misc from '#/api/gamecenter/misc.ts';
-import { ValidationError } from '#/errors/index.ts';
 import { testData } from '../../test-utils.ts';
-import { APIResponse } from '#/client/types.ts';
-
-const expectValidationError = (error: APIResponse<unknown>) => {
-   expect(error).toBeDefined();
-   expect(error.status).toBe('error');
-   if (error.status !== 'error') return;
-   expect(error.error).toBeInstanceOf(ValidationError);
-};
+import { expectValidationError } from './test-utils.ts';
 
 describe('Misc Module', () => {
    let originalFetch: typeof globalThis.fetch;

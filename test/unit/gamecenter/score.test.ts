@@ -10,6 +10,7 @@
 
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import { score, scoreboard } from '#/api/gamecenter/score.ts';
+import { expectValidationError } from './test-utils.ts';
 
 describe('Score Module', () => {
    let originalFetch: typeof globalThis.fetch;
@@ -134,11 +135,7 @@ describe('Score Module', () => {
    });
 
    test('scoreboard.date should reject invalid date', async () => {
-      try {
-         await scoreboard.date('invalid-date');
-         expect.unreachable();
-      } catch {
-         // Expected to throw for invalid date
-      }
+      const result = await scoreboard.date('invalid-date');
+      expectValidationError(result);
    });
 });
