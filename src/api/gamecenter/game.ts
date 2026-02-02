@@ -402,8 +402,17 @@ export async function playoffSeries(
  * playoffSeriesSchedule('A', 20232024).then((data) => console.log(data));
  * ```
  */
+
 export async function playoffSeriesSchedule(
    seriesLetter: SeriesLetter,
+   season?: Season,
+): Promise<APIResponse<PlayoffSeriesSchedule>>;
+export async function playoffSeriesSchedule(
+   seriesLetter: string,
+   season?: Season,
+): Promise<APIResponse<PlayoffSeriesSchedule>>;
+export async function playoffSeriesSchedule(
+   seriesLetter: SeriesLetter | string,
    season?: Season,
 ): Promise<APIResponse<PlayoffSeriesSchedule>> {
    const parsed = SeriesAndSeasonParams({
