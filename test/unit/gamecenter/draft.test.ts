@@ -15,7 +15,7 @@
 
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import * as draft from '#/api/gamecenter/draft.ts';
-import { NHLError, ValidationError } from '#/errors/index.ts';
+import { ValidationError } from '#/errors/index.ts';
 
 describe('Draft Module', () => {
    let originalFetch: typeof globalThis.fetch;
@@ -100,20 +100,21 @@ describe('Draft Module', () => {
       });
 
       test('draft should reject invalid year', async () => {
-         try {
-            await draft.picks('invalid', 1);
-            expect.unreachable();
-         } catch {
-            // Expected to throw for invalid year
+         const result = await draft.picks('invalid', 1);
+         expect(result.success).toBeFalse();
+         if (!result.success) {
+            expect(result.error).toBeInstanceOf(ValidationError);
          }
       });
 
       test('draft should reject invalid round', async () => {
-         try {
-            await draft.picks(2024, 'invalid' as unknown as number);
-            expect.unreachable();
-         } catch {
-            // Expected to throw for invalid round
+         const result = await draft.picks(
+            2024,
+            'invalid' as unknown as number,
+         );
+         expect(result.success).toBeFalse();
+         if (!result.success) {
+            expect(result.error).toBeInstanceOf(ValidationError);
          }
       });
    });
@@ -210,8 +211,8 @@ describe('Draft Module', () => {
 
       test('draftRankings should return NHLError for invalid year', async () => {
          const result = await draft.rankings('invalid').skatersIntl();
-         expect(result.status).toBe('error');
-         if (result.status === 'error') {
+         expect(result.success).toBeFalse();
+         if (!result.success) {
             expect(result.error).toBeInstanceOf(ValidationError);
          }
       });
