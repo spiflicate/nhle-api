@@ -2,7 +2,7 @@
  * @module api/gamecenter/team
  * @description Team-related API endpoints for rosters, schedules, stats, standings, and prospects
  */
-import nhlClient from '#/client/index.ts';
+import { nhlClient } from '#/client/index.ts';
 import type { APIResponse } from '#/client/types.ts';
 import { ValidationError } from '#/errors/index.ts';
 import type {

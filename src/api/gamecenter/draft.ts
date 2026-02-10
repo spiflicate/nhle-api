@@ -3,7 +3,7 @@
  * @description Draft-related API endpoints for accessing NHL draft picks, rankings, and tracker information
  */
 
-import nhlClient from '#/client/index.ts';
+import { nhlClient } from '#/client/index.ts';
 import type { APIResponse } from '#/client/types.ts';
 import { type NHLError, ValidationError } from '#/errors/index.ts';
 import type {

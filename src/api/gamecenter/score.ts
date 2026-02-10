@@ -2,7 +2,7 @@
  * @module api/gamecenter/score
  * @description Score and scoreboard endpoints for accessing game scores and live score information
  */
-import nhlClient from '#/client/index.ts';
+import { nhlClient } from '#/client/index.ts';
 import type { APIResponse } from '#/client/types.ts';
 import { ValidationError } from '#/errors/index.ts';
 import type { Score, Scoreboard, TeamAbbrev } from '#/types/index.ts';

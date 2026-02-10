@@ -3,7 +3,7 @@
  * @description Miscellaneous NHL API endpoints for meta information, location data, and utility functions
  */
 
-import nhlClient from '#/client/index.ts';
+import { nhlClient } from '#/client/index.ts';
 import type { APIResponse } from '#/client/types.ts';
 import { ValidationError } from '#/errors/index.ts';
 import type {

@@ -2,7 +2,7 @@
  * @module api/gamecenter/game
  * @description Game-related API endpoints for schedules, play-by-play, boxscores, playoffs, and game information
  */
-import nhlClient from '#/client/index.ts';
+import { nhlClient } from '#/client/index.ts';
 import type { APIResponse } from '#/client/types.ts';
 import { ValidationError } from '#/errors/index.ts';
 import type {

@@ -3,7 +3,7 @@
  * @description Player-related API endpoints for player information, stats, game logs, and search
  */
 
-import nhlClient, { createNHLClient } from '#/client/index.ts';
+import { createNHLClient, nhlClient } from '#/client/index.ts';
 import type { APIResponse } from '#/client/types.ts';
 import { ValidationError } from '#/errors/index.ts';
 import type {

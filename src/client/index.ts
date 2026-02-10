@@ -192,5 +192,4 @@ const nhlClient = createNHLClient('default');
  */
 const edgeStatsClient = createNHLClient('edge-stats');
 
-export default nhlClient;
-export { edgeStatsClient };
+export { nhlClient, edgeStatsClient };
