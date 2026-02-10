@@ -5,6 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.4] - TBD
+
+### Added
+
+- Added game report tooling scripts for downloading and parsing summaries to support data collection workflows
+- Added PlayerSearchResult response typing for Game Center player search
+- Added test utilities for API response validation
+
+### Changed
+
+- Reworked API response handling to use a `success` field instead of `status`, with simpler error handling
+- Exported `nhlClient` as a named export and updated consumers
+- Renamed the route helper to `resolvePath` and refactored Game Center/Edge Advanced Stats path builders
+- Renamed Game Center and Edge Advanced Stats path modules from `_paths` to `paths` and cleaned up path object naming
+- Restructured Edge Advanced Stats exports and converted module methods to standalone async functions
+- Updated Edge Advanced Stats top10 schema validators to match the new path naming
+- Overloaded game log and playoff series schedule helpers for flexible parameter handling
+- Updated README usage examples and badges
+
+### Fixed
+
+- Corrected rankings response handling to align with `success` response payloads
+- Removed a stray console log from `getSeason`
+
+### Technical
+
+- Reorganized edge-stats tests and added edge-adv unit tests for goalies, skaters, summary, and teams
+- Updated Game Center test utilities and imports for shared validation helpers
+- Updated test coverage to handle error result objects
+- Removed an unused Game Center index export
+- Updated dependencies and devDependencies (including cheerio and node-html-parser)
+
 ## [0.5.3] - 2025-12-03
 
 ### Added
