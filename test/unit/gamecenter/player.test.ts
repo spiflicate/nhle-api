@@ -13,7 +13,7 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import * as player from '#/api/gamecenter/player.ts';
 import { testData } from '../../test-utils.ts';
-import { expectValidationError } from './test-utils.ts';
+import { expectValidationError } from '../test-utils.ts';
 
 describe('Player Module', () => {
    let originalFetch: typeof globalThis.fetch;
