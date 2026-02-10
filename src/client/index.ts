@@ -176,7 +176,7 @@ export class NHLClient {
  * @returns A new NHL API client instance
  */
 export function createNHLClient(
-   baseURL?: string | APIEndpoint,
+   baseURL?: APIEndpoint,
    errorConfig?: ErrorConfig,
 ): NHLClient {
    return new NHLClient(baseURL, errorConfig);
