@@ -29,7 +29,7 @@ import {
    TeamAbbrev as TeamAbbrevAT,
    TeamAndSeasonParams,
 } from '#/utils/schemas.ts';
-import { route } from '../../utils/utils.ts';
+import { resolvePath } from '../../utils/utils.ts';
 import { teamPaths as p } from './paths.ts';
 
 /**
@@ -53,7 +53,8 @@ export async function rosterSeasons(
          }),
       };
    }
-   return nhlClient.get(route(p.rosterSeasons, { team: parsed }));
+   const path = resolvePath(p.rosterSeasons, { team: parsed });
+   return nhlClient.get(path);
 }
 
 /**
@@ -79,7 +80,8 @@ export async function roster(
          }),
       };
    }
-   return nhlClient.get(route(p.roster, parsed));
+   const path = resolvePath(p.roster, parsed);
+   return nhlClient.get(path);
 }
 
 /**
@@ -103,7 +105,8 @@ export async function prospects(
          }),
       };
    }
-   return nhlClient.get(route(p.prospects, { team: parsed }));
+   const path = resolvePath(p.prospects, { team: parsed });
+   return nhlClient.get(path);
 }
 
 /**
@@ -134,7 +137,8 @@ export async function stats(
          }),
       };
    }
-   return nhlClient.get(route(p.clubStats, parsed));
+   const path = resolvePath(p.clubStats, parsed);
+   return nhlClient.get(path);
 }
 
 /**
@@ -160,7 +164,8 @@ export async function statsSeason(
          }),
       };
    }
-   return nhlClient.get(route(p.clubStatsSeason, { team: parsed }));
+   const path = resolvePath(p.clubStatsSeason, { team: parsed });
+   return nhlClient.get(path);
 }
 
 /**
@@ -184,7 +189,8 @@ export async function standings(
          }),
       };
    }
-   return nhlClient.get(route(p.standings, { date: parsed }));
+   const path = resolvePath(p.standings, { date: parsed });
+   return nhlClient.get(path);
 }
 
 /**
@@ -238,7 +244,8 @@ async function scheduleWeek(
          }),
       };
    }
-   return nhlClient.get(route(p.clubSchedule.week, parsed));
+   const path = resolvePath(p.clubSchedule.week, parsed);
+   return nhlClient.get(path);
 }
 
 /**
@@ -277,7 +284,8 @@ async function scheduleMonth(
          }),
       };
    }
-   return nhlClient.get(route(p.clubSchedule.month, parsed));
+   const path = resolvePath(p.clubSchedule.month, parsed);
+   return nhlClient.get(path);
 }
 
 /**
@@ -314,7 +322,8 @@ async function scheduleSeason(
          }),
       };
    }
-   return nhlClient.get(route(p.clubSchedule.season, parsed));
+   const path = resolvePath(p.clubSchedule.season, parsed);
+   return nhlClient.get(path);
 }
 
 /**

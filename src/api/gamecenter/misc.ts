@@ -28,7 +28,7 @@ import {
    PostalCode as PostalCodeAT,
    SeriesParams,
 } from '#/utils/schemas.ts';
-import { route } from '#/utils/utils.ts';
+import { resolvePath } from '#/utils/utils.ts';
 import { miscPaths as p } from './paths.ts';
 
 /**
@@ -72,7 +72,8 @@ async function metaGame(gameId: GameId): Promise<APIResponse<GameMeta>> {
          }),
       };
    }
-   return nhlClient.get(route(p.metaGame, { gameId: parsedGameId }));
+   const path = resolvePath(p.metaGame, { gameId: parsedGameId });
+   return nhlClient.get(path);
 }
 
 /**
@@ -107,7 +108,8 @@ async function metaPlayoffSeries(
          }),
       };
    }
-   return nhlClient.get(route(p.metaPlayoffSeries, parsed));
+   const path = resolvePath(p.metaPlayoffSeries, parsed);
+   return nhlClient.get(path);
 }
 
 /**
@@ -133,9 +135,10 @@ export async function postalLookup(
          }),
       };
    }
-   return nhlClient.get(
-      route(p.postalLookup, { postalCode: parsedPostalCode }),
-   );
+   const path = resolvePath(p.postalLookup, {
+      postalCode: parsedPostalCode,
+   });
+   return nhlClient.get(path);
 }
 
 /**
@@ -174,7 +177,8 @@ export async function partnerGame(
          }),
       };
    }
-   return nhlClient.get(
-      route(p.partnerGame, { countryCode: parsedCountryCode }),
-   );
+   const path = resolvePath(p.partnerGame, {
+      countryCode: parsedCountryCode,
+   });
+   return nhlClient.get(path);
 }

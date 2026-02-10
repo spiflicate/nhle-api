@@ -19,7 +19,7 @@ import {
    isParseError,
    Year as YearType,
 } from '#/utils/schemas.ts';
-import { route } from '#/utils/utils.ts';
+import { resolvePath } from '#/utils/utils.ts';
 import { draftPaths as p } from './paths.ts';
 
 /**
@@ -49,10 +49,13 @@ export async function picks(
          }),
       };
    }
-   if (parsed.year && !parsed.round)
-      return nhlClient.get(route(p.draftPicks.byYear, parsed));
-
-   return nhlClient.get(route(p.draftPicks.byYearAndRound, parsed));
+   let path = '';
+   if (parsed.year && !parsed.round) {
+      path = resolvePath(p.draftPicks.byYear, parsed);
+   } else {
+      path = resolvePath(p.draftPicks.byYearAndRound, parsed);
+   }
+   return nhlClient.get(path);
 }
 
 /**
@@ -104,12 +107,8 @@ export function rankings(year?: Year): {
             }),
          };
       }
-      return nhlClient.get(
-         route(p.draftRankings, {
-            year: parsedYear,
-            type,
-         }),
-      );
+      const path = resolvePath(p.draftRankings, { year: parsedYear, type });
+      return nhlClient.get(path);
    };
 
    return {

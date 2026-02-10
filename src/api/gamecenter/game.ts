@@ -40,7 +40,7 @@ import {
    SeriesAndSeasonParams,
    Year as YearAT,
 } from '#/utils/schemas.ts';
-import { route } from '#/utils/utils.ts';
+import { resolvePath } from '#/utils/utils.ts';
 import { gamePaths as p } from './paths.ts';
 
 /**
@@ -64,9 +64,10 @@ export async function playByPlay(
          }),
       };
    }
-   return nhlClient.get(
-      route(p.gamecenter.playByPlay, { gameId: parsedGameId }),
-   );
+   const path = resolvePath(p.gamecenter.playByPlay, {
+      gameId: parsedGameId,
+   });
+   return nhlClient.get(path);
 }
 
 /**
@@ -111,9 +112,8 @@ export async function reports(
          }),
       };
    }
-   return nhlClient.get(
-      route(p.gamecenter.reports, { gameId: parsedGameId }),
-   );
+   const path = resolvePath(p.gamecenter.reports, { gameId: parsedGameId });
+   return nhlClient.get(path);
 }
 /**
  * Get landing page data for a specific game
@@ -136,9 +136,8 @@ export async function landing(
          }),
       };
    }
-   return nhlClient.get(
-      route(p.gamecenter.landing, { gameId: parsedGameId }),
-   );
+   const path = resolvePath(p.gamecenter.landing, { gameId: parsedGameId });
+   return nhlClient.get(path);
 }
 /**
  * Get boxscore data for a specific game
@@ -161,9 +160,10 @@ export async function boxscore(
          }),
       };
    }
-   return nhlClient.get(
-      route(p.gamecenter.boxscore, { gameId: parsedGameId }),
-   );
+   const path = resolvePath(p.gamecenter.boxscore, {
+      gameId: parsedGameId,
+   });
+   return nhlClient.get(path);
 }
 
 /**
@@ -196,7 +196,8 @@ async function wscGameStory(
          }),
       };
    }
-   return nhlClient.get(route(p.wsc.gameStory, { gameId: parsedGameId }));
+   const path = resolvePath(p.wsc.gameStory, { gameId: parsedGameId });
+   return nhlClient.get(path);
 }
 
 /**
@@ -220,7 +221,8 @@ async function wscPlayByPlay(
          }),
       };
    }
-   return nhlClient.get(route(p.wsc.playByPlay, { gameId: parsedGameId }));
+   const path = resolvePath(p.wsc.playByPlay, { gameId: parsedGameId });
+   return nhlClient.get(path);
 }
 
 /**
@@ -255,7 +257,8 @@ async function pptReplayGoal(
          }),
       };
    }
-   return nhlClient.get(route(p.pptReplay.goal, { gameId, eventId }));
+   const path = resolvePath(p.pptReplay.goal, { gameId, eventId });
+   return nhlClient.get(path);
 }
 
 /**
@@ -281,7 +284,8 @@ async function pptReplayEvent(
          }),
       };
    }
-   return nhlClient.get(route(p.pptReplay.event, { gameId, eventId }));
+   const path = resolvePath(p.pptReplay.event, { gameId, eventId });
+   return nhlClient.get(path);
 }
 
 /**
@@ -309,7 +313,8 @@ export async function schedule(
          }),
       };
    }
-   return nhlClient.get(route(p.schedule, { date: parsedDate }));
+   const path = resolvePath(p.schedule, { date: parsedDate });
+   return nhlClient.get(path);
 }
 
 /**
@@ -333,7 +338,8 @@ export async function scheduleCalendar(
          }),
       };
    }
-   return nhlClient.get(route(p.scheduleCalendar, { date: parsedDate }));
+   const path = resolvePath(p.scheduleCalendar, { date: parsedDate });
+   return nhlClient.get(path);
 }
 
 /**
@@ -357,7 +363,8 @@ export async function playoffBracket(
          }),
       };
    }
-   return nhlClient.get(route(p.playoffBracket, { year: parsedYear }));
+   const path = resolvePath(p.playoffBracket, { year: parsedYear });
+   return nhlClient.get(path);
 }
 
 /**
@@ -381,7 +388,8 @@ export async function playoffSeries(
          }),
       };
    }
-   return nhlClient.get(route(p.playoffSeries, { season: parsedSeason }));
+   const path = resolvePath(p.playoffSeries, { season: parsedSeason });
+   return nhlClient.get(path);
 }
 
 /**
@@ -422,7 +430,8 @@ export async function playoffSeriesSchedule(
    }
    // series letter is a single character from A to O (/[a-oA-O]/)
    // Are series letters assigned in a pre determined manner?
-   return nhlClient.get(route(p.playoffSeriesSchedule, parsed));
+   const path = resolvePath(p.playoffSeriesSchedule, parsed);
+   return nhlClient.get(path);
 }
 
 /**
@@ -434,7 +443,8 @@ export async function playoffSeriesSchedule(
  * ```
  */
 export async function whereToWatch(): Promise<APIResponse<WhereToWatch>> {
-   return nhlClient.get(p.whereToWatch);
+   const path = resolvePath(p.whereToWatch, {});
+   return nhlClient.get(path);
 }
 
 /**
@@ -458,5 +468,6 @@ export async function networkTVSchedule(
          }),
       };
    }
-   return nhlClient.get(route(p.networkTVSchedule, { date: parsedDate }));
+   const path = resolvePath(p.networkTVSchedule, { date: parsedDate });
+   return nhlClient.get(path);
 }

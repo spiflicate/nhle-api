@@ -16,7 +16,7 @@ import type {
 } from '#/types/index.ts';
 import type { GameType, Season } from '#/types/types.ts';
 import { BaseParams, isParseError, PlayerId } from '#/utils/schemas.ts';
-import { route } from '#/utils/utils.ts';
+import { resolvePath } from '#/utils/utils.ts';
 import { playerPaths as p } from './paths.ts';
 
 const nhlPlayerSearch = createNHLClient(p.playerSearch);
@@ -43,7 +43,8 @@ export async function landing(
          }),
       };
    }
-   return nhlClient.get(route(p.landing, { playerId: parsedPlayerId }));
+   const path = resolvePath(p.landing, { playerId: parsedPlayerId });
+   return nhlClient.get(path);
 }
 
 /**
@@ -84,7 +85,8 @@ export async function gameLog(
          }),
       };
    }
-   return nhlClient.get(route(p.gameLog, parsed));
+   const path = resolvePath(p.gameLog, parsed);
+   return nhlClient.get(path);
 }
 
 /**
@@ -148,7 +150,8 @@ async function statsLeadersSkaters(
          }),
       };
    }
-   return nhlClient.get(route(p.statsLeaders.skaters, parsed));
+   const path = resolvePath(p.statsLeaders.skaters, parsed);
+   return nhlClient.get(path);
 }
 
 /**
@@ -174,5 +177,6 @@ async function statsLeadersGoalies(
          }),
       };
    }
-   return nhlClient.get(route(p.statsLeaders.goalies, parsed));
+   const path = resolvePath(p.statsLeaders.goalies, parsed);
+   return nhlClient.get(path);
 }

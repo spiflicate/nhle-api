@@ -12,7 +12,7 @@ import {
    NHLDate,
    TeamAbbrev as Team,
 } from '#/utils/schemas.ts';
-import { route } from '#/utils/utils.ts';
+import { resolvePath } from '#/utils/utils.ts';
 import { scorePaths as p } from './paths.ts';
 
 /**
@@ -40,7 +40,8 @@ export async function score(
          }),
       };
    }
-   return nhlClient.get(route(p.score, { date: parsed }));
+   const path = resolvePath(p.score, { date: parsed });
+   return nhlClient.get(path);
 }
 
 /**
@@ -52,7 +53,7 @@ export async function score(
  * ```
  */
 export async function scoreboard(): Promise<APIResponse<Scoreboard>> {
-   return nhlClient.get<Scoreboard>(p.scoreboard.now);
+   return nhlClient.get(p.scoreboard.now);
 }
 
 /**
@@ -76,9 +77,8 @@ scoreboard.team = async (
          }),
       };
    }
-   return nhlClient.get<Scoreboard>(
-      route(p.scoreboard.byTeam, { team: parsed }),
-   );
+   const path = resolvePath(p.scoreboard.byTeam, { team: parsed });
+   return nhlClient.get(path);
 };
 
 /**
@@ -102,7 +102,6 @@ scoreboard.date = async (
          }),
       };
    }
-   return nhlClient.get<Scoreboard>(
-      route(p.scoreboard.byDate, { date: parsed }),
-   );
+   const path = resolvePath(p.scoreboard.byDate, { date: parsed });
+   return nhlClient.get(path);
 };
