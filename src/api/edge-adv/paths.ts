@@ -1,5 +1,5 @@
 /** API endpoint paths for skater-related data. */
-export const _goaliesPaths = {
+export const goaliesPaths = {
    player: 'edge/goalie-detail/{player-id}/{season}/{game-type}',
    compare: 'edge/goalie-comparison/{player-id}/{season}/{game-type}',
    leaders: 'edge/goalie-landing/{season}/{game-type}',
@@ -20,7 +20,7 @@ export const _goaliesPaths = {
 };
 
 /** API endpoint paths for skater-related data. */
-export const _skatersPaths = {
+export const skatersPaths = {
    comparison: 'skater-comparison/{playerId}/{season}/{gameType}',
    detail: 'skater-detail/{playerId}/{season}/{gameType}',
    distanceTop10:
@@ -45,7 +45,7 @@ export const _skatersPaths = {
 };
 
 /** API endpoint paths for team-related data. */
-export const _teamsPaths = {
+export const teamsPaths = {
    stats: 'edge/team-comparison/{team-id}/{season}/{game-type}',
    compare: 'edge/team-detail/{team-id}/{season}/{game-type}',
    leaders: 'edge/team-landing/{season}/{game-type}',

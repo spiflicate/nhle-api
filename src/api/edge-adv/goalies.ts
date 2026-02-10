@@ -14,7 +14,7 @@
  * ======================================================================
  */
 
-import nhlClient from '#/client/index.ts';
+import { nhlClient } from '#/client/index.ts';
 import { NHLError } from '#/errors/index.ts';
 import {
    BaseParams,
@@ -35,7 +35,7 @@ import type {
    Season,
 } from '../../types/types.ts';
 import { route } from '../../utils/utils.ts';
-import { _goaliesPaths as _paths } from './_paths.ts';
+import { goaliesPaths as p } from './paths.ts';
 
 /**
  * Goalie Edge Advanced Stats API helpers.
@@ -61,10 +61,10 @@ export async function player(
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: _paths.player,
+            endpoint: p.player,
          }),
       );
-   return nhlClient.get(route(_paths.player, parsed));
+   return nhlClient.get(route(p.player, parsed));
 }
 
 /**
@@ -83,10 +83,10 @@ export async function compare(
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: _paths.compare,
+            endpoint: p.compare,
          }),
       );
-   return nhlClient.get(route(_paths.compare, parsed));
+   return nhlClient.get(route(p.compare, parsed));
 }
 /**
  * Get goalie landing / leaders for a season.
@@ -102,10 +102,10 @@ export async function leaders(
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: _paths.leaders,
+            endpoint: p.leaders,
          }),
       );
-   return nhlClient.get(route(_paths.leaders, parsed));
+   return nhlClient.get(route(p.leaders, parsed));
 }
 
 /**
@@ -124,10 +124,10 @@ export async function savePercentage5v5(
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: _paths.savePercentage5v5,
+            endpoint: p.savePercentage5v5,
          }),
       );
-   return nhlClient.get(route(_paths.savePercentage5v5, parsed));
+   return nhlClient.get(route(p.savePercentage5v5, parsed));
 }
 
 /**
@@ -146,10 +146,10 @@ export async function savePercentage(
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: _paths.savePercentage,
+            endpoint: p.savePercentage,
          }),
       );
-   return nhlClient.get(route(_paths.savePercentage, parsed));
+   return nhlClient.get(route(p.savePercentage, parsed));
 }
 
 /**
@@ -168,10 +168,10 @@ export async function saveLocation(
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: _paths.saveLocation,
+            endpoint: p.saveLocation,
          }),
       );
-   return nhlClient.get(route(_paths.saveLocation, parsed));
+   return nhlClient.get(route(p.saveLocation, parsed));
 }
 
 /**
@@ -202,10 +202,10 @@ async function top10SavePercentage(
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: _paths.top10.SavePercentage,
+            endpoint: p.top10.SavePercentage,
          }),
       );
-   return nhlClient.get(route(_paths.top10.SavePercentage, parsed));
+   return nhlClient.get(route(p.top10.SavePercentage, parsed));
 }
 
 /**
@@ -227,10 +227,10 @@ async function top10SavePercentage5v5(
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: _paths.top10.SavePercentage5v5,
+            endpoint: p.top10.SavePercentage5v5,
          }),
       );
-   return nhlClient.get(route(_paths.top10.SavePercentage5v5, parsed));
+   return nhlClient.get(route(p.top10.SavePercentage5v5, parsed));
 }
 
 /**
@@ -260,8 +260,8 @@ async function top10SaveLocation(
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: _paths.top10.SaveLocation,
+            endpoint: p.top10.SaveLocation,
          }),
       );
-   return nhlClient.get(route(_paths.top10.SaveLocation, parsed));
+   return nhlClient.get(route(p.top10.SaveLocation, parsed));
 }

@@ -6,7 +6,7 @@
  * Available endpoints: see `edge.paths`
  * ======================================================================
  */
-import nhlClient from '#/client/index.ts';
+import { nhlClient } from '#/client/index.ts';
 
 /**
  * Edge Advanced Stats API helpers.

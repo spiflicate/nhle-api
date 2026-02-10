@@ -9,7 +9,7 @@
  * ======================================================================
  */
 
-import nhlClient from '#/client/index.ts';
+import { nhlClient } from '#/client/index.ts';
 import { NHLError } from '#/errors/index.ts';
 import {
    isParseError,
@@ -37,7 +37,7 @@ import type {
    ZoneTimeSort,
 } from '../../types/types.ts';
 import { route } from '../../utils/utils.ts';
-import { _teamsPaths as _paths } from './_paths.ts';
+import { teamsPaths as p } from './paths.ts';
 
 /**
  * Team Edge Advanced Stats API helpers.
@@ -62,10 +62,10 @@ export async function stats(
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: _paths.stats,
+            endpoint: p.stats,
          }),
       );
-   return nhlClient.get(route(_paths.stats, parsed));
+   return nhlClient.get(route(p.stats, parsed));
 }
 
 /**
@@ -81,10 +81,10 @@ export async function compare(
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: _paths.compare,
+            endpoint: p.compare,
          }),
       );
-   return nhlClient.get(route(_paths.compare, parsed));
+   return nhlClient.get(route(p.compare, parsed));
 }
 
 /**
@@ -98,10 +98,10 @@ export async function leaders(
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: _paths.leaders,
+            endpoint: p.leaders,
          }),
       );
-   return nhlClient.get(route(_paths.leaders, parsed));
+   return nhlClient.get(route(p.leaders, parsed));
 }
 
 /**
@@ -116,10 +116,10 @@ export async function shotLocation(
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: _paths.shotLocation,
+            endpoint: p.shotLocation,
          }),
       );
-   return nhlClient.get(route(_paths.shotLocation, parsed));
+   return nhlClient.get(route(p.shotLocation, parsed));
 }
 
 /**
@@ -134,10 +134,10 @@ export async function shotSpeed(
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: _paths.shotSpeed,
+            endpoint: p.shotSpeed,
          }),
       );
-   return nhlClient.get(route(_paths.shotSpeed, parsed));
+   return nhlClient.get(route(p.shotSpeed, parsed));
 }
 
 /**
@@ -152,10 +152,10 @@ export async function skatingDistance(
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: _paths.skatingDistance,
+            endpoint: p.skatingDistance,
          }),
       );
-   return nhlClient.get(route(_paths.skatingDistance, parsed));
+   return nhlClient.get(route(p.skatingDistance, parsed));
 }
 
 /**
@@ -170,10 +170,10 @@ export async function skatingSpeed(
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: _paths.skatingSpeed,
+            endpoint: p.skatingSpeed,
          }),
       );
-   return nhlClient.get(route(_paths.skatingSpeed, parsed));
+   return nhlClient.get(route(p.skatingSpeed, parsed));
 }
 
 /**
@@ -188,10 +188,10 @@ export async function zoneTime(
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: _paths.zoneTime,
+            endpoint: p.zoneTime,
          }),
       );
-   return nhlClient.get(route(_paths.zoneTime, parsed));
+   return nhlClient.get(route(p.zoneTime, parsed));
 }
 
 export const top10 = {
@@ -226,10 +226,10 @@ async function top10ShotLocation(
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: _paths.shotLocation,
+            endpoint: p.shotLocation,
          }),
       );
-   return nhlClient.get(route(_paths.shotLocation, parsed));
+   return nhlClient.get(route(p.shotLocation, parsed));
 }
 /**
  * Top-10 team shot speed lists.
@@ -253,10 +253,10 @@ async function top10ShotSpeed(
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: _paths.shotSpeed,
+            endpoint: p.shotSpeed,
          }),
       );
-   return nhlClient.get(route(_paths.shotSpeed, parsed));
+   return nhlClient.get(route(p.shotSpeed, parsed));
 }
 /**
  * Top-10 team skating distance lists.
@@ -283,10 +283,10 @@ async function top10SkatingDistance(
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: _paths.skatingDistance,
+            endpoint: p.skatingDistance,
          }),
       );
-   return nhlClient.get(route(_paths.skatingDistance, parsed));
+   return nhlClient.get(route(p.skatingDistance, parsed));
 }
 /**
  * Top-10 team skating speed lists.
@@ -310,10 +310,10 @@ async function top10SkatingSpeed(
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: _paths.skatingSpeed,
+            endpoint: p.skatingSpeed,
          }),
       );
-   return nhlClient.get(route(_paths.skatingSpeed, parsed));
+   return nhlClient.get(route(p.skatingSpeed, parsed));
 }
 /**
  * Top-10 team zone time lists.
@@ -337,8 +337,8 @@ async function top10ZoneTime(
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: _paths.zoneTime,
+            endpoint: p.zoneTime,
          }),
       );
-   return nhlClient.get(route(_paths.zoneTime, parsed));
+   return nhlClient.get(route(p.zoneTime, parsed));
 }
