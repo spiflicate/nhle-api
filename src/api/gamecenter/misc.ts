@@ -29,7 +29,7 @@ import {
    SeriesParams,
 } from '#/utils/schemas.ts';
 import { route } from '#/utils/utils.ts';
-import { _miscPaths as _paths } from './_paths.ts';
+import { miscPaths as p } from './paths.ts';
 
 /**
  * Get list of all valid NHL seasons
@@ -40,7 +40,7 @@ import { _miscPaths as _paths } from './_paths.ts';
  * ```
  */
 export async function seasons(): Promise<APIResponse<NHLSeasons>> {
-   return nhlClient.get(_paths.season);
+   return nhlClient.get(p.season);
 }
 
 /**
@@ -68,11 +68,11 @@ async function metaGame(gameId: GameId): Promise<APIResponse<GameMeta>> {
       return {
          success: false,
          error: new ValidationError(parsedGameId.summary, {
-            endpoint: _paths.metaGame,
+            endpoint: p.metaGame,
          }),
       };
    }
-   return nhlClient.get(route(_paths.metaGame, { gameId: parsedGameId }));
+   return nhlClient.get(route(p.metaGame, { gameId: parsedGameId }));
 }
 
 /**
@@ -103,11 +103,11 @@ async function metaPlayoffSeries(
       return {
          success: false,
          error: new ValidationError(parsed.summary, {
-            endpoint: _paths.metaPlayoffSeries,
+            endpoint: p.metaPlayoffSeries,
          }),
       };
    }
-   return nhlClient.get(route(_paths.metaPlayoffSeries, parsed));
+   return nhlClient.get(route(p.metaPlayoffSeries, parsed));
 }
 
 /**
@@ -129,12 +129,12 @@ export async function postalLookup(
       return {
          success: false,
          error: new ValidationError(parsedPostalCode.summary, {
-            endpoint: _paths.postalLookup,
+            endpoint: p.postalLookup,
          }),
       };
    }
    return nhlClient.get(
-      route(_paths.postalLookup, { postalCode: parsedPostalCode }),
+      route(p.postalLookup, { postalCode: parsedPostalCode }),
    );
 }
 
@@ -149,7 +149,7 @@ export async function postalLookup(
  * ```
  */
 export async function location(): Promise<APIResponse<LocationInfo>> {
-   return nhlClient.get(_paths.location);
+   return nhlClient.get(p.location);
 }
 
 /**
@@ -170,11 +170,11 @@ export async function partnerGame(
       return {
          success: false,
          error: new ValidationError(parsedCountryCode.summary, {
-            endpoint: _paths.partnerGame,
+            endpoint: p.partnerGame,
          }),
       };
    }
    return nhlClient.get(
-      route(_paths.partnerGame, { countryCode: parsedCountryCode }),
+      route(p.partnerGame, { countryCode: parsedCountryCode }),
    );
 }

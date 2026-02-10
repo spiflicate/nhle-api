@@ -41,7 +41,7 @@ import {
    Year as YearAT,
 } from '#/utils/schemas.ts';
 import { route } from '#/utils/utils.ts';
-import { _gamePaths as _paths } from './_paths.ts';
+import { gamePaths as p } from './paths.ts';
 
 /**
  * Get play-by-play data for a specific game
@@ -60,12 +60,12 @@ export async function playByPlay(
       return {
          success: false,
          error: new ValidationError(parsedGameId.summary, {
-            endpoint: _paths.gamecenter.playByPlay,
+            endpoint: p.gamecenter.playByPlay,
          }),
       };
    }
    return nhlClient.get(
-      route(_paths.gamecenter.playByPlay, { gameId: parsedGameId }),
+      route(p.gamecenter.playByPlay, { gameId: parsedGameId }),
    );
 }
 
@@ -107,12 +107,12 @@ export async function reports(
       return {
          success: false,
          error: new ValidationError(parsedGameId.summary, {
-            endpoint: _paths.gamecenter.reports,
+            endpoint: p.gamecenter.reports,
          }),
       };
    }
    return nhlClient.get(
-      route(_paths.gamecenter.reports, { gameId: parsedGameId }),
+      route(p.gamecenter.reports, { gameId: parsedGameId }),
    );
 }
 /**
@@ -132,12 +132,12 @@ export async function landing(
       return {
          success: false,
          error: new ValidationError(parsedGameId.summary, {
-            endpoint: _paths.gamecenter.landing,
+            endpoint: p.gamecenter.landing,
          }),
       };
    }
    return nhlClient.get(
-      route(_paths.gamecenter.landing, { gameId: parsedGameId }),
+      route(p.gamecenter.landing, { gameId: parsedGameId }),
    );
 }
 /**
@@ -157,12 +157,12 @@ export async function boxscore(
       return {
          success: false,
          error: new ValidationError(parsedGameId.summary, {
-            endpoint: _paths.gamecenter.boxscore,
+            endpoint: p.gamecenter.boxscore,
          }),
       };
    }
    return nhlClient.get(
-      route(_paths.gamecenter.boxscore, { gameId: parsedGameId }),
+      route(p.gamecenter.boxscore, { gameId: parsedGameId }),
    );
 }
 
@@ -192,13 +192,11 @@ async function wscGameStory(
       return {
          success: false,
          error: new ValidationError(parsedGameId.summary, {
-            endpoint: _paths.wsc.gameStory,
+            endpoint: p.wsc.gameStory,
          }),
       };
    }
-   return nhlClient.get(
-      route(_paths.wsc.gameStory, { gameId: parsedGameId }),
-   );
+   return nhlClient.get(route(p.wsc.gameStory, { gameId: parsedGameId }));
 }
 
 /**
@@ -218,13 +216,11 @@ async function wscPlayByPlay(
       return {
          success: false,
          error: new ValidationError(parsedGameId.summary, {
-            endpoint: _paths.wsc.playByPlay,
+            endpoint: p.wsc.playByPlay,
          }),
       };
    }
-   return nhlClient.get(
-      route(_paths.wsc.playByPlay, { gameId: parsedGameId }),
-   );
+   return nhlClient.get(route(p.wsc.playByPlay, { gameId: parsedGameId }));
 }
 
 /**
@@ -255,11 +251,11 @@ async function pptReplayGoal(
       return {
          success: false,
          error: new ValidationError(parsed.summary, {
-            endpoint: _paths.pptReplay.goal,
+            endpoint: p.pptReplay.goal,
          }),
       };
    }
-   return nhlClient.get(route(_paths.pptReplay.goal, { gameId, eventId }));
+   return nhlClient.get(route(p.pptReplay.goal, { gameId, eventId }));
 }
 
 /**
@@ -281,11 +277,11 @@ async function pptReplayEvent(
       return {
          success: false,
          error: new ValidationError(parsed.summary, {
-            endpoint: _paths.pptReplay.event,
+            endpoint: p.pptReplay.event,
          }),
       };
    }
-   return nhlClient.get(route(_paths.pptReplay.event, { gameId, eventId }));
+   return nhlClient.get(route(p.pptReplay.event, { gameId, eventId }));
 }
 
 /**
@@ -309,11 +305,11 @@ export async function schedule(
       return {
          success: false,
          error: new ValidationError(parsedDate.summary, {
-            endpoint: _paths.schedule,
+            endpoint: p.schedule,
          }),
       };
    }
-   return nhlClient.get(route(_paths.schedule, { date: parsedDate }));
+   return nhlClient.get(route(p.schedule, { date: parsedDate }));
 }
 
 /**
@@ -333,13 +329,11 @@ export async function scheduleCalendar(
       return {
          success: false,
          error: new ValidationError(parsedDate.summary, {
-            endpoint: _paths.scheduleCalendar,
+            endpoint: p.scheduleCalendar,
          }),
       };
    }
-   return nhlClient.get(
-      route(_paths.scheduleCalendar, { date: parsedDate }),
-   );
+   return nhlClient.get(route(p.scheduleCalendar, { date: parsedDate }));
 }
 
 /**
@@ -359,11 +353,11 @@ export async function playoffBracket(
       return {
          success: false,
          error: new ValidationError(parsedYear.summary, {
-            endpoint: _paths.playoffBracket,
+            endpoint: p.playoffBracket,
          }),
       };
    }
-   return nhlClient.get(route(_paths.playoffBracket, { year: parsedYear }));
+   return nhlClient.get(route(p.playoffBracket, { year: parsedYear }));
 }
 
 /**
@@ -383,13 +377,11 @@ export async function playoffSeries(
       return {
          success: false,
          error: new ValidationError(parsedSeason.summary, {
-            endpoint: _paths.playoffSeries,
+            endpoint: p.playoffSeries,
          }),
       };
    }
-   return nhlClient.get(
-      route(_paths.playoffSeries, { season: parsedSeason }),
-   );
+   return nhlClient.get(route(p.playoffSeries, { season: parsedSeason }));
 }
 
 /**
@@ -424,13 +416,13 @@ export async function playoffSeriesSchedule(
       return {
          success: false,
          error: new ValidationError(parsed.summary, {
-            endpoint: _paths.playoffSeriesSchedule,
+            endpoint: p.playoffSeriesSchedule,
          }),
       };
    }
    // series letter is a single character from A to O (/[a-oA-O]/)
    // Are series letters assigned in a pre determined manner?
-   return nhlClient.get(route(_paths.playoffSeriesSchedule, parsed));
+   return nhlClient.get(route(p.playoffSeriesSchedule, parsed));
 }
 
 /**
@@ -442,7 +434,7 @@ export async function playoffSeriesSchedule(
  * ```
  */
 export async function whereToWatch(): Promise<APIResponse<WhereToWatch>> {
-   return nhlClient.get(_paths.whereToWatch);
+   return nhlClient.get(p.whereToWatch);
 }
 
 /**
@@ -462,11 +454,9 @@ export async function networkTVSchedule(
       return {
          success: false,
          error: new ValidationError(parsedDate.summary, {
-            endpoint: _paths.networkTVSchedule,
+            endpoint: p.networkTVSchedule,
          }),
       };
    }
-   return nhlClient.get(
-      route(_paths.networkTVSchedule, { date: parsedDate }),
-   );
+   return nhlClient.get(route(p.networkTVSchedule, { date: parsedDate }));
 }

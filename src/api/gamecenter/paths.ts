@@ -1,4 +1,4 @@
-export const _teamPaths = {
+export const teamPaths = {
    rosterSeasons: 'roster-season/{team}',
    roster: 'roster/{team}/{season}',
    prospects: 'prospects/{team}',
@@ -13,7 +13,7 @@ export const _teamPaths = {
    },
 };
 
-export const _scorePaths = {
+export const scorePaths = {
    score: 'score/{date}',
    scoreboard: {
       now: 'scoreboard/now',
@@ -22,7 +22,7 @@ export const _scorePaths = {
    },
 };
 
-export const _playerPaths = {
+export const playerPaths = {
    landing: 'player/{playerId}/landing',
    gameLog: 'player/{playerId}/game-log/{season}/{gameType}',
    spotlight: 'player-spotlight',
@@ -33,7 +33,7 @@ export const _playerPaths = {
    playerSearch: 'https://search.d3.nhle.com/api/v1/search/player',
 };
 
-export const _miscPaths = {
+export const miscPaths = {
    season: 'season',
    metaPlayoffSeries: 'meta/playoff-series/{year}/{seriesLetter}',
    metaGame: 'meta/game/{gameId}',
@@ -42,7 +42,7 @@ export const _miscPaths = {
    partnerGame: 'partner-game/{countryCode}/now',
 };
 
-export const _gamePaths = {
+export const gamePaths = {
    schedule: 'schedule/{date}',
    scheduleCalendar: 'schedule-calendar/{date}',
    playoffBracket: 'playoff-bracket/{year}',
@@ -66,7 +66,7 @@ export const _gamePaths = {
    networkTVSchedule: 'network/tv-schedule/{date}',
 };
 
-export const _draftPaths = {
+export const draftPaths = {
    draftPicks: {
       byYearAndRound: 'draft/picks/{year}/{round}',
       byYear: 'draft/picks/{year}/all',

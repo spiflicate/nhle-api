@@ -20,7 +20,7 @@ import {
    Year as YearType,
 } from '#/utils/schemas.ts';
 import { route } from '#/utils/utils.ts';
-import { _draftPaths as _paths } from './_paths.ts';
+import { draftPaths as p } from './paths.ts';
 
 /**
  * Get draft picks for a specific year and round, or all picks for a year
@@ -45,14 +45,14 @@ export async function picks(
       return {
          success: false,
          error: new ValidationError(parsed.summary, {
-            endpoint: _paths.draftPicks.byYearAndRound,
+            endpoint: p.draftPicks.byYearAndRound,
          }),
       };
    }
    if (parsed.year && !parsed.round)
-      return nhlClient.get(route(_paths.draftPicks.byYear, parsed));
+      return nhlClient.get(route(p.draftPicks.byYear, parsed));
 
-   return nhlClient.get(route(_paths.draftPicks.byYearAndRound, parsed));
+   return nhlClient.get(route(p.draftPicks.byYearAndRound, parsed));
 }
 
 /**
@@ -64,7 +64,7 @@ export async function picks(
  * ```
  */
 export async function tracker(): Promise<APIResponse<DraftTracker>> {
-   return nhlClient.get(_paths.draftTracker);
+   return nhlClient.get(p.draftTracker);
 }
 /**
  * Access draft rankings by category (skaters/goalies, NA/International)
@@ -100,12 +100,12 @@ export function rankings(year?: Year): {
          return {
             success: false,
             error: new ValidationError(parsedYear.summary, {
-               endpoint: _paths.draftRankings,
+               endpoint: p.draftRankings,
             }),
          };
       }
       return nhlClient.get(
-         route(_paths.draftRankings, {
+         route(p.draftRankings, {
             year: parsedYear,
             type,
          }),

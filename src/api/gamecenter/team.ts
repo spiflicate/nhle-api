@@ -30,7 +30,7 @@ import {
    TeamAndSeasonParams,
 } from '#/utils/schemas.ts';
 import { route } from '../../utils/utils.ts';
-import { _teamPaths as _paths } from './_paths.ts';
+import { teamPaths as p } from './paths.ts';
 
 /**
  * Get available roster seasons for a team
@@ -49,11 +49,11 @@ export async function rosterSeasons(
       return {
          success: false,
          error: new ValidationError(parsed.summary, {
-            endpoint: _paths.rosterSeasons,
+            endpoint: p.rosterSeasons,
          }),
       };
    }
-   return nhlClient.get(route(_paths.rosterSeasons, { team: parsed }));
+   return nhlClient.get(route(p.rosterSeasons, { team: parsed }));
 }
 
 /**
@@ -75,11 +75,11 @@ export async function roster(
       return {
          success: false,
          error: new ValidationError(parsed.summary, {
-            endpoint: _paths.roster,
+            endpoint: p.roster,
          }),
       };
    }
-   return nhlClient.get(route(_paths.roster, parsed));
+   return nhlClient.get(route(p.roster, parsed));
 }
 
 /**
@@ -99,11 +99,11 @@ export async function prospects(
       return {
          success: false,
          error: new ValidationError(parsed.summary, {
-            endpoint: _paths.prospects,
+            endpoint: p.prospects,
          }),
       };
    }
-   return nhlClient.get(route(_paths.prospects, { team: parsed }));
+   return nhlClient.get(route(p.prospects, { team: parsed }));
 }
 
 /**
@@ -130,11 +130,11 @@ export async function stats(
       return {
          success: false,
          error: new ValidationError(parsed.summary, {
-            endpoint: _paths.clubStats,
+            endpoint: p.clubStats,
          }),
       };
    }
-   return nhlClient.get(route(_paths.clubStats, parsed));
+   return nhlClient.get(route(p.clubStats, parsed));
 }
 
 /**
@@ -156,11 +156,11 @@ export async function statsSeason(
       return {
          success: false,
          error: new ValidationError(parsed.summary, {
-            endpoint: _paths.clubStatsSeason,
+            endpoint: p.clubStatsSeason,
          }),
       };
    }
-   return nhlClient.get(route(_paths.clubStatsSeason, { team: parsed }));
+   return nhlClient.get(route(p.clubStatsSeason, { team: parsed }));
 }
 
 /**
@@ -180,11 +180,11 @@ export async function standings(
       return {
          success: false,
          error: new ValidationError(parsed.summary, {
-            endpoint: _paths.standings,
+            endpoint: p.standings,
          }),
       };
    }
-   return nhlClient.get(route(_paths.standings, { date: parsed }));
+   return nhlClient.get(route(p.standings, { date: parsed }));
 }
 
 /**
@@ -198,7 +198,7 @@ export async function standings(
 export async function standingsSeason(): Promise<
    APIResponse<NHLStandingsSeason>
 > {
-   return nhlClient.get(_paths.standingsSeason);
+   return nhlClient.get(p.standingsSeason);
 }
 
 /**
@@ -234,11 +234,11 @@ async function scheduleWeek(
       return {
          success: false,
          error: new ValidationError(parsed.summary, {
-            endpoint: _paths.clubSchedule.week,
+            endpoint: p.clubSchedule.week,
          }),
       };
    }
-   return nhlClient.get(route(_paths.clubSchedule.week, parsed));
+   return nhlClient.get(route(p.clubSchedule.week, parsed));
 }
 
 /**
@@ -273,11 +273,11 @@ async function scheduleMonth(
       return {
          success: false,
          error: new ValidationError(parsed.summary, {
-            endpoint: _paths.clubSchedule.month,
+            endpoint: p.clubSchedule.month,
          }),
       };
    }
-   return nhlClient.get(route(_paths.clubSchedule.month, parsed));
+   return nhlClient.get(route(p.clubSchedule.month, parsed));
 }
 
 /**
@@ -310,11 +310,11 @@ async function scheduleSeason(
       return {
          success: false,
          error: new ValidationError(parsed.summary, {
-            endpoint: _paths.clubSchedule.season,
+            endpoint: p.clubSchedule.season,
          }),
       };
    }
-   return nhlClient.get(route(_paths.clubSchedule.season, parsed));
+   return nhlClient.get(route(p.clubSchedule.season, parsed));
 }
 
 /**

@@ -17,9 +17,9 @@ import type {
 import type { GameType, Season } from '#/types/types.ts';
 import { BaseParams, isParseError, PlayerId } from '#/utils/schemas.ts';
 import { route } from '#/utils/utils.ts';
-import { _playerPaths as _paths } from './_paths.ts';
+import { playerPaths as p } from './paths.ts';
 
-const nhlPlayerSearch = createNHLClient(_paths.playerSearch);
+const nhlPlayerSearch = createNHLClient(p.playerSearch);
 const searchUrlParams = { culture: 'en', q: '' };
 
 /**
@@ -39,13 +39,11 @@ export async function landing(
       return {
          success: false,
          error: new ValidationError(parsedPlayerId.summary, {
-            endpoint: _paths.landing,
+            endpoint: p.landing,
          }),
       };
    }
-   return nhlClient.get(
-      route(_paths.landing, { playerId: parsedPlayerId }),
-   );
+   return nhlClient.get(route(p.landing, { playerId: parsedPlayerId }));
 }
 
 /**
@@ -82,11 +80,11 @@ export async function gameLog(
       return {
          success: false,
          error: new ValidationError(parsed.summary, {
-            endpoint: _paths.gameLog,
+            endpoint: p.gameLog,
          }),
       };
    }
-   return nhlClient.get(route(_paths.gameLog, parsed));
+   return nhlClient.get(route(p.gameLog, parsed));
 }
 
 /**
@@ -98,7 +96,7 @@ export async function gameLog(
  * ```
  */
 export async function spotlight(): Promise<APIResponse<PlayerSpotlight[]>> {
-   return nhlClient.get(_paths.spotlight);
+   return nhlClient.get(p.spotlight);
 }
 
 /**
@@ -146,11 +144,11 @@ async function statsLeadersSkaters(
       return {
          success: false,
          error: new ValidationError(parsed.summary, {
-            endpoint: _paths.statsLeaders.skaters,
+            endpoint: p.statsLeaders.skaters,
          }),
       };
    }
-   return nhlClient.get(route(_paths.statsLeaders.skaters, parsed));
+   return nhlClient.get(route(p.statsLeaders.skaters, parsed));
 }
 
 /**
@@ -172,9 +170,9 @@ async function statsLeadersGoalies(
       return {
          success: false,
          error: new ValidationError(parsed.summary, {
-            endpoint: _paths.statsLeaders.goalies,
+            endpoint: p.statsLeaders.goalies,
          }),
       };
    }
-   return nhlClient.get(route(_paths.statsLeaders.goalies, parsed));
+   return nhlClient.get(route(p.statsLeaders.goalies, parsed));
 }

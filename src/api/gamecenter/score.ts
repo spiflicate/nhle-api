@@ -13,7 +13,7 @@ import {
    TeamAbbrev as Team,
 } from '#/utils/schemas.ts';
 import { route } from '#/utils/utils.ts';
-import { _scorePaths as _paths } from './_paths.ts';
+import { scorePaths as p } from './paths.ts';
 
 /**
  * Get scores for a specific date
@@ -36,11 +36,11 @@ export async function score(
       return {
          success: false,
          error: new ValidationError(parsed.summary, {
-            endpoint: _paths.score,
+            endpoint: p.score,
          }),
       };
    }
-   return nhlClient.get(route(_paths.score, { date: parsed }));
+   return nhlClient.get(route(p.score, { date: parsed }));
 }
 
 /**
@@ -52,7 +52,7 @@ export async function score(
  * ```
  */
 export async function scoreboard(): Promise<APIResponse<Scoreboard>> {
-   return nhlClient.get<Scoreboard>(_paths.scoreboard.now);
+   return nhlClient.get<Scoreboard>(p.scoreboard.now);
 }
 
 /**
@@ -72,12 +72,12 @@ scoreboard.team = async (
       return {
          success: false,
          error: new ValidationError(parsed.summary, {
-            endpoint: _paths.scoreboard.byTeam,
+            endpoint: p.scoreboard.byTeam,
          }),
       };
    }
    return nhlClient.get<Scoreboard>(
-      route(_paths.scoreboard.byTeam, { team: parsed }),
+      route(p.scoreboard.byTeam, { team: parsed }),
    );
 };
 
@@ -98,11 +98,11 @@ scoreboard.date = async (
       return {
          success: false,
          error: new ValidationError(parsed.summary, {
-            endpoint: _paths.scoreboard.byDate,
+            endpoint: p.scoreboard.byDate,
          }),
       };
    }
    return nhlClient.get<Scoreboard>(
-      route(_paths.scoreboard.byDate, { date: parsed }),
+      route(p.scoreboard.byDate, { date: parsed }),
    );
 };
