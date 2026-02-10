@@ -41,7 +41,7 @@ import type {
    SkatingSpeedSort,
    ZoneTimeSort,
 } from '../../types/types.ts';
-import { route } from '../../utils/utils.ts';
+import { resolvePath } from '../../utils/utils.ts';
 import { skatersPaths as p } from './paths.ts';
 
 /**
@@ -62,10 +62,11 @@ export async function detail(
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.detail,
+            endpoint: p.player,
          }),
       );
-   return nhlClient.get(route(p.detail, parsed));
+   const path = resolvePath(p.player, parsed);
+   return nhlClient.get(path);
 }
 
 /** Get skater shot location details for a player. */
@@ -81,7 +82,8 @@ export async function shotLocation(
             endpoint: p.shotLocation,
          }),
       );
-   return nhlClient.get(route(p.shotLocation, parsed));
+   const path = resolvePath(p.shotLocation, parsed);
+   return nhlClient.get(path);
 }
 
 /** Get skater shot speed details for a player. */
@@ -97,7 +99,8 @@ export async function shotSpeed(
             endpoint: p.shotSpeed,
          }),
       );
-   return nhlClient.get(route(p.shotSpeed, parsed));
+   const path = resolvePath(p.shotSpeed, parsed);
+   return nhlClient.get(path);
 }
 
 /** Get skater skating distance details for a player. */
@@ -113,7 +116,8 @@ export async function skatingDistance(
             endpoint: p.skatingDistance,
          }),
       );
-   return nhlClient.get(route(p.skatingDistance, parsed));
+   const path = resolvePath(p.skatingDistance, parsed);
+   return nhlClient.get(path);
 }
 
 /** Get skater skating speed details for a player. */
@@ -129,7 +133,8 @@ export async function skatingSpeed(
             endpoint: p.skatingSpeed,
          }),
       );
-   return nhlClient.get(route(p.skatingSpeed, parsed));
+   const path = resolvePath(p.skatingSpeed, parsed);
+   return nhlClient.get(path);
 }
 
 /** Get skater zone time for a player. */
@@ -145,7 +150,8 @@ export async function zoneTime(
             endpoint: p.zoneTime,
          }),
       );
-   return nhlClient.get(route(p.zoneTime, parsed));
+   const path = resolvePath(p.zoneTime, parsed);
+   return nhlClient.get(path);
 }
 
 /** Get skater comparison data for a player. */
@@ -158,10 +164,11 @@ export async function comparison(
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.comparison,
+            endpoint: p.compare,
          }),
       );
-   return nhlClient.get(route(p.comparison, parsed));
+   const path = resolvePath(p.compare, parsed);
+   return nhlClient.get(path);
 }
 
 /** Get skater landing / leaders for a season. */
@@ -173,10 +180,11 @@ export async function leaders(
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.landing,
+            endpoint: p.leaders,
          }),
       );
-   return nhlClient.get(route(p.landing, parsed));
+   const path = resolvePath(p.leaders, parsed);
+   return nhlClient.get(path);
 }
 
 export const top10 = {
@@ -207,10 +215,11 @@ async function top10Distance(
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.distanceTop10,
+            endpoint: p.top10.skatingDistance,
          }),
       );
-   return nhlClient.get(route(p.distanceTop10, parsed));
+   const path = resolvePath(p.top10.skatingDistance, parsed);
+   return nhlClient.get(path);
 }
 /** Top-10 shot location lists. */
 async function top10ShotLocation(
@@ -233,10 +242,11 @@ async function top10ShotLocation(
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.shotLocationTop10,
+            endpoint: p.top10.shotLocation,
          }),
       );
-   return nhlClient.get(route(p.shotLocationTop10, parsed));
+   const path = resolvePath(p.top10.shotLocation, parsed);
+   return nhlClient.get(path);
 }
 /** Top-10 shot speed lists. */
 async function top10ShotSpeed(
@@ -256,10 +266,11 @@ async function top10ShotSpeed(
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.shotSpeedTop10,
+            endpoint: p.top10.shotSpeed,
          }),
       );
-   return nhlClient.get(route(p.shotSpeedTop10, parsed));
+   const path = resolvePath(p.top10.shotSpeed, parsed);
+   return nhlClient.get(path);
 }
 /** Top-10 skating speed lists. */
 async function top10Speed(
@@ -279,10 +290,11 @@ async function top10Speed(
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.speedTop10,
+            endpoint: p.top10.skatingSpeed,
          }),
       );
-   return nhlClient.get(route(p.speedTop10, parsed));
+   const path = resolvePath(p.top10.skatingSpeed, parsed);
+   return nhlClient.get(path);
 }
 /** Top-10 zone time lists. */
 async function top10ZoneTime(
@@ -304,8 +316,9 @@ async function top10ZoneTime(
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.zoneTimeTop10,
+            endpoint: p.top10.zoneTime,
          }),
       );
-   return nhlClient.get(route(p.zoneTimeTop10, parsed));
+   const path = resolvePath(p.top10.zoneTime, parsed);
+   return nhlClient.get(path);
 }

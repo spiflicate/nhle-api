@@ -7,6 +7,7 @@
  * ======================================================================
  */
 import { nhlClient } from '#/client/index.ts';
+import { summaryPaths as p } from './paths.ts';
 
 /**
  * Edge Advanced Stats API helpers.
@@ -16,15 +17,11 @@ import { nhlClient } from '#/client/index.ts';
  * client.get call.
  */
 
-/** API endpoint paths for edge home page data. */
-const _paths = {
-   byTheNumbers: 'edge/by-the-numbers/now',
-};
 /**
  * Get the "by the numbers" data for the current day, updated daily with
  * insights from the previous days games.
  * @returns A promise that resolves to the "by the numbers" data.
  */
 export async function byTheNumbers() {
-   return nhlClient.get(_paths.byTheNumbers);
+   return nhlClient.get(p.byTheNumbers);
 }

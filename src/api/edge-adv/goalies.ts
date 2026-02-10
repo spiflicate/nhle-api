@@ -34,7 +34,7 @@ import type {
    SavePercentageSort,
    Season,
 } from '../../types/types.ts';
-import { route } from '../../utils/utils.ts';
+import { resolvePath } from '../../utils/utils.ts';
 import { goaliesPaths as p } from './paths.ts';
 
 /**
@@ -64,7 +64,8 @@ export async function player(
             endpoint: p.player,
          }),
       );
-   return nhlClient.get(route(p.player, parsed));
+   const path = resolvePath(p.player, parsed);
+   return nhlClient.get(path);
 }
 
 /**
@@ -86,7 +87,8 @@ export async function compare(
             endpoint: p.compare,
          }),
       );
-   return nhlClient.get(route(p.compare, parsed));
+   const path = resolvePath(p.compare, parsed);
+   return nhlClient.get(path);
 }
 /**
  * Get goalie landing / leaders for a season.
@@ -105,7 +107,8 @@ export async function leaders(
             endpoint: p.leaders,
          }),
       );
-   return nhlClient.get(route(p.leaders, parsed));
+   const path = resolvePath(p.leaders, parsed);
+   return nhlClient.get(path);
 }
 
 /**
@@ -127,7 +130,8 @@ export async function savePercentage5v5(
             endpoint: p.savePercentage5v5,
          }),
       );
-   return nhlClient.get(route(p.savePercentage5v5, parsed));
+   const path = resolvePath(p.savePercentage5v5, parsed);
+   return nhlClient.get(path);
 }
 
 /**
@@ -149,7 +153,8 @@ export async function savePercentage(
             endpoint: p.savePercentage,
          }),
       );
-   return nhlClient.get(route(p.savePercentage, parsed));
+   const path = resolvePath(p.savePercentage, parsed);
+   return nhlClient.get(path);
 }
 
 /**
@@ -171,7 +176,8 @@ export async function saveLocation(
             endpoint: p.saveLocation,
          }),
       );
-   return nhlClient.get(route(p.saveLocation, parsed));
+   const path = resolvePath(p.saveLocation, parsed);
+   return nhlClient.get(path);
 }
 
 /**
@@ -205,7 +211,8 @@ async function top10SavePercentage(
             endpoint: p.top10.SavePercentage,
          }),
       );
-   return nhlClient.get(route(p.top10.SavePercentage, parsed));
+   const path = resolvePath(p.top10.SavePercentage, parsed);
+   return nhlClient.get(path);
 }
 
 /**
@@ -230,7 +237,8 @@ async function top10SavePercentage5v5(
             endpoint: p.top10.SavePercentage5v5,
          }),
       );
-   return nhlClient.get(route(p.top10.SavePercentage5v5, parsed));
+   const path = resolvePath(p.top10.SavePercentage5v5, parsed);
+   return nhlClient.get(path);
 }
 
 /**
@@ -263,5 +271,6 @@ async function top10SaveLocation(
             endpoint: p.top10.SaveLocation,
          }),
       );
-   return nhlClient.get(route(p.top10.SaveLocation, parsed));
+   const path = resolvePath(p.top10.SaveLocation, parsed);
+   return nhlClient.get(path);
 }

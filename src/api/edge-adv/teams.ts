@@ -12,6 +12,7 @@
 import { nhlClient } from '#/client/index.ts';
 import { NHLError } from '#/errors/index.ts';
 import {
+   BaseParams,
    isParseError,
    PositionFilter as PositionFilterSchema,
    ShotLocationCategory as ShotLocationCategorySchema,
@@ -36,7 +37,7 @@ import type {
    TeamId,
    ZoneTimeSort,
 } from '../../types/types.ts';
-import { route } from '../../utils/utils.ts';
+import { resolvePath } from '../../utils/utils.ts';
 import { teamsPaths as p } from './paths.ts';
 
 /**
@@ -65,7 +66,8 @@ export async function stats(
             endpoint: p.stats,
          }),
       );
-   return nhlClient.get(route(p.stats, parsed));
+   const path = resolvePath(p.stats, parsed);
+   return nhlClient.get(path);
 }
 
 /**
@@ -84,7 +86,8 @@ export async function compare(
             endpoint: p.compare,
          }),
       );
-   return nhlClient.get(route(p.compare, parsed));
+   const path = resolvePath(p.compare, parsed);
+   return nhlClient.get(path);
 }
 
 /**
@@ -94,14 +97,15 @@ export async function leaders(
    season?: Season,
    gameType?: GameType,
 ): Promise<unknown> {
-   const parsed = TeamParams({ season, gameType });
+   const parsed = BaseParams({ season, gameType });
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
             endpoint: p.leaders,
          }),
       );
-   return nhlClient.get(route(p.leaders, parsed));
+   const path = resolvePath(p.leaders, parsed);
+   return nhlClient.get(path);
 }
 
 /**
@@ -119,7 +123,8 @@ export async function shotLocation(
             endpoint: p.shotLocation,
          }),
       );
-   return nhlClient.get(route(p.shotLocation, parsed));
+   const path = resolvePath(p.shotLocation, parsed);
+   return nhlClient.get(path);
 }
 
 /**
@@ -137,7 +142,8 @@ export async function shotSpeed(
             endpoint: p.shotSpeed,
          }),
       );
-   return nhlClient.get(route(p.shotSpeed, parsed));
+   const path = resolvePath(p.shotSpeed, parsed);
+   return nhlClient.get(path);
 }
 
 /**
@@ -155,7 +161,8 @@ export async function skatingDistance(
             endpoint: p.skatingDistance,
          }),
       );
-   return nhlClient.get(route(p.skatingDistance, parsed));
+   const path = resolvePath(p.skatingDistance, parsed);
+   return nhlClient.get(path);
 }
 
 /**
@@ -173,7 +180,8 @@ export async function skatingSpeed(
             endpoint: p.skatingSpeed,
          }),
       );
-   return nhlClient.get(route(p.skatingSpeed, parsed));
+   const path = resolvePath(p.skatingSpeed, parsed);
+   return nhlClient.get(path);
 }
 
 /**
@@ -191,7 +199,8 @@ export async function zoneTime(
             endpoint: p.zoneTime,
          }),
       );
-   return nhlClient.get(route(p.zoneTime, parsed));
+   const path = resolvePath(p.zoneTime, parsed);
+   return nhlClient.get(path);
 }
 
 export const top10 = {
@@ -211,7 +220,7 @@ async function top10ShotLocation(
    category?: ShotLocationCategory,
    sortBy?: ShotLocationSort,
 ): Promise<unknown> {
-   const Parser = TeamParams.merge({
+   const Parser = BaseParams.merge({
       position: PositionFilterSchema.default('ALL'),
       category: ShotLocationCategorySchema.default('G'),
       sortBy: ShotLocationSortSchema.default('ALL'),
@@ -229,7 +238,8 @@ async function top10ShotLocation(
             endpoint: p.shotLocation,
          }),
       );
-   return nhlClient.get(route(p.shotLocation, parsed));
+   const path = resolvePath(p.top10.shotLocation, parsed);
+   return nhlClient.get(path);
 }
 /**
  * Top-10 team shot speed lists.
@@ -240,7 +250,7 @@ async function top10ShotSpeed(
    position?: PositionFilter,
    sortBy?: ShotSpeedSort,
 ): Promise<unknown> {
-   const Parser = TeamParams.merge({
+   const Parser = BaseParams.merge({
       position: PositionFilterSchema.default('ALL'),
       sortBy: ShotSpeedSortSchema.default('MAX'),
    });
@@ -256,7 +266,8 @@ async function top10ShotSpeed(
             endpoint: p.shotSpeed,
          }),
       );
-   return nhlClient.get(route(p.shotSpeed, parsed));
+   const path = resolvePath(p.top10.shotSpeed, parsed);
+   return nhlClient.get(path);
 }
 /**
  * Top-10 team skating distance lists.
@@ -268,7 +279,7 @@ async function top10SkatingDistance(
    strength?: SkatersStrength,
    sortBy?: SkatingDistanceSort,
 ): Promise<unknown> {
-   const Parser = TeamParams.merge({
+   const Parser = BaseParams.merge({
       position: PositionFilterSchema.default('ALL'),
       strength: SkatersStrengthSchema.default('ALL'),
       sortBy: SkatingDistanceSortSchema.default('TOTAL'),
@@ -286,7 +297,8 @@ async function top10SkatingDistance(
             endpoint: p.skatingDistance,
          }),
       );
-   return nhlClient.get(route(p.skatingDistance, parsed));
+   const path = resolvePath(p.top10.skatingDistance, parsed);
+   return nhlClient.get(path);
 }
 /**
  * Top-10 team skating speed lists.
@@ -297,7 +309,7 @@ async function top10SkatingSpeed(
    position?: PositionFilter,
    sortBy?: SkatingSpeedSort,
 ): Promise<unknown> {
-   const Parser = TeamParams.merge({
+   const Parser = BaseParams.merge({
       position: PositionFilterSchema.default('ALL'),
       sortBy: SkatingSpeedSortSchema.default('TOP'),
    });
@@ -313,7 +325,8 @@ async function top10SkatingSpeed(
             endpoint: p.skatingSpeed,
          }),
       );
-   return nhlClient.get(route(p.skatingSpeed, parsed));
+   const path = resolvePath(p.top10.skatingSpeed, parsed);
+   return nhlClient.get(path);
 }
 /**
  * Top-10 team zone time lists.
@@ -324,7 +337,7 @@ async function top10ZoneTime(
    strength?: SkatersStrength,
    sortBy?: ZoneTimeSort,
 ): Promise<unknown> {
-   const Parser = TeamParams.merge({
+   const Parser = BaseParams.merge({
       strength: SkatersStrengthSchema.default('ALL'),
       sortBy: ZoneTimeSortSchema.default('OZ'),
    });
@@ -340,5 +353,6 @@ async function top10ZoneTime(
             endpoint: p.zoneTime,
          }),
       );
-   return nhlClient.get(route(p.zoneTime, parsed));
+   const path = resolvePath(p.top10.zoneTime, parsed);
+   return nhlClient.get(path);
 }
