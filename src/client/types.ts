@@ -31,13 +31,6 @@ export interface NHLClientConfig {
    language?: 'en' | 'fr';
 }
 
-export interface NHLApiResponse<T> {
-   data: T;
-   status: number;
-   statusText: string;
-   headers: Record<string, string>;
-}
-
 export type APIResponse<T> =
    | { success: true; data: T }
    | { success: false; error: NHLError };
