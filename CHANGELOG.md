@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.5.4] - TBD
+## [0.5.4] - 2026-02-10
 
 ### Added
 
@@ -23,11 +23,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated Edge Advanced Stats top10 schema validators to match the new path naming
 - Overloaded game log and playoff series schedule helpers for flexible parameter handling
 - Updated README usage examples and badges
+- Simplified base URL handling in NHL client configuration
+- Enhanced endpoint paths documentation for clarity and completeness across edge-adv module
 
 ### Fixed
 
 - Corrected rankings response handling to align with `success` response payloads
 - Removed a stray console log from `getSeason`
+
+### Deprecated
+
+- Marked the player search endpoint as deprecated; use the team roster endpoints for player information instead
 
 ### Technical
 
