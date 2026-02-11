@@ -31,20 +31,6 @@ export interface NHLClientConfig {
    language?: 'en' | 'fr';
 }
 
-/**
- * Predefined API endpoints for different NHL services
- */
-export type APIEndpoint = 'edge-adv' | 'edge-stats' | 'default';
-
-/**
- * Mapping of API endpoints to their base URLs
- */
-export const API_BASE_URLS: Record<APIEndpoint, string> = {
-   'edge-adv': 'https://api-web.nhle.com/v1',
-   'edge-stats': 'https://api.nhle.com/stats/rest',
-   default: 'https://api-web.nhle.com/v1',
-};
-
 export interface NHLApiResponse<T> {
    data: T;
    status: number;

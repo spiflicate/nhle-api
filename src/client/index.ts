@@ -10,8 +10,7 @@ import {
    ErrorHandler,
    NHLError,
 } from '#/errors/index.ts';
-import type { APIEndpoint, APIResponse, NHLClientConfig } from './types.ts';
-import { API_BASE_URLS } from './types.ts';
+import type { APIResponse, NHLClientConfig } from './types.ts';
 
 /**
  * Extended configuration for the NHL API client including error handling
@@ -23,12 +22,17 @@ export interface NHLClientWithErrorConfig extends NHLClientConfig {
    errorConfig?: ErrorConfig;
 }
 
+const BASE_URLS = {
+   gamecenter: 'https://api-web.nhle.com/v1',
+   edgeStats: 'https://api.nhle.com/stats/rest',
+};
+
 /**
  * Default configuration for the NHL API client
  * Uses environment variables if set, otherwise falls back to sensible defaults
  */
 const DEFAULT_CONFIG: Required<NHLClientConfig> = {
-   baseUrl: 'https://api-web.nhle.com/v1',
+   baseUrl: BASE_URLS.gamecenter,
    timeout: envConfig.timeout,
    headers: {
       Accept: 'application/json',
@@ -51,15 +55,9 @@ export class NHLClient {
     * @param baseURL - Optional custom base URL or predefined API endpoint key
     * @param errorConfig - Optional error handling configuration
     */
-   constructor(baseURL?: string | APIEndpoint, errorConfig?: ErrorConfig) {
+   constructor(baseURL?: string, errorConfig?: ErrorConfig) {
       this.config = { ...DEFAULT_CONFIG };
-
-      // Check if baseURL is a predefined endpoint key
-      if (baseURL && baseURL in API_BASE_URLS) {
-         this.config.baseUrl = API_BASE_URLS[baseURL as APIEndpoint];
-      } else if (baseURL) {
-         this.config.baseUrl = baseURL;
-      }
+      if (baseURL) this.config.baseUrl = baseURL;
 
       // Initialize error handler with provided config
       this.errorHandler = new ErrorHandler(errorConfig);
@@ -176,20 +174,20 @@ export class NHLClient {
  * @returns A new NHL API client instance
  */
 export function createNHLClient(
-   baseURL?: APIEndpoint,
+   baseURL?: string,
    errorConfig?: ErrorConfig,
 ): NHLClient {
    return new NHLClient(baseURL, errorConfig);
 }
 
 /**
- * Default client instance for edge-adv API endpoints
+ * Default client instance for gamecenter and edge-adv APIs
  */
-const nhlClient = createNHLClient('default');
+const nhlClient = createNHLClient(BASE_URLS.gamecenter);
 
 /**
- * Client instance for edge-stats API endpoints
+ * Client instance for edge-stats APIs
  */
-const edgeStatsClient = createNHLClient('edge-stats');
+const edgeStatsClient = createNHLClient(BASE_URLS.edgeStats);
 
 export { nhlClient, edgeStatsClient };
