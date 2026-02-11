@@ -4,7 +4,7 @@
  */
 
 import { nhlClient } from '#/client/index.ts';
-import type { APIResponse } from '#/client/types.ts';
+import type { APIResult } from '#/client/types.ts';
 import { ValidationError } from '#/errors/index.ts';
 import type {
    CountryCode,
@@ -39,7 +39,7 @@ import { miscPaths as p } from './paths.ts';
  * seasons().then((data) => console.log(data));
  * ```
  */
-export async function seasons(): Promise<APIResponse<NHLSeasons>> {
+export async function seasons(): Promise<APIResult<NHLSeasons>> {
    return nhlClient.get(p.season);
 }
 
@@ -62,7 +62,7 @@ export const meta = {
  * meta.game(2023020001).then((data) => console.log(data));
  * ```
  */
-async function metaGame(gameId: GameId): Promise<APIResponse<GameMeta>> {
+async function metaGame(gameId: GameId): Promise<APIResult<GameMeta>> {
    const parsedGameId = GameIdAT(gameId);
    if (isParseError(parsedGameId)) {
       return {
@@ -90,15 +90,15 @@ async function metaGame(gameId: GameId): Promise<APIResponse<GameMeta>> {
 async function metaPlayoffSeries(
    seriesLetter: SeriesLetter,
    year?: Year,
-): Promise<APIResponse<PlayoffSeriesMeta>>;
+): Promise<APIResult<PlayoffSeriesMeta>>;
 async function metaPlayoffSeries(
    seriesLetter: string,
    year?: Year,
-): Promise<APIResponse<PlayoffSeriesMeta>>;
+): Promise<APIResult<PlayoffSeriesMeta>>;
 async function metaPlayoffSeries(
    seriesLetter: SeriesLetter | string,
    year?: Year,
-): Promise<APIResponse<PlayoffSeriesMeta>> {
+): Promise<APIResult<PlayoffSeriesMeta>> {
    const parsed = SeriesParams({ year, seriesLetter });
    if (isParseError(parsed)) {
       return {
@@ -125,7 +125,7 @@ async function metaPlayoffSeries(
  */
 export async function postalLookup(
    postalCode: PostalCode,
-): Promise<APIResponse<PostalCodeInfo>> {
+): Promise<APIResult<PostalCodeInfo>> {
    const parsedPostalCode = PostalCodeAT(postalCode);
    if (isParseError(parsedPostalCode)) {
       return {
@@ -151,7 +151,7 @@ export async function postalLookup(
  * location().then((data) => console.log(data));
  * ```
  */
-export async function location(): Promise<APIResponse<LocationInfo>> {
+export async function location(): Promise<APIResult<LocationInfo>> {
    return nhlClient.get(p.location);
 }
 
@@ -167,7 +167,7 @@ export async function location(): Promise<APIResponse<LocationInfo>> {
  */
 export async function partnerGame(
    countryCode: CountryCode,
-): Promise<APIResponse<PartnerGameInfo>> {
+): Promise<APIResult<PartnerGameInfo>> {
    const parsedCountryCode = CountryCodeAT(countryCode);
    if (isParseError(parsedCountryCode)) {
       return {

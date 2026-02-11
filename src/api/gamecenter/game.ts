@@ -3,7 +3,7 @@
  * @description Game-related API endpoints for schedules, play-by-play, boxscores, playoffs, and game information
  */
 import { nhlClient } from '#/client/index.ts';
-import type { APIResponse } from '#/client/types.ts';
+import type { APIResult } from '#/client/types.ts';
 import { ValidationError } from '#/errors/index.ts';
 import type {
    GamecenterBoxscore,
@@ -54,7 +54,7 @@ import { gamePaths as p } from './paths.ts';
  */
 export async function playByPlay(
    gameId: GameId,
-): Promise<APIResponse<GamecenterPlayByPlay>> {
+): Promise<APIResult<GamecenterPlayByPlay>> {
    const parsedGameId = GameIdAT(gameId);
    if (isParseError(parsedGameId)) {
       return {
@@ -102,7 +102,7 @@ export async function playByPlay(
  */
 export async function reports(
    gameId: GameId,
-): Promise<APIResponse<GamecenterReports>> {
+): Promise<APIResult<GamecenterReports>> {
    const parsedGameId = GameIdAT(gameId);
    if (isParseError(parsedGameId)) {
       return {
@@ -126,7 +126,7 @@ export async function reports(
  */
 export async function landing(
    gameId: GameId,
-): Promise<APIResponse<GamecenterLanding>> {
+): Promise<APIResult<GamecenterLanding>> {
    const parsedGameId = GameIdAT(gameId);
    if (isParseError(parsedGameId)) {
       return {
@@ -150,7 +150,7 @@ export async function landing(
  */
 export async function boxscore(
    gameId: GameId,
-): Promise<APIResponse<GamecenterBoxscore>> {
+): Promise<APIResult<GamecenterBoxscore>> {
    const parsedGameId = GameIdAT(gameId);
    if (isParseError(parsedGameId)) {
       return {
@@ -186,7 +186,7 @@ export const wsc = {
  */
 async function wscGameStory(
    gameId: GameId,
-): Promise<APIResponse<WSCGameStory>> {
+): Promise<APIResult<WSCGameStory>> {
    const parsedGameId = GameIdAT(gameId);
    if (isParseError(parsedGameId)) {
       return {
@@ -211,7 +211,7 @@ async function wscGameStory(
  */
 async function wscPlayByPlay(
    gameId: GameId,
-): Promise<APIResponse<WSCPlayByPlay>> {
+): Promise<APIResult<WSCPlayByPlay>> {
    const parsedGameId = GameIdAT(gameId);
    if (isParseError(parsedGameId)) {
       return {
@@ -247,7 +247,7 @@ export const pptReplay = {
 async function pptReplayGoal(
    gameId: GameId,
    eventId: number | string,
-): Promise<APIResponse<PPTReplayGoal>> {
+): Promise<APIResult<PPTReplayGoal>> {
    const parsed = GameIdAndEventId({ gameId, eventId });
    if (isParseError(parsed)) {
       return {
@@ -274,7 +274,7 @@ async function pptReplayGoal(
 async function pptReplayEvent(
    gameId: GameId,
    eventId: number | string,
-): Promise<APIResponse<PPTReplayEvent>> {
+): Promise<APIResult<PPTReplayEvent>> {
    const parsed = GameIdAndEventId({ gameId, eventId });
    if (isParseError(parsed)) {
       return {
@@ -303,7 +303,7 @@ async function pptReplayEvent(
  */
 export async function schedule(
    date?: Date | string,
-): Promise<APIResponse<LeagueSchedule>> {
+): Promise<APIResult<LeagueSchedule>> {
    const parsedDate = NHLDate(date ?? getCurrentDate());
    if (isParseError(parsedDate)) {
       return {
@@ -328,7 +328,7 @@ export async function schedule(
  */
 export async function scheduleCalendar(
    date?: Date | string,
-): Promise<APIResponse<ScheduleCalendar>> {
+): Promise<APIResult<ScheduleCalendar>> {
    const parsedDate = NHLDate(date);
    if (isParseError(parsedDate)) {
       return {
@@ -353,7 +353,7 @@ export async function scheduleCalendar(
  */
 export async function playoffBracket(
    year?: Year,
-): Promise<APIResponse<PlayoffBracket>> {
+): Promise<APIResult<PlayoffBracket>> {
    const parsedYear = YearAT(year ?? getCurrentYear());
    if (isParseError(parsedYear)) {
       return {
@@ -378,7 +378,7 @@ export async function playoffBracket(
  */
 export async function playoffSeries(
    season?: Season,
-): Promise<APIResponse<PlayoffSeries>> {
+): Promise<APIResult<PlayoffSeries>> {
    const parsedSeason = SeasonAT(season ?? getCurrentSeason());
    if (isParseError(parsedSeason)) {
       return {
@@ -406,15 +406,15 @@ export async function playoffSeries(
 export async function playoffSeriesSchedule(
    seriesLetter: SeriesLetter,
    season?: Season,
-): Promise<APIResponse<PlayoffSeriesSchedule>>;
+): Promise<APIResult<PlayoffSeriesSchedule>>;
 export async function playoffSeriesSchedule(
    seriesLetter: string,
    season?: Season,
-): Promise<APIResponse<PlayoffSeriesSchedule>>;
+): Promise<APIResult<PlayoffSeriesSchedule>>;
 export async function playoffSeriesSchedule(
    seriesLetter: SeriesLetter | string,
    season?: Season,
-): Promise<APIResponse<PlayoffSeriesSchedule>> {
+): Promise<APIResult<PlayoffSeriesSchedule>> {
    const parsed = SeriesAndSeasonParams({
       seriesLetter,
       season: season ?? getCurrentSeason(),
@@ -442,7 +442,7 @@ export async function playoffSeriesSchedule(
  * whereToWatch().then((data) => console.log(data));
  * ```
  */
-export async function whereToWatch(): Promise<APIResponse<WhereToWatch>> {
+export async function whereToWatch(): Promise<APIResult<WhereToWatch>> {
    const path = resolvePath(p.whereToWatch, {});
    return nhlClient.get(path);
 }
@@ -458,7 +458,7 @@ export async function whereToWatch(): Promise<APIResponse<WhereToWatch>> {
  */
 export async function networkTVSchedule(
    date?: Date | string,
-): Promise<APIResponse<NetworkTVSchedule>> {
+): Promise<APIResult<NetworkTVSchedule>> {
    const parsedDate = NHLDate(date ?? getCurrentDate());
    if (isParseError(parsedDate)) {
       return {

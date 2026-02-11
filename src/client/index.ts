@@ -10,7 +10,7 @@ import {
    ErrorHandler,
    NHLError,
 } from '#/errors/index.ts';
-import type { APIResponse, NHLClientConfig } from './types.ts';
+import type { APIResult, NHLClientConfig } from './types.ts';
 
 /**
  * Extended configuration for the NHL API client including error handling
@@ -95,7 +95,7 @@ export class NHLClient {
    async get<T = unknown>(
       endpoint: string,
       params?: Record<string, unknown>,
-   ): Promise<APIResponse<T>> {
+   ): Promise<APIResult<T>> {
       const url = this.buildUrl(endpoint, params);
       const controller = new AbortController();
       const timeoutId = setTimeout(

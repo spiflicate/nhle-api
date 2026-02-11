@@ -3,7 +3,7 @@
  * @description Score and scoreboard endpoints for accessing game scores and live score information
  */
 import { nhlClient } from '#/client/index.ts';
-import type { APIResponse } from '#/client/types.ts';
+import type { APIResult } from '#/client/types.ts';
 import { ValidationError } from '#/errors/index.ts';
 import type { Score, Scoreboard, TeamAbbrev } from '#/types/index.ts';
 import { getCurrentDate } from '#/utils/date.ts';
@@ -30,7 +30,7 @@ import { scorePaths as p } from './paths.ts';
  */
 export async function score(
    date?: Date | string,
-): Promise<APIResponse<Score>> {
+): Promise<APIResult<Score>> {
    const parsed = NHLDate(date ?? getCurrentDate());
    if (isParseError(parsed)) {
       return {
@@ -52,7 +52,7 @@ export async function score(
  * scoreboard().then((data) => console.log(data));
  * ```
  */
-export async function scoreboard(): Promise<APIResponse<Scoreboard>> {
+export async function scoreboard(): Promise<APIResult<Scoreboard>> {
    return nhlClient.get(p.scoreboard.now);
 }
 
@@ -67,7 +67,7 @@ export async function scoreboard(): Promise<APIResponse<Scoreboard>> {
  */
 scoreboard.team = async (
    team: TeamAbbrev,
-): Promise<APIResponse<Scoreboard>> => {
+): Promise<APIResult<Scoreboard>> => {
    const parsed = Team(team);
    if (isParseError(parsed)) {
       return {
@@ -92,7 +92,7 @@ scoreboard.team = async (
  */
 scoreboard.date = async (
    date: Date | string,
-): Promise<APIResponse<Scoreboard>> => {
+): Promise<APIResult<Scoreboard>> => {
    const parsed = NHLDate(date);
    if (isParseError(parsed)) {
       return {

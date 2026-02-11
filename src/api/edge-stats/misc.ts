@@ -16,7 +16,7 @@ import type {
    Country,
    Franchise,
    GlossaryEntry,
-   PaginatedResponse,
+   PaginatedData,
 } from './types.ts';
 
 const defaultLang = envConfig.language;
@@ -47,7 +47,7 @@ export async function getConfig(lang: string = defaultLang) {
  */
 export async function getCountries(lang: string = defaultLang) {
    const path = resolvePath(p.countries, { lang });
-   return edgeStatsClient.get<PaginatedResponse<Country>>(path);
+   return edgeStatsClient.get<PaginatedData<Country>>(path);
 }
 
 /**
@@ -61,7 +61,7 @@ export async function getCountries(lang: string = defaultLang) {
  */
 export async function getGlossary(lang: string = defaultLang) {
    const path = resolvePath(p.glossary, { lang });
-   return edgeStatsClient.get<PaginatedResponse<GlossaryEntry>>(path);
+   return edgeStatsClient.get<PaginatedData<GlossaryEntry>>(path);
 }
 
 /**
@@ -75,5 +75,5 @@ export async function getGlossary(lang: string = defaultLang) {
  */
 export async function getFranchises(lang: string = defaultLang) {
    const path = resolvePath(p.franchises, { lang });
-   return edgeStatsClient.get<PaginatedResponse<Franchise>>(path);
+   return edgeStatsClient.get<PaginatedData<Franchise>>(path);
 }

@@ -4,7 +4,7 @@
  */
 
 import { createNHLClient, nhlClient } from '#/client/index.ts';
-import type { APIResponse } from '#/client/types.ts';
+import type { APIResult } from '#/client/types.ts';
 import { ValidationError } from '#/errors/index.ts';
 import type {
    GoalieStatsLeaders,
@@ -33,7 +33,7 @@ const searchUrlParams = { culture: 'en', q: '' };
  */
 export async function landing(
    playerId: number | string,
-): Promise<APIResponse<PlayerLanding>> {
+): Promise<APIResult<PlayerLanding>> {
    const parsedPlayerId = PlayerId(playerId);
    if (isParseError(parsedPlayerId)) {
       return {
@@ -62,17 +62,17 @@ export async function gameLog(
    playerId: number | string,
    season?: Season,
    gameType?: GameType,
-): Promise<APIResponse<PlayerGameLog>>;
+): Promise<APIResult<PlayerGameLog>>;
 export async function gameLog(
    playerId: number | string,
    season?: Season,
    gameType?: number | string,
-): Promise<APIResponse<PlayerGameLog>>;
+): Promise<APIResult<PlayerGameLog>>;
 export async function gameLog(
    playerId: number | string,
    season?: Season,
    gameType?: GameType | number | string,
-): Promise<APIResponse<PlayerGameLog>> {
+): Promise<APIResult<PlayerGameLog>> {
    const Parser = BaseParams.merge({
       playerId: PlayerId,
    });
@@ -97,7 +97,7 @@ export async function gameLog(
  * spotlight().then((data) => console.log(data));
  * ```
  */
-export async function spotlight(): Promise<APIResponse<PlayerSpotlight[]>> {
+export async function spotlight(): Promise<APIResult<PlayerSpotlight[]>> {
    return nhlClient.get(p.spotlight);
 }
 
@@ -113,7 +113,7 @@ export async function spotlight(): Promise<APIResponse<PlayerSpotlight[]>> {
  */
 export async function search(
    query: string,
-): Promise<APIResponse<PlayerSearchResult[] | undefined>> {
+): Promise<APIResult<PlayerSearchResult[] | undefined>> {
    return nhlPlayerSearch.get('', {
       ...searchUrlParams,
       q: query,
@@ -141,7 +141,7 @@ export const statsLeaders = {
 async function statsLeadersSkaters(
    season?: Season,
    gameType?: GameType,
-): Promise<APIResponse<SkaterStatsLeaders>> {
+): Promise<APIResult<SkaterStatsLeaders>> {
    const parsed = BaseParams({ season, gameType });
    if (isParseError(parsed)) {
       return {
@@ -168,7 +168,7 @@ async function statsLeadersSkaters(
 async function statsLeadersGoalies(
    season?: Season,
    gameType?: GameType,
-): Promise<APIResponse<GoalieStatsLeaders>> {
+): Promise<APIResult<GoalieStatsLeaders>> {
    const parsed = BaseParams({ season, gameType });
    if (isParseError(parsed)) {
       return {

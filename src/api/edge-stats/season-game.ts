@@ -14,7 +14,7 @@ import { dataPaths as p } from './paths.ts';
 import type {
    Draft,
    Game,
-   PaginatedResponse,
+   PaginatedData,
    Season,
    ShiftChart,
 } from './types.ts';
@@ -32,7 +32,7 @@ const defaultLang = envConfig.language;
  */
 export async function getSeasons(lang: string = defaultLang) {
    const path = resolvePath(p.season, { lang });
-   return edgeStatsClient.get<PaginatedResponse<Season>>(path);
+   return edgeStatsClient.get<PaginatedData<Season>>(path);
 }
 
 /**
@@ -46,7 +46,7 @@ export async function getSeasons(lang: string = defaultLang) {
  */
 export async function getGames(lang: string = defaultLang) {
    const path = resolvePath(p.game, { lang });
-   return edgeStatsClient.get<PaginatedResponse<Game>>(path);
+   return edgeStatsClient.get<PaginatedData<Game>>(path);
 }
 
 /**
@@ -65,7 +65,7 @@ export async function getShiftChart(
 ) {
    const path = resolvePath(p.shiftCharts, { lang });
    const cayenneExp = `gameId=${gameId}`;
-   return edgeStatsClient.get<PaginatedResponse<ShiftChart>>(path, {
+   return edgeStatsClient.get<PaginatedData<ShiftChart>>(path, {
       cayenneExp,
    });
 }
@@ -81,5 +81,5 @@ export async function getShiftChart(
  */
 export async function getDraft(lang: string = 'en') {
    const path = resolvePath(p.draft, { lang });
-   return edgeStatsClient.get<PaginatedResponse<Draft>>(path);
+   return edgeStatsClient.get<PaginatedData<Draft>>(path);
 }

@@ -4,7 +4,7 @@
  */
 
 import { nhlClient } from '#/client/index.ts';
-import type { APIResponse } from '#/client/types.ts';
+import type { APIResult } from '#/client/types.ts';
 import { type NHLError, ValidationError } from '#/errors/index.ts';
 import type {
    DraftPicks,
@@ -39,7 +39,7 @@ import { draftPaths as p } from './paths.ts';
 export async function picks(
    year?: Year,
    round?: DraftRound,
-): Promise<APIResponse<DraftPicks>> {
+): Promise<APIResult<DraftPicks>> {
    const parsed = DraftParams({ year, round });
    if (isParseError(parsed)) {
       return {
@@ -66,7 +66,7 @@ export async function picks(
  * tracker().then((data) => console.log(data));
  * ```
  */
-export async function tracker(): Promise<APIResponse<DraftTracker>> {
+export async function tracker(): Promise<APIResult<DraftTracker>> {
    return nhlClient.get(p.draftTracker);
 }
 /**
@@ -83,11 +83,11 @@ export async function tracker(): Promise<APIResponse<DraftTracker>> {
  * ```
  */
 export function rankings(year?: Year): {
-   skatersNA: () => Promise<APIResponse<DraftRankings>>;
-   skatersIntl: () => Promise<APIResponse<DraftRankings>>;
-   goaliesNA: () => Promise<APIResponse<DraftRankings>>;
-   goaliesIntl: () => Promise<APIResponse<DraftRankings>>;
-   all: () => Promise<APIResponse<DraftRankings[]>>;
+   skatersNA: () => Promise<APIResult<DraftRankings>>;
+   skatersIntl: () => Promise<APIResult<DraftRankings>>;
+   goaliesNA: () => Promise<APIResult<DraftRankings>>;
+   goaliesIntl: () => Promise<APIResult<DraftRankings>>;
+   all: () => Promise<APIResult<DraftRankings[]>>;
 } {
    const DraftRankingsEnum = {
       skatersNA: '1',
@@ -97,7 +97,7 @@ export function rankings(year?: Year): {
    } as const;
    const getRankings = async (
       type: '1' | '2' | '3' | '4',
-   ): Promise<APIResponse<DraftRankings>> => {
+   ): Promise<APIResult<DraftRankings>> => {
       const parsedYear = YearType(year ?? getCurrentYear());
       if (isParseError(parsedYear)) {
          return {
@@ -116,33 +116,33 @@ export function rankings(year?: Year): {
        * Get North American skater draft rankings
        * @returns Promise resolving to NA skater rankings
        */
-      skatersNA: async (): Promise<APIResponse<DraftRankings>> =>
+      skatersNA: async (): Promise<APIResult<DraftRankings>> =>
          getRankings(DraftRankingsEnum.skatersNA),
       /**
        * Get International skater draft rankings
        * @returns Promise resolving to International skater rankings
        */
-      skatersIntl: async (): Promise<APIResponse<DraftRankings>> =>
+      skatersIntl: async (): Promise<APIResult<DraftRankings>> =>
          getRankings(DraftRankingsEnum.skatersIntl),
       /**
        * Get North American goalie draft rankings
        * @returns Promise resolving to NA goalie rankings
        */
-      goaliesNA: async (): Promise<APIResponse<DraftRankings>> =>
+      goaliesNA: async (): Promise<APIResult<DraftRankings>> =>
          getRankings(DraftRankingsEnum.goaliesNA),
       /**
        * Get International goalie draft rankings
        * @returns Promise resolving to International goalie rankings
        */
-      goaliesIntl: async (): Promise<APIResponse<DraftRankings>> =>
+      goaliesIntl: async (): Promise<APIResult<DraftRankings>> =>
          getRankings(DraftRankingsEnum.goaliesIntl),
       /**
        * Get all draft rankings (NA/Intl skaters and goalies)
        * @returns Promise resolving to array of all rankings
        */
-      all: async (): Promise<APIResponse<DraftRankings[]>> => {
+      all: async (): Promise<APIResult<DraftRankings[]>> => {
          const unwrapAPIResponse = (
-            apiResponse: APIResponse<unknown>,
+            apiResponse: APIResult<unknown>,
          ): DraftRankings => {
             if (apiResponse.success) {
                return apiResponse.data as DraftRankings;
@@ -158,7 +158,7 @@ export function rankings(year?: Year): {
          ]);
          try {
             const dataOnly = response.map((r) => unwrapAPIResponse(r));
-            const newResponse: APIResponse<DraftRankings[]> = {
+            const newResponse: APIResult<DraftRankings[]> = {
                success: true,
                data: dataOnly,
             };

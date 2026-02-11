@@ -3,7 +3,7 @@
  * @description Team-related API endpoints for rosters, schedules, stats, standings, and prospects
  */
 import { nhlClient } from '#/client/index.ts';
-import type { APIResponse } from '#/client/types.ts';
+import type { APIResult } from '#/client/types.ts';
 import { ValidationError } from '#/errors/index.ts';
 import type {
    GameType,
@@ -43,7 +43,7 @@ import { teamPaths as p } from './paths.ts';
  */
 export async function rosterSeasons(
    team: TeamAbbrev,
-): Promise<APIResponse<TeamRosterSeasons>> {
+): Promise<APIResult<TeamRosterSeasons>> {
    const parsed = TeamAbbrevAT(team);
    if (isParseError(parsed)) {
       return {
@@ -70,7 +70,7 @@ export async function rosterSeasons(
 export async function roster(
    team: string,
    season?: string | number,
-): Promise<APIResponse<TeamRoster>> {
+): Promise<APIResult<TeamRoster>> {
    const parsed = TeamAndSeasonParams({ team, season });
    if (isParseError(parsed)) {
       return {
@@ -95,7 +95,7 @@ export async function roster(
  */
 export async function prospects(
    team: TeamAbbrev,
-): Promise<APIResponse<TeamProspects>> {
+): Promise<APIResult<TeamProspects>> {
    const parsed = TeamAbbrevAT(team);
    if (isParseError(parsed)) {
       return {
@@ -124,7 +124,7 @@ export async function stats(
    team: TeamAbbrev,
    season?: Season,
    gameType?: GameType,
-): Promise<APIResponse<TeamStats>> {
+): Promise<APIResult<TeamStats>> {
    const Parser = BaseParams.merge({
       team: TeamAbbrevAT,
    });
@@ -154,7 +154,7 @@ export async function stats(
  */
 export async function statsSeason(
    team: TeamAbbrev,
-): Promise<APIResponse<TeamStatsSeason>> {
+): Promise<APIResult<TeamStatsSeason>> {
    const parsed = TeamAbbrevAT(team);
    if (isParseError(parsed)) {
       return {
@@ -179,7 +179,7 @@ export async function statsSeason(
  */
 export async function standings(
    date?: Date | string,
-): Promise<APIResponse<NHLStandings>> {
+): Promise<APIResult<NHLStandings>> {
    const parsed = NHLDate(date ?? getCurrentDate());
    if (isParseError(parsed)) {
       return {
@@ -202,7 +202,7 @@ export async function standings(
  * ```
  */
 export async function standingsSeason(): Promise<
-   APIResponse<NHLStandingsSeason>
+   APIResult<NHLStandingsSeason>
 > {
    return nhlClient.get(p.standingsSeason);
 }
@@ -226,15 +226,15 @@ export async function standingsSeason(): Promise<
 async function scheduleWeek(
    team: TeamAbbrev,
    date?: Date | string,
-): Promise<APIResponse<TeamScheduleWeek>>;
+): Promise<APIResult<TeamScheduleWeek>>;
 async function scheduleWeek(
    team: string,
    date?: Date | string,
-): Promise<APIResponse<TeamScheduleWeek>>;
+): Promise<APIResult<TeamScheduleWeek>>;
 async function scheduleWeek(
    team: TeamAbbrev | string,
    date?: Date | string,
-): Promise<APIResponse<TeamScheduleWeek>> {
+): Promise<APIResult<TeamScheduleWeek>> {
    const parsed = ScheduleParams({ team, date, month: undefined });
    if (isParseError(parsed)) {
       return {
@@ -266,15 +266,15 @@ async function scheduleWeek(
 async function scheduleMonth(
    team: TeamAbbrev,
    date?: Date | string,
-): Promise<APIResponse<TeamScheduleMonth>>;
+): Promise<APIResult<TeamScheduleMonth>>;
 async function scheduleMonth(
    team: string,
    date?: Date | string,
-): Promise<APIResponse<TeamScheduleMonth>>;
+): Promise<APIResult<TeamScheduleMonth>>;
 async function scheduleMonth(
    team: TeamAbbrev | string,
    date?: Date | string,
-): Promise<APIResponse<TeamScheduleMonth>> {
+): Promise<APIResult<TeamScheduleMonth>> {
    const parsed = ScheduleParams({ team, month: date, date: undefined });
    if (isParseError(parsed)) {
       return {
@@ -304,15 +304,15 @@ async function scheduleMonth(
 async function scheduleSeason(
    team: TeamAbbrev,
    season?: Season,
-): Promise<APIResponse<TeamScheduleSeason>>;
+): Promise<APIResult<TeamScheduleSeason>>;
 async function scheduleSeason(
    team: string,
    season?: Season,
-): Promise<APIResponse<TeamScheduleSeason>>;
+): Promise<APIResult<TeamScheduleSeason>>;
 async function scheduleSeason(
    team: TeamAbbrev | string,
    season?: Season,
-): Promise<APIResponse<TeamScheduleSeason>> {
+): Promise<APIResult<TeamScheduleSeason>> {
    const parsed = TeamAndSeasonParams({ team, season });
    if (isParseError(parsed)) {
       return {

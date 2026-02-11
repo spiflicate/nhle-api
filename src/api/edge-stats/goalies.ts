@@ -8,7 +8,7 @@
  */
 
 import { edgeStatsClient } from '#/client/index.js';
-import type { APIResponse } from '#/client/types.js';
+import type { APIResult } from '#/client/types.js';
 import { envConfig } from '#/config/env.js';
 import {
    buildCayenneExp,
@@ -20,7 +20,7 @@ import type {
    GoalieLeader,
    GoalieMilestone,
    GoalieStats,
-   PaginatedResponse,
+   PaginatedData,
    StatsQueryParams,
 } from './types.js';
 
@@ -41,7 +41,7 @@ export async function getLeaders(
    lang: string = envConfig.language,
 ) {
    const path = resolvePath(p.goalie.leaders[statCategory], { lang });
-   return edgeStatsClient.get<PaginatedResponse<GoalieLeader>>(path);
+   return edgeStatsClient.get<PaginatedData<GoalieLeader>>(path);
 }
 
 /**
@@ -72,7 +72,7 @@ export async function getStatsWithParams(
    lang: string = defaultLang,
 ) {
    const path = resolvePath(p.goalie.report, { lang, report });
-   return edgeStatsClient.get<PaginatedResponse<GoalieStats>>(path, params);
+   return edgeStatsClient.get<PaginatedData<GoalieStats>>(path, params);
 }
 
 /**
@@ -108,7 +108,7 @@ export async function getStatsWithBuilder(
    const builder = new CayenneQueryBuilder();
    const params = buildQuery(builder);
    const path = resolvePath(p.goalie.report, { lang, report });
-   return edgeStatsClient.get<PaginatedResponse<GoalieStats>>(path, params);
+   return edgeStatsClient.get<PaginatedData<GoalieStats>>(path, params);
 }
 
 /**
@@ -175,7 +175,7 @@ export async function getStatsWithFilters(
    }
 
    const path = resolvePath(p.goalie.report, { lang, report });
-   return edgeStatsClient.get<PaginatedResponse<GoalieStats>>(path, params);
+   return edgeStatsClient.get<PaginatedData<GoalieStats>>(path, params);
 }
 
 /**
@@ -189,5 +189,5 @@ export async function getStatsWithFilters(
  */
 export async function getMilestones(lang: string = defaultLang) {
    const path = resolvePath(p.goalie.milestones, { lang });
-   return edgeStatsClient.get<PaginatedResponse<GoalieMilestone>>(path);
+   return edgeStatsClient.get<PaginatedData<GoalieMilestone>>(path);
 }

@@ -16,7 +16,7 @@ import {
 import { resolvePath } from '#/utils/utils.ts';
 import { dataPaths as p } from './paths.ts';
 import type {
-   PaginatedResponse,
+   PaginatedData,
    SkaterLeader,
    SkaterMilestone,
    SkaterStats,
@@ -54,7 +54,7 @@ export async function getLeaders(
    lang: string = defaultLang,
 ) {
    const path = resolvePath(p.skater.leaders[statCategory], { lang });
-   return edgeStatsClient.get<PaginatedResponse<SkaterLeader>>(path);
+   return edgeStatsClient.get<PaginatedData<SkaterLeader>>(path);
 }
 
 /**
@@ -68,7 +68,7 @@ export async function getLeaders(
  */
 export async function getMilestones(lang: string = defaultLang) {
    const path = resolvePath(p.skater.milestones, { lang });
-   return edgeStatsClient.get<PaginatedResponse<SkaterMilestone>>(path);
+   return edgeStatsClient.get<PaginatedData<SkaterMilestone>>(path);
 }
 /**
  * Get skater information (detailed)
@@ -81,7 +81,7 @@ export async function getMilestones(lang: string = defaultLang) {
  */
 export async function getStats(lang: string = defaultLang) {
    const path = resolvePath(p.skater.report, { lang });
-   return edgeStatsClient.get<PaginatedResponse<SkaterStats>>(path);
+   return edgeStatsClient.get<PaginatedData<SkaterStats>>(path);
 }
 
 /**
@@ -112,7 +112,7 @@ export async function getStatsWithParams(
    lang: string = defaultLang,
 ) {
    const path = resolvePath(p.skater.report, { lang, report });
-   return edgeStatsClient.get<PaginatedResponse<SkaterStats>>(path, params);
+   return edgeStatsClient.get<PaginatedData<SkaterStats>>(path, params);
 }
 /**
  * Get skater stats using a fluent query builder
@@ -147,7 +147,7 @@ export async function getStatsWithBuilder(
    const builder = new CayenneQueryBuilder();
    const params = buildQuery(builder);
    const path = resolvePath(p.skater.report, { lang, report });
-   return edgeStatsClient.get<PaginatedResponse<SkaterStats>>(path, params);
+   return edgeStatsClient.get<PaginatedData<SkaterStats>>(path, params);
 }
 
 /**
@@ -213,5 +213,5 @@ export async function getStatsWithFilters(
       params.start = pagination.start;
    }
    const path = resolvePath(p.skater.report, { lang, report });
-   return edgeStatsClient.get<PaginatedResponse<SkaterStats>>(path, params);
+   return edgeStatsClient.get<PaginatedData<SkaterStats>>(path, params);
 }

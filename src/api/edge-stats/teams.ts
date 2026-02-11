@@ -16,7 +16,7 @@ import {
 import { resolvePath } from '#/utils/utils.ts';
 import { dataPaths as p } from './paths.ts';
 import type {
-   PaginatedResponse,
+   PaginatedData,
    StatsQueryParams,
    Team,
    TeamStats,
@@ -79,7 +79,7 @@ export async function getStatsWithParams(
    lang: string = defaultLang,
 ) {
    const path = resolvePath(p.team.report, { lang, report });
-   return edgeStatsClient.get<PaginatedResponse<TeamStats>>(path, params);
+   return edgeStatsClient.get<PaginatedData<TeamStats>>(path, params);
 }
 
 /**
@@ -115,7 +115,7 @@ export async function getStatsWithBuilder(
    const builder = new CayenneQueryBuilder();
    const params = buildQuery(builder);
    const path = resolvePath(p.team.report, { lang, report });
-   return edgeStatsClient.get<PaginatedResponse<TeamStats>>(path, params);
+   return edgeStatsClient.get<PaginatedData<TeamStats>>(path, params);
 }
 
 /**
@@ -178,5 +178,5 @@ export async function getStatsWithFilters(
       params.start = pagination.start;
    }
    const path = resolvePath(p.team.report, { lang, report });
-   return edgeStatsClient.get<PaginatedResponse<TeamStats>>(path, params);
+   return edgeStatsClient.get<PaginatedData<TeamStats>>(path, params);
 }

@@ -27,9 +27,9 @@
  */
 
 /**
- * Generic paginated response structure
+ * Generic paginated data structure
  */
-export interface PaginatedResponse<T> {
+export interface PaginatedData<T> {
    data: T[];
    total: number;
    limit?: number;
