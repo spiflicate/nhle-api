@@ -105,6 +105,7 @@ export async function spotlight(): Promise<APIResponse<PlayerSpotlight[]>> {
  * Search for players by name
  * @param query - The search query string (player name)
  * @returns Promise resolving to player search results
+ * @deprecated This endpoint is deprecated and may be removed in future versions. Use the NHL Stats API player endpoint instead.
  * @example
  * ```ts
  * search('McDavid').then((data) => console.log(data));
