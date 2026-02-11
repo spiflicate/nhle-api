@@ -8,69 +8,51 @@
  */
 
 import { edgeStatsClient } from '#/client/index.ts';
+import { envConfig } from '#/config/env.ts';
+import { resolvePath } from '#/utils/utils.ts';
+import { dataPaths as p } from './paths.ts';
 import type { Draft, Game, PaginatedResponse, Season } from './types.ts';
 
-/**
- * Season endpoints and helper functions
- */
-export const seasons = {
-   /**
-    * Get component season information
-    *
-    * @param lang - Language code (default: 'en')
-    * @returns Promise resolving to component season data
-    *
-    * @example
-    * const componentSeason = await seasons.getComponent('en');
-    */
-   getComponent: async (
-      lang: string = 'en',
-   ): Promise<PaginatedResponse<Season>> =>
-      edgeStatsClient.get(`/${lang}/componentSeason`),
-
-   /**
-    * Get season information
-    *
-    * @param lang - Language code (default: 'en')
-    * @returns Promise resolving to season data
-    *
-    * @example
-    * const seasonInfo = await seasons.get('en');
-    */
-   get: async (lang: string = 'en'): Promise<PaginatedResponse<Season>> =>
-      edgeStatsClient.get(`/${lang}/season`),
-};
+const defaultLang = envConfig.language;
 
 /**
- * Game endpoints and helper functions
+ * Get season information
+ *
+ * @param lang - Language code (default: 'en')
+ * @returns Promise resolving to season data
+ *
+ * @example
+ * const seasonInfo = await getSeasons('en');
  */
-export const games = {
-   /**
-    * Get game information
-    *
-    * @param lang - Language code (default: 'en')
-    * @returns Promise resolving to game data
-    *
-    * @example
-    * const gameInfo = await games.get('en');
-    */
-   get: async (lang: string = 'en'): Promise<PaginatedResponse<Game>> =>
-      edgeStatsClient.get(`/${lang}/game`),
-};
+export async function getSeasons(lang: string = defaultLang) {
+   const path = resolvePath(p.season, { lang });
+   return edgeStatsClient.get<PaginatedResponse<Season>>(path);
+}
 
 /**
- * Draft endpoints and helper functions
+ * Get game information
+ *
+ * @param lang - Language code (default: 'en')
+ * @returns Promise resolving to game data
+ *
+ * @example
+ * const gameInfo = await getGames('en');
  */
-export const draft = {
-   /**
-    * Get draft information
-    *
-    * @param lang - Language code (default: 'en')
-    * @returns Promise resolving to draft data
-    *
-    * @example
-    * const draftInfo = await draft.get('en');
-    */
-   get: async (lang: string = 'en'): Promise<PaginatedResponse<Draft>> =>
-      edgeStatsClient.get(`/${lang}/draft`),
-};
+export async function getGames(lang: string = defaultLang) {
+   const path = resolvePath(p.game, { lang });
+   return edgeStatsClient.get<PaginatedResponse<Game>>(path);
+}
+
+/**
+ * Get draft information
+ *
+ * @param lang - Language code (default: 'en')
+ * @returns Promise resolving to draft data
+ *
+ * @example
+ * const draftInfo = await getDraft('en');
+ */
+export async function getDraft(lang: string = 'en') {
+   const path = resolvePath(p.draft, { lang });
+   return edgeStatsClient.get<PaginatedResponse<Draft>>(path);
+}

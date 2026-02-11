@@ -15,9 +15,9 @@ export {
    CayenneQueryBuilder,
    createCayenneQuery,
 } from '#/utils/cayenne-query-builder.ts';
-export * from './goalies.ts';
-export * from './misc.ts';
-export * from './season-game.ts';
-export * from './skaters.ts';
-export * from './teams.ts';
+export * as goalies from './goalies.ts';
+export * as misc from './misc.ts';
+export * as season from './season-game.ts';
+export * as skaters from './skaters.ts';
+export * as teams from './teams.ts';
 export * from './types.ts';
