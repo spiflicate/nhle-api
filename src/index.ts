@@ -7,6 +7,9 @@
 
 // Re-export all public API functions
 export * from './api/index.js';
+// Re-export shared client retry configuration
+export { configureSharedClientRetries } from './client/index.js';
+export type { RetryConfig, RetryOn } from './client/types.js';
 // Re-export configuration utilities
 export { envConfig, logEnvConfig } from './config/env.js';
 // Re-export constants

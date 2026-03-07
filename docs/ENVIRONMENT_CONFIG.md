@@ -181,6 +181,38 @@ logEnvConfig();
 
 ---
 
+## Shared Client Retry Configuration
+
+Retry support for transient failures is available programmatically and is
+disabled by default so existing behavior remains unchanged until you opt in.
+
+```typescript
+import { configureSharedClientRetries } from 'nhle-api';
+
+configureSharedClientRetries({
+  enabled: true,
+  maxAttempts: 3,
+  baseDelayMs: 250,
+  maxDelayMs: 2000,
+  retryOn: ['network', 'timeout', 'rate-limit', 'server'],
+  respectRetryAfter: true,
+});
+```
+
+The shared clients will retry:
+
+- network errors
+- request timeouts / `AbortError`
+- HTTP `429`
+- HTTP `5xx`
+
+Other `4xx` responses are not retried.
+
+Backoff uses exponential delays with an upper cap, and `Retry-After` is honored
+for `429` responses when present.
+
+---
+
 ## Advanced: Custom Client Configuration
 
 For more fine-grained control, you can still create custom client instances:
