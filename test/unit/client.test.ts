@@ -14,6 +14,22 @@ import {
 describe('NHLClient retry handling', () => {
    let originalFetch: typeof globalThis.fetch;
 
+   const createFetchMock = (
+      handler: (
+         input: string | URL | Request,
+         init?: RequestInit,
+      ) => Promise<Response>,
+   ): typeof fetch => {
+      return (input, init) => {
+         const normalizedInput =
+            typeof input === 'string' || input instanceof URL
+               ? input
+               : input.clone();
+
+         return handler(normalizedInput, init);
+      };
+   };
+
    beforeEach(() => {
       originalFetch = globalThis.fetch;
       configureSharedClientRetries({ enabled: false });
@@ -34,7 +50,7 @@ describe('NHLClient retry handling', () => {
       });
       let callCount = 0;
 
-      globalThis.fetch = (async () => {
+      globalThis.fetch = createFetchMock(async () => {
          callCount++;
 
          if (callCount === 1) {
@@ -45,7 +61,7 @@ describe('NHLClient retry handling', () => {
             status: 200,
             headers: { 'Content-Type': 'application/json' },
          });
-      }) as unknown as typeof globalThis.fetch;
+      });
 
       const result = await client.get<{ playerId: number }>(
          'players/8478402',
@@ -69,7 +85,7 @@ describe('NHLClient retry handling', () => {
       });
       let callCount = 0;
 
-      globalThis.fetch = (async () => {
+      globalThis.fetch = createFetchMock(async () => {
          callCount++;
 
          return new Response(JSON.stringify({ message: 'Slow down' }), {
@@ -80,7 +96,7 @@ describe('NHLClient retry handling', () => {
                'Retry-After': '0',
             },
          });
-      }) as unknown as typeof globalThis.fetch;
+      });
 
       const result = await client.get('players/8478402/landing');
 
@@ -100,7 +116,7 @@ describe('NHLClient retry handling', () => {
       });
       let callCount = 0;
 
-      globalThis.fetch = (async () => {
+      globalThis.fetch = createFetchMock(async () => {
          callCount++;
 
          return new Response(JSON.stringify({ message: 'Not found' }), {
@@ -108,7 +124,7 @@ describe('NHLClient retry handling', () => {
             statusText: 'Not Found',
             headers: { 'Content-Type': 'application/json' },
          });
-      }) as unknown as typeof globalThis.fetch;
+      });
 
       const result = await client.get('players/0/landing');
 
@@ -129,7 +145,7 @@ describe('NHLClient retry handling', () => {
       });
       let callCount = 0;
 
-      globalThis.fetch = (async () => {
+      globalThis.fetch = createFetchMock(async () => {
          callCount++;
 
          if (callCount === 1) {
@@ -147,7 +163,7 @@ describe('NHLClient retry handling', () => {
             status: 200,
             headers: { 'Content-Type': 'application/json' },
          });
-      }) as unknown as typeof globalThis.fetch;
+      });
 
       const result = await nhlClient.get<{
          landing: Record<string, never>;
@@ -170,7 +186,7 @@ describe('NHLClient retry handling', () => {
       });
       let callCount = 0;
 
-      globalThis.fetch = (async () => {
+      globalThis.fetch = createFetchMock(async () => {
          callCount++;
 
          return new Response(JSON.stringify({ message: 'Still failing' }), {
@@ -178,7 +194,7 @@ describe('NHLClient retry handling', () => {
             statusText: 'Internal Server Error',
             headers: { 'Content-Type': 'application/json' },
          });
-      }) as unknown as typeof globalThis.fetch;
+      });
 
       const result = await client.get('players/8478402/landing');
 
@@ -199,10 +215,10 @@ describe('NHLClient retry handling', () => {
       });
       let callCount = 0;
 
-      globalThis.fetch = (async () => {
+      globalThis.fetch = createFetchMock(async () => {
          callCount++;
          throw new DOMException('The operation was aborted.', 'AbortError');
-      }) as unknown as typeof globalThis.fetch;
+      });
 
       const result = await client.get('players/8478402/landing');
 

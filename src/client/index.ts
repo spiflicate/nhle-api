@@ -61,6 +61,8 @@ const DEFAULT_RETRY_CONFIG: Required<RetryConfig> = {
    respectRetryAfter: true,
 };
 
+const MAX_RETRY_EXPONENT = 10;
+
 /**
  * NHL API Client class for making API requests to the NHL API
  * Provides methods for sending GET requests to the NHL API with automatic
@@ -231,9 +233,13 @@ export class NHLClient {
       attempt: number,
       response?: Response,
    ): number {
+      const retryExponent = Math.min(
+         MAX_RETRY_EXPONENT,
+         Math.max(0, attempt - 1),
+      );
       const exponentialDelay = Math.min(
          this.retryConfig.maxDelayMs,
-         this.retryConfig.baseDelayMs * 2 ** Math.max(0, attempt - 1),
+         this.retryConfig.baseDelayMs * 2 ** retryExponent,
       );
 
       if (
@@ -253,12 +259,34 @@ export class NHLClient {
       return exponentialDelay;
    }
 
+   private getRetryReason(
+      error?: unknown,
+      response?: Response,
+   ): RetryOn {
+      if (response) {
+         return response.status === 429 ? 'rate-limit' : 'server';
+      }
+
+      return error instanceof Error && error.name === 'AbortError'
+         ? 'timeout'
+         : 'network';
+   }
+
    private async sleep(delayMs: number): Promise<void> {
       if (delayMs <= 0) {
          return;
       }
 
       await new Promise((resolve) => setTimeout(resolve, delayMs));
+   }
+
+   private createResponseError(
+      response: Response,
+      endpoint: string,
+   ): Promise<NHLError> {
+      return this.errorHandler.fromResponse(response, {
+         endpoint,
+      });
    }
 
    private createRequestError(endpoint: string, error: unknown): NHLError {
@@ -318,6 +346,7 @@ export class NHLClient {
       const maxAttempts = this.retryConfig.enabled
          ? this.retryConfig.maxAttempts
          : 1;
+      let finalError: NHLError | undefined;
 
       for (let attempt = 1; attempt <= maxAttempts; attempt++) {
          try {
@@ -328,8 +357,7 @@ export class NHLClient {
                   attempt < maxAttempts &&
                   this.shouldRetryResponse(response)
                ) {
-                  const retryOn =
-                     response.status === 429 ? 'rate-limit' : 'server';
+                  const retryOn = this.getRetryReason(undefined, response);
                   const delayMs = this.computeRetryDelayMs(
                      attempt,
                      response,
@@ -345,14 +373,9 @@ export class NHLClient {
                   continue;
                }
 
-               const error = await this.errorHandler.fromResponse(
-                  response,
-                  {
-                     endpoint: url,
-                  },
-               );
-               this.errorHandler.log(error);
-               return { success: false, error };
+               const error = await this.createResponseError(response, url);
+               finalError = error;
+               break;
             }
 
             return { data: (await response.json()) as T, success: true };
@@ -360,31 +383,27 @@ export class NHLClient {
             const nhlError = this.createRequestError(url, error);
 
             if (attempt < maxAttempts && this.shouldRetryError(error)) {
-               const retryOn =
-                  error instanceof Error && error.name === 'AbortError'
-                     ? 'timeout'
-                     : 'network';
+               const retryOn = this.getRetryReason(error);
                const delayMs = this.computeRetryDelayMs(attempt);
                this.logRetryAttempt(url, attempt + 1, delayMs, retryOn);
                await this.sleep(delayMs);
                continue;
             }
 
-            this.errorHandler.log(nhlError);
-            return { success: false, error: nhlError };
+            finalError = nhlError;
+            break;
          }
       }
 
-      const fallbackError = new NHLError(
-         'Request failed',
-         ErrorCategory.NETWORK,
-         {
+      const error =
+         finalError ||
+         new NetworkError('Unexpected retry loop termination', {
             endpoint: url,
             method: 'GET',
-         },
-      );
-      this.errorHandler.log(fallbackError);
-      return { success: false, error: fallbackError };
+         });
+
+      this.errorHandler.log(error);
+      return { success: false, error };
    }
 
    /**
