@@ -78,6 +78,7 @@ export class NHLClient {
     * Creates a new NHL API client instance
     * @param baseURL - Optional custom base URL or predefined API endpoint key
     * @param errorConfig - Optional error handling configuration
+    * @param retryConfig - Optional retry configuration for transient failures
     */
    constructor(
       baseURL?: string,
@@ -429,6 +430,7 @@ export class NHLClient {
  *
  * @param baseURL - Optional custom base URL or predefined API endpoint key
  * @param errorConfig - Optional error handling configuration
+ * @param retryConfig - Optional retry configuration for transient failures
  * @returns A new NHL API client instance
  */
 export function createNHLClient(
