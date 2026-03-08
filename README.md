@@ -78,6 +78,32 @@ logEnvConfig(); // logs only variables that are explicitly set
 
 See `docs/ENVIRONMENT_CONFIG.md` for more details.
 
+Retry handling for transient failures is available centrally in the shared
+client layer and is disabled by default. You can opt in without changing any
+endpoint wrapper signatures:
+
+```ts
+import { configureSharedClientRetries } from 'nhle-api';
+
+configureSharedClientRetries({
+   enabled: true,
+   maxAttempts: 3,
+   baseDelayMs: 250,
+   maxDelayMs: 2000,
+   retryOn: ['network', 'timeout', 'rate-limit', 'server'],
+   respectRetryAfter: true,
+});
+```
+
+When enabled, shared clients retry only transient failures:
+
+- network errors
+- request timeouts / `AbortError`
+- HTTP `429` (including `Retry-After` support)
+- HTTP `5xx`
+
+Other `4xx` responses are returned immediately without retrying.
+
 ## Top-Level Exports
 
 The package root `nhle-api` re-exports the main API namespaces, configuration utilities, constants, and public types:
@@ -181,6 +207,7 @@ Under the hood, low-level HTTP requests use a shared `NHLClient` and `ErrorHandl
 - All non-2xx responses and network/timeout failures are converted to an `NHLError` instance.
 - Errors are categorized (client/server/network) with optional context (endpoint, method, status code).
 - High-level helpers expose these via the `APIResponse<T>` union so you can safely branch on `status` without catching exceptions.
+- Shared clients can optionally retry transient failures with exponential backoff while preserving the same `APIResponse<T>` contract.
 
 Typical usage pattern:
 

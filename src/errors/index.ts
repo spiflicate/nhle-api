@@ -250,6 +250,18 @@ export class ErrorHandler {
    }
 
    /**
+    * Log a non-error message based on configuration
+    */
+   logMessage(
+      level: LogLevel,
+      message: string,
+      context?: ErrorContext,
+   ): void {
+      if (level > this.config.logLevel) return;
+      this.config.logger(level, message, context);
+   }
+
+   /**
     * Determine log level based on error category
     */
    private getLogLevel(category: ErrorCategory): LogLevel {

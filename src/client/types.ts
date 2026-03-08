@@ -3,6 +3,47 @@
  */
 
 import type { NHLError } from '#/errors/index.ts';
+
+export type RetryOn = 'network' | 'timeout' | 'rate-limit' | 'server';
+
+export interface RetryConfig {
+   /**
+    * Enable retry handling for transient failures.
+    * @default false
+    */
+   enabled?: boolean;
+
+   /**
+    * Total request attempts, including the initial try.
+    * @default 3
+    */
+   maxAttempts?: number;
+
+   /**
+    * Base delay for exponential backoff in milliseconds.
+    * @default 250
+    */
+   baseDelayMs?: number;
+
+   /**
+    * Maximum retry delay in milliseconds.
+    * @default 2000
+    */
+   maxDelayMs?: number;
+
+   /**
+    * Transient failure categories that should trigger retries.
+    * @default ['network', 'timeout', 'rate-limit', 'server']
+    */
+   retryOn?: RetryOn[];
+
+   /**
+    * Respect Retry-After headers for 429 responses when present.
+    * @default true
+   */
+   respectRetryAfter?: boolean;
+}
+
 /**
  * Configuration options for the NHL API client
  */
