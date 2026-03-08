@@ -176,6 +176,50 @@ describe('NHLClient retry handling', () => {
       }
    });
 
+   test('drains retryable error responses before retrying', async () => {
+      const client = new NHLClient('https://example.com', undefined, {
+         enabled: true,
+         baseDelayMs: 0,
+         maxDelayMs: 0,
+         maxAttempts: 2,
+         retryOn: ['server'],
+      });
+      let callCount = 0;
+      let cancelCalled = 0;
+
+      globalThis.fetch = createFetchMock(async () => {
+         callCount++;
+
+         if (callCount === 1) {
+            return {
+               ok: false,
+               status: 503,
+               headers: new Headers({
+                  'Content-Type': 'application/json',
+               }),
+               body: {
+                  cancel: async () => {
+                     cancelCalled++;
+                  },
+               },
+            } as unknown as Response;
+         }
+
+         return new Response(JSON.stringify({ landing: {} }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' },
+         });
+      });
+
+      const result = await client.get<{
+         landing: Record<string, never>;
+      }>('players/8478402/landing');
+
+      expect(callCount).toBe(2);
+      expect(cancelCalled).toBe(1);
+      expect(result.success).toBeTrue();
+   });
+
    test('returns a server error after retry exhaustion on 5xx responses', async () => {
       const client = new NHLClient('https://example.com', undefined, {
          enabled: true,

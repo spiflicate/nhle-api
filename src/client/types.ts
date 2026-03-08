@@ -40,9 +40,10 @@ export interface RetryConfig {
    /**
     * Respect Retry-After headers for 429 responses when present.
     * @default true
-    */
+   */
    respectRetryAfter?: boolean;
 }
+
 /**
  * Configuration options for the NHL API client
  */

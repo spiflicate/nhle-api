@@ -290,6 +290,14 @@ export class NHLClient {
       });
    }
 
+   private async drainRetryableResponse(response: Response): Promise<void> {
+      try {
+         await response.body?.cancel();
+      } catch {
+         // Ignore drain failures and allow retry handling to continue.
+      }
+   }
+
    private createRequestError(endpoint: string, error: unknown): NHLError {
       if (error instanceof NHLError) {
          return error;
@@ -363,6 +371,7 @@ export class NHLClient {
                      attempt,
                      response,
                   );
+                  await this.drainRetryableResponse(response);
                   this.logRetryAttempt(
                      url,
                      attempt + 1,
@@ -451,6 +460,10 @@ const nhlClient = createNHLClient(BASE_URLS.gamecenter);
  */
 const edgeStatsClient = createNHLClient(BASE_URLS.edgeStats);
 
+/**
+ * Configure retry behavior for the shared gamecenter and edge-stats clients.
+ * @param config - Retry configuration options
+ */
 export function configureSharedClientRetries(
    config: Partial<RetryConfig>,
 ): void {
