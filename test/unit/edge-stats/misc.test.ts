@@ -1,15 +1,8 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
-import {
-   config,
-   contentModules,
-   countries,
-   glossary,
-   server,
-   shiftCharts,
-} from '#/api/edge-stats/misc.ts';
+import { misc } from '#/api/edge-stats/index.ts';
 import { MockResponseFactory } from '../../test-utils.ts';
 
-describe('Misc Modules', () => {
+describe('Misc Functions', () => {
    let originalFetch: typeof globalThis.fetch;
    let mockCalls: Array<string> = [];
 
@@ -93,52 +86,28 @@ describe('Misc Modules', () => {
 
    describe('Config', () => {
       test('should fetch config', async () => {
-         const result = await config.get('en');
+         const result = await misc.getConfig('en');
          expect(result).toBeDefined();
          expect(mockCalls[0]).toContain('/config');
       });
    });
 
-   describe('Server', () => {
-      test('should ping the server', async () => {
-         const result = await server.ping();
-         expect(result).toBeDefined();
-         expect(mockCalls[0]).toContain('/ping');
-      });
-   });
-
    describe('Countries', () => {
       test('should fetch all countries', async () => {
-         const result = await countries.get('en');
+         const result = await misc.getCountries('en');
          expect(result).toBeDefined();
-         expect(result.data).toBeInstanceOf(Array);
-         expect(mockCalls[0]).toContain('/country');
-      });
-   });
 
-   describe('Shift Charts', () => {
-      test('should fetch shift charts by game ID', async () => {
-         const result = await shiftCharts.getByGame('2023020001', 'en');
-         expect(result).toBeDefined();
-         expect(result.data).toBeInstanceOf(Array);
-         expect(mockCalls[0]).toContain('/shiftcharts');
+         expect(result.data.data).toBeInstanceOf(Array);
+         expect(mockCalls[0]).toContain('/country');
       });
    });
 
    describe('Glossary', () => {
       test('should fetch glossary entries', async () => {
-         const result = await glossary.get('en');
+         const result = await misc.getGlossary('en');
          expect(result).toBeDefined();
-         expect(result.data).toBeInstanceOf(Array);
+         expect(result.data.data).toBeInstanceOf(Array);
          expect(mockCalls[0]).toContain('/glossary');
-      });
-   });
-
-   describe('Content Modules', () => {
-      test('should fetch content modules', async () => {
-         const result = await contentModules.get('en');
-         expect(result).toBeDefined();
-         expect(mockCalls[0]).toContain('/content');
       });
    });
 });

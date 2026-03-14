@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
-import { draft, games, seasons } from '#/api/edge-stats/season-game.ts';
+import { season } from '#/api/edge-stats/index.ts';
 import { MockResponseFactory } from '../../test-utils.ts';
 
 describe('Season/Game/Draft Modules', () => {

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
-import { goalies } from '#/api/edge-stats/goalies.ts';
+import { goalies } from '#/api/edge-stats/index.ts';
 import { MockResponseFactory, testData } from '../../test-utils.ts';
 
 describe('Goalies Module', () => {
