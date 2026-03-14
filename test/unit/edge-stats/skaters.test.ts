@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
-import { skaters } from '#/api/edge-stats/skaters.ts';
+import { skaters } from '#/api/edge-stats/index.ts';
 import { MockResponseFactory, testData } from '../../test-utils.ts';
+import { expectSuccess } from '../helpers.ts';
 
 describe('Skaters Module', () => {
    let originalFetch: typeof globalThis.fetch;
@@ -72,29 +73,25 @@ describe('Skaters Module', () => {
 
    test('getPlayerInfo should fetch player information', async () => {
       const result = await skaters.getPlayerInfo('en');
-      expect(result).toBeDefined();
-      expect(result.data).toBeInstanceOf(Array);
+      expectSuccess(result);
       expect(mockCalls[0]).toContain('/en/players');
    });
 
    test('getLeaders should fetch skater leaders with attribute', async () => {
       const result = await skaters.getLeaders('points', 'en');
-      expect(result).toBeDefined();
-      expect(result.data).toBeInstanceOf(Array);
+      expectSuccess(result);
       expect(mockCalls[0]).toContain('/leaders/skaters/points');
    });
 
    test('getMilestones should fetch skater milestones', async () => {
       const result = await skaters.getMilestones('en');
-      expect(result).toBeDefined();
-      expect(result.data).toBeInstanceOf(Array);
+      expectSuccess(result);
       expect(mockCalls[0]).toContain('/milestones/skaters');
    });
 
-   test('getInfo should fetch skater info', async () => {
-      const result = await skaters.getInfo('en');
-      expect(result).toBeDefined();
-      expect(result.data).toBeInstanceOf(Array);
+   test('getStats should fetch skater stats', async () => {
+      const result = await skaters.getStats('en');
+      expectSuccess(result);
       expect(mockCalls[0]).toContain('/en/skater');
    });
 
@@ -102,8 +99,7 @@ describe('Skaters Module', () => {
       const result = await skaters.getStatsWithParams('summary', {
          cayenneExp: 'seasonId=20232024',
       });
-      expect(result).toBeDefined();
-      expect(result.data).toBeInstanceOf(Array);
+      expectSuccess(result);
       expect(mockCalls[0]).toContain('/skater/summary');
    });
 
@@ -111,16 +107,16 @@ describe('Skaters Module', () => {
       const result = await skaters.getStatsWithBuilder('summary', (q) => ({
          cayenneExp: q.equals('seasonId', '20232024').build(),
       }));
-      expect(result).toBeDefined();
-      expect(result.data).toBeInstanceOf(Array);
+      expectSuccess(result);
+      expect(mockCalls[0]).toContain('/skater/summary');
    });
 
    test('getStatsWithFilters should accept high-level filters', async () => {
       const result = await skaters.getStatsWithFilters('summary', {
          seasonId: '20232024',
       });
-      expect(result).toBeDefined();
-      expect(result.data).toBeInstanceOf(Array);
+      expectSuccess(result);
+      expect(mockCalls[0]).toContain('/skater/summary');
    });
 
    test('getStatsWithFilters should handle sorting options', async () => {
@@ -129,7 +125,9 @@ describe('Skaters Module', () => {
          { seasonId: '20232024' },
          { sortBy: 'points', direction: 'desc' },
       );
-      expect(result).toBeDefined();
+      expectSuccess(result);
+      expect(mockCalls[0]).toContain('sort=points');
+      expect(mockCalls[0]).toContain('dir=desc');
    });
 
    test('getStatsWithFilters should handle pagination options', async () => {
@@ -139,7 +137,9 @@ describe('Skaters Module', () => {
          undefined,
          { limit: 50, start: 25 },
       );
-      expect(result).toBeDefined();
+      expectSuccess(result);
+      expect(mockCalls[0]).toContain('limit=50');
+      expect(mockCalls[0]).toContain('start=25');
    });
 
    test('should support French language', async () => {
@@ -156,8 +156,12 @@ describe('Skaters Module', () => {
       const result = await skaters.getStatsWithParams('summary', {
          cayenneExp: 'seasonId=20232024',
       });
-      expect(result.data).toBeDefined();
-      expect(result.total).toBeDefined();
-      expect(Array.isArray(result.data)).toBe(true);
+      expectSuccess(result);
+      if (result.success) {
+         expect(result.data).toHaveProperty('data');
+         expect(Array.isArray(result.data.data)).toBeTrue();
+         expect(result.data).toHaveProperty('total');
+         expect(typeof result.data.total).toBe('number');
+      }
    });
 });

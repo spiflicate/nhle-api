@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import { misc } from '#/api/edge-stats/index.ts';
 import { MockResponseFactory } from '../../test-utils.ts';
+import { expectSuccess } from '../helpers.ts';
 
 describe('Misc Functions', () => {
    let originalFetch: typeof globalThis.fetch;
@@ -87,7 +88,7 @@ describe('Misc Functions', () => {
    describe('Config', () => {
       test('should fetch config', async () => {
          const result = await misc.getConfig('en');
-         expect(result).toBeDefined();
+         expectSuccess(result);
          expect(mockCalls[0]).toContain('/config');
       });
    });
@@ -95,9 +96,10 @@ describe('Misc Functions', () => {
    describe('Countries', () => {
       test('should fetch all countries', async () => {
          const result = await misc.getCountries('en');
-         expect(result).toBeDefined();
-
-         expect(result.data.data).toBeInstanceOf(Array);
+         expectSuccess(result);
+         if (result.success) {
+            expect(result.data.data).toBeInstanceOf(Array);
+         }
          expect(mockCalls[0]).toContain('/country');
       });
    });
@@ -105,8 +107,10 @@ describe('Misc Functions', () => {
    describe('Glossary', () => {
       test('should fetch glossary entries', async () => {
          const result = await misc.getGlossary('en');
-         expect(result).toBeDefined();
-         expect(result.data.data).toBeInstanceOf(Array);
+         expectSuccess(result);
+         if (result.success) {
+            expect(result.data.data).toBeInstanceOf(Array);
+         }
          expect(mockCalls[0]).toContain('/glossary');
       });
    });

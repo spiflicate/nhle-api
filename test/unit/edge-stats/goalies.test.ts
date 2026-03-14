@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import { goalies } from '#/api/edge-stats/index.ts';
-import { MockResponseFactory, testData } from '../../test-utils.ts';
+import { MockResponseFactory } from '../../test-utils.ts';
+import { expectSuccess } from '../helpers.ts';
 
 describe('Goalies Module', () => {
    let originalFetch: typeof globalThis.fetch;
@@ -57,16 +58,14 @@ describe('Goalies Module', () => {
    });
 
    test('getLeaders should fetch goalie leaders with attribute', async () => {
-      const result = await goalies.getLeaders('wins', 'en');
-      expect(result).toBeDefined();
-      expect(result.data).toBeInstanceOf(Array);
-      expect(mockCalls[0]).toContain('/leaders/goalies/wins');
+      const result = await goalies.getLeaders('gaa', 'en');
+      expectSuccess(result);
+      expect(mockCalls[0]).toContain('/leaders/goalies/gaa');
    });
 
    test('getMilestones should fetch goalie milestones', async () => {
       const result = await goalies.getMilestones('en');
-      expect(result).toBeDefined();
-      expect(result.data).toBeInstanceOf(Array);
+      expectSuccess(result);
       expect(mockCalls[0]).toContain('/milestones/goalies');
    });
 
@@ -74,8 +73,7 @@ describe('Goalies Module', () => {
       const result = await goalies.getStatsWithParams('summary', {
          cayenneExp: 'seasonId=20232024',
       });
-      expect(result).toBeDefined();
-      expect(result.data).toBeInstanceOf(Array);
+      expectSuccess(result);
       expect(mockCalls[0]).toContain('/goalie/summary');
    });
 
@@ -83,16 +81,16 @@ describe('Goalies Module', () => {
       const result = await goalies.getStatsWithBuilder('summary', (q) => ({
          cayenneExp: q.equals('seasonId', '20232024').build(),
       }));
-      expect(result).toBeDefined();
-      expect(result.data).toBeInstanceOf(Array);
+      expectSuccess(result);
+      expect(mockCalls[0]).toContain('/goalie/summary');
    });
 
    test('getStatsWithFilters should accept high-level filters', async () => {
       const result = await goalies.getStatsWithFilters('summary', {
          seasonId: '20232024',
       });
-      expect(result).toBeDefined();
-      expect(result.data).toBeInstanceOf(Array);
+      expectSuccess(result);
+      expect(mockCalls[0]).toContain('/goalie/summary');
    });
 
    test('getStatsWithFilters should handle sorting options', async () => {
@@ -101,7 +99,9 @@ describe('Goalies Module', () => {
          { seasonId: '20232024' },
          { sortBy: 'wins', direction: 'desc' },
       );
-      expect(result).toBeDefined();
+      expectSuccess(result);
+      expect(mockCalls[0]).toContain('sort=wins');
+      expect(mockCalls[0]).toContain('dir=desc');
    });
 
    test('getStatsWithFilters should handle pagination options', async () => {
@@ -111,11 +111,13 @@ describe('Goalies Module', () => {
          undefined,
          { limit: 50, start: 25 },
       );
-      expect(result).toBeDefined();
+      expectSuccess(result);
+      expect(mockCalls[0]).toContain('limit=50');
+      expect(mockCalls[0]).toContain('start=25');
    });
 
    test('should support multiple languages', async () => {
-      await goalies.getLeaders('wins', 'fr');
+      await goalies.getLeaders('gaa', 'fr');
       expect(mockCalls[0]).toContain('/fr/');
    });
 
@@ -123,8 +125,12 @@ describe('Goalies Module', () => {
       const result = await goalies.getStatsWithParams('summary', {
          cayenneExp: 'seasonId=20232024',
       });
-      expect(result.data).toBeDefined();
-      expect(result.total).toBeDefined();
-      expect(Array.isArray(result.data)).toBe(true);
+      expectSuccess(result);
+      if (result.success) {
+         expect(result.data).toHaveProperty('data');
+         expect(Array.isArray(result.data.data)).toBeTrue();
+         expect(result.data).toHaveProperty('total');
+         expect(typeof result.data.total).toBe('number');
+      }
    });
 });

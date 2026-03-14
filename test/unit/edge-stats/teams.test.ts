@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
-import { teams } from '#/api/edge-stats/teams.ts';
+import { teams } from '#/api/edge-stats/index.ts';
 import { MockResponseFactory, testData } from '../../test-utils.ts';
+import { expectSuccess } from '../helpers.ts';
 
 describe('Teams Module', () => {
    let originalFetch: typeof globalThis.fetch;
@@ -58,14 +59,13 @@ describe('Teams Module', () => {
 
    test('getAll should fetch all teams', async () => {
       const result = await teams.getAll('en');
-      expect(result).toBeDefined();
-      expect(result.data).toBeInstanceOf(Array);
+      expectSuccess(result);
       expect(mockCalls[0]).toContain('/team');
    });
 
    test('getById should fetch team by ID', async () => {
       const result = await teams.getById(testData.teamId, 'en');
-      expect(result).toBeDefined();
+      expectSuccess(result);
       expect(mockCalls[0]).toContain(`/team/id/${testData.teamId}`);
    });
 
@@ -73,8 +73,7 @@ describe('Teams Module', () => {
       const result = await teams.getStatsWithParams('summary', {
          cayenneExp: 'seasonId=20232024',
       });
-      expect(result).toBeDefined();
-      expect(result.data).toBeInstanceOf(Array);
+      expectSuccess(result);
       expect(mockCalls[0]).toContain('/team/summary');
    });
 
@@ -82,16 +81,16 @@ describe('Teams Module', () => {
       const result = await teams.getStatsWithBuilder('summary', (q) => ({
          cayenneExp: q.equals('seasonId', '20232024').build(),
       }));
-      expect(result).toBeDefined();
-      expect(result.data).toBeInstanceOf(Array);
+      expectSuccess(result);
+      expect(mockCalls[0]).toContain('/team/summary');
    });
 
    test('getStatsWithFilters should accept high-level filters', async () => {
       const result = await teams.getStatsWithFilters('summary', {
          seasonId: '20232024',
       });
-      expect(result).toBeDefined();
-      expect(result.data).toBeInstanceOf(Array);
+      expectSuccess(result);
+      expect(mockCalls[0]).toContain('/team/summary');
    });
 
    test('getStatsWithFilters should handle sorting options', async () => {
@@ -100,7 +99,9 @@ describe('Teams Module', () => {
          { seasonId: '20232024' },
          { sortBy: 'points', direction: 'desc' },
       );
-      expect(result).toBeDefined();
+      expectSuccess(result);
+      expect(mockCalls[0]).toContain('sort=points');
+      expect(mockCalls[0]).toContain('dir=desc');
    });
 
    test('getStatsWithFilters should handle pagination options', async () => {
@@ -108,9 +109,11 @@ describe('Teams Module', () => {
          'summary',
          { seasonId: '20232024' },
          undefined,
-         { limit: 32, start: 0 },
+         { limit: 32, start: 25 },
       );
-      expect(result).toBeDefined();
+      expectSuccess(result);
+      expect(mockCalls[0]).toContain('limit=32');
+      expect(mockCalls[0]).toContain('start=25');
    });
 
    test('should support multiple languages', async () => {
@@ -122,8 +125,12 @@ describe('Teams Module', () => {
       const result = await teams.getStatsWithParams('summary', {
          cayenneExp: 'seasonId=20232024',
       });
-      expect(result.data).toBeDefined();
-      expect(result.total).toBeDefined();
-      expect(Array.isArray(result.data)).toBe(true);
+      expectSuccess(result);
+      if (result.success) {
+         expect(result.data).toHaveProperty('data');
+         expect(Array.isArray(result.data.data)).toBeTrue();
+         expect(result.data).toHaveProperty('total');
+         expect(typeof result.data.total).toBe('number');
+      }
    });
 });
