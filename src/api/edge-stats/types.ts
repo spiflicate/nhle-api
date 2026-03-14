@@ -26,6 +26,8 @@
  * @see StatsConfig
  */
 
+import type { APIResult } from '#/client/types.ts';
+
 /**
  * Generic paginated data structure
  */
@@ -35,6 +37,8 @@ export interface PaginatedData<T> {
    limit?: number;
    start?: number;
 }
+
+export type APIResultPaginated<T> = APIResult<PaginatedData<T>>;
 
 /**
  * Player information structure (skater or goalie)
@@ -337,14 +341,6 @@ export interface ShiftChart {
 export interface GlossaryEntry {
    term?: string;
    definition?: string;
-   [key: string]: unknown;
-}
-
-/**
- * Content module response
- */
-export interface ContentModule {
-   templateKey?: string;
    [key: string]: unknown;
 }
 
