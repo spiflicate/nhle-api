@@ -49,6 +49,7 @@ describe('Goalies Module', () => {
             status: 404,
             json: async () => ({ error: 'Not found' }),
          } as Response;
+         // biome-ignore lint/suspicious/noExplicitAny: Need to mock fetch with custom behavior
       }) as any;
    });
 
