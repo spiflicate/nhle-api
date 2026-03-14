@@ -10,7 +10,7 @@
 
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import { score, scoreboard } from '#/api/gamecenter/score.ts';
-import { expectValidationError } from '../test-utils.ts';
+import { expectValidationError } from '../helpers.ts';
 
 describe('Score Module', () => {
    let originalFetch: typeof globalThis.fetch;

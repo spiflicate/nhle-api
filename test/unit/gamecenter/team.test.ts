@@ -16,7 +16,7 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import * as team from '#/api/gamecenter/team.ts';
 import { getCurrentDate, getCurrentSeason } from '#/utils/date.ts';
-import { expectSuccess, expectValidationError } from '../test-utils.ts';
+import { expectSuccess, expectValidationError } from '../helpers.ts';
 
 describe('Team Module', () => {
    let originalFetch: typeof globalThis.fetch;
