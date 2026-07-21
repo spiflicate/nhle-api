@@ -8,7 +8,7 @@
  */
 
 import { edgeStatsClient } from '#/client/index.ts';
-import { envConfig } from '#/config/env.ts';
+import { config } from '#/config/index.ts';
 import {
    buildCayenneExp,
    CayenneQueryBuilder,
@@ -23,8 +23,6 @@ import type {
    StatsQueryParams,
 } from './types.ts';
 
-const defaultLang = envConfig.language;
-
 /**
  * Get player information (truncated list)
  *
@@ -34,7 +32,7 @@ const defaultLang = envConfig.language;
  * @example
  * const players = await getPlayerInfo('en');
  */
-export async function getPlayerInfo(lang: string = defaultLang) {
+export async function getPlayerInfo(lang: string = config.language) {
    const path = resolvePath(p.skater.players, { lang });
    return edgeStatsClient.get(path);
 }
@@ -51,7 +49,7 @@ export async function getPlayerInfo(lang: string = defaultLang) {
  */
 export async function getLeaders(
    statCategory: keyof typeof p.skater.leaders,
-   lang: string = defaultLang,
+   lang: string = config.language,
 ) {
    const path = resolvePath(p.skater.leaders[statCategory], { lang });
    return edgeStatsClient.get<PaginatedData<SkaterLeader>>(path);
@@ -66,7 +64,7 @@ export async function getLeaders(
  * @example
  * const milestones = await skaters.getMilestones('en');
  */
-export async function getMilestones(lang: string = defaultLang) {
+export async function getMilestones(lang: string = config.language) {
    const path = resolvePath(p.skater.milestones, { lang });
    return edgeStatsClient.get<PaginatedData<SkaterMilestone>>(path);
 }
@@ -79,7 +77,7 @@ export async function getMilestones(lang: string = defaultLang) {
  * @example
  * const info = await skaters.getInfo('en');
  */
-export async function getStats(lang: string = defaultLang) {
+export async function getStats(lang: string = config.language) {
    const path = resolvePath(p.skater.report, { lang });
    return edgeStatsClient.get<PaginatedData<SkaterStats>>(path);
 }
@@ -109,7 +107,7 @@ export async function getStats(lang: string = defaultLang) {
 export async function getStatsWithParams(
    report: string,
    params: StatsQueryParams,
-   lang: string = defaultLang,
+   lang: string = config.language,
 ) {
    const path = resolvePath(p.skater.report, { lang, report });
    return edgeStatsClient.get<PaginatedData<SkaterStats>>(path, params);
@@ -142,7 +140,7 @@ export async function getStatsWithParams(
 export async function getStatsWithBuilder(
    report: string,
    buildQuery: (builder: CayenneQueryBuilder) => StatsQueryParams,
-   lang: string = defaultLang,
+   lang: string = config.language,
 ) {
    const builder = new CayenneQueryBuilder();
    const params = buildQuery(builder);

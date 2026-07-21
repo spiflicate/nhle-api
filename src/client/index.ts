@@ -3,7 +3,7 @@
  * Internal client for making API requests to the NHL API
  */
 
-import { envConfig } from '#/config/env.ts';
+import { config } from '#/config/index.ts';
 import {
    ErrorCategory,
    type ErrorConfig,
@@ -29,15 +29,15 @@ const BASE_URLS = {
 
 /**
  * Default configuration for the NHL API client
- * Uses environment variables if set, otherwise falls back to sensible defaults
+ * Uses the code-defined configuration defaults.
  */
 const DEFAULT_CONFIG: Required<NHLClientConfig> = {
    baseUrl: BASE_URLS.gamecenter,
-   timeout: envConfig.timeout,
+   timeout: config.timeout,
    headers: {
       Accept: 'application/json',
    },
-   language: envConfig.language,
+   language: config.language,
 };
 
 /**
@@ -190,4 +190,4 @@ const nhlClient = createNHLClient(BASE_URLS.gamecenter);
  */
 const edgeStatsClient = createNHLClient(BASE_URLS.edgeStats);
 
-export { nhlClient, edgeStatsClient };
+export { edgeStatsClient, nhlClient };

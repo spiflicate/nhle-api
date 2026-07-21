@@ -8,7 +8,7 @@
  */
 
 import { edgeStatsClient } from '#/client/index.js';
-import { envConfig } from '#/config/env.js';
+import { config } from '#/config/index.js';
 import {
    buildCayenneExp,
    CayenneQueryBuilder,
@@ -24,13 +24,11 @@ import type {
    StatsQueryParams,
 } from './types.js';
 
-const defaultLang = envConfig.language;
-
 /**
  * Get goalie leaders for a specific attribute
  *
  * @param attribute - The attribute to rank by (e.g., 'gaa', 'wins', 'shutouts')
- * @param lang - Language code (default: environment language if configured, otherwise 'en')
+ * @param lang - Language code (default: configured language)
  * @returns Promise resolving to goalie leaders
  *
  * @example
@@ -38,7 +36,7 @@ const defaultLang = envConfig.language;
  */
 export async function getLeaders(
    statCategory: keyof typeof p.goalie.leaders,
-   lang: string = envConfig.language,
+   lang: string = config.language,
 ): Promise<APIResultPaginated<GoalieLeader>> {
    const path = resolvePath(p.goalie.leaders[statCategory], { lang });
    return edgeStatsClient.get<PaginatedData<GoalieLeader>>(path);
@@ -50,7 +48,7 @@ export async function getLeaders(
  *
  * @param report - The report type (e.g., 'summary', 'detailed')
  * @param params - Query parameters including cayenneExp for filtering
- * @param lang - Language code (default: environment language if configured, otherwise 'en')
+ * @param lang - Language code (default: configured language)
  * @returns Promise resolving to goalie statistics
  *
  * @example
@@ -69,7 +67,7 @@ export async function getLeaders(
 export async function getStatsWithParams(
    report: string,
    params: StatsQueryParams,
-   lang: string = defaultLang,
+   lang: string = config.language,
 ): Promise<APIResultPaginated<GoalieStats>> {
    const path = resolvePath(p.goalie.report, { lang, report });
    return edgeStatsClient.get<PaginatedData<GoalieStats>>(path, params);
@@ -81,7 +79,7 @@ export async function getStatsWithParams(
  *
  * @param report - The report type (e.g., 'summary', 'detailed')
  * @param buildQuery - Function that receives a CayenneQueryBuilder and returns params
- * @param lang - Language code (default: environment language if configured, otherwise 'en')
+ * @param lang - Language code (default: configured language)
  * @returns Promise resolving to goalie statistics
  *
  * @example
@@ -103,7 +101,7 @@ export async function getStatsWithParams(
 export async function getStatsWithBuilder(
    report: string,
    buildQuery: (builder: CayenneQueryBuilder) => StatsQueryParams,
-   lang: string = defaultLang,
+   lang: string = config.language,
 ): Promise<APIResultPaginated<GoalieStats>> {
    const builder = new CayenneQueryBuilder();
    const params = buildQuery(builder);
@@ -119,7 +117,7 @@ export async function getStatsWithBuilder(
  * @param filters - High-level filter object
  * @param sorting - Sorting options
  * @param pagination - Pagination options
- * @param lang - Language code (default: environment language if configured, otherwise 'en')
+ * @param lang - Language code (default: configured language)
  * @returns Promise resolving to goalie statistics
  *
  * @example
@@ -148,7 +146,7 @@ export async function getStatsWithFilters(
       limit?: number;
       start?: number;
    },
-   lang: string = defaultLang,
+   lang: string = config.language,
 ): Promise<APIResultPaginated<GoalieStats>> {
    // Build cayenneExp from high-level filters
    const cayenneFilters: Record<string, string | number> = {};
@@ -181,14 +179,14 @@ export async function getStatsWithFilters(
 /**
  * Get goalie milestones
  *
- * @param lang - Language code (default: environment language if configured, otherwise 'en')
+ * @param lang - Language code (default: configured language)
  * @returns Promise resolving to goalie milestones
  *
  * @example
  * const milestones = await goalies.getMilestones();
  */
 export async function getMilestones(
-   lang: string = defaultLang,
+   lang: string = config.language,
 ): Promise<APIResultPaginated<GoalieMilestone>> {
    const path = resolvePath(p.goalie.milestones, { lang });
    return edgeStatsClient.get<PaginatedData<GoalieMilestone>>(path);

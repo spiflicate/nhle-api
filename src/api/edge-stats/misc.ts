@@ -8,7 +8,7 @@
  */
 
 import { edgeStatsClient } from '#/client/index.ts';
-import { envConfig } from '#/config/env.ts';
+import { config } from '#/config/index.ts';
 import { resolvePath } from '#/utils/utils.ts';
 import { dataPaths as p } from './paths.ts';
 import type {
@@ -19,8 +19,6 @@ import type {
    PaginatedData,
 } from './types.ts';
 
-const defaultLang = envConfig.language;
-
 /**
  * Get configuration information
  *
@@ -30,7 +28,7 @@ const defaultLang = envConfig.language;
  * @example
  * const config = await getConfig('en');
  */
-export async function getConfig(lang: string = defaultLang) {
+export async function getConfig(lang: string = config.language) {
    const path = resolvePath(p.config, { lang });
    return edgeStatsClient.get<Config>(path);
 }
@@ -45,7 +43,7 @@ export async function getConfig(lang: string = defaultLang) {
  * @example
  * const countries = await getCountries('en');
  */
-export async function getCountries(lang: string = defaultLang) {
+export async function getCountries(lang: string = config.language) {
    const path = resolvePath(p.countries, { lang });
    return edgeStatsClient.get<PaginatedData<Country>>(path);
 }
@@ -59,7 +57,7 @@ export async function getCountries(lang: string = defaultLang) {
  * @example
  * const glossary = await glossary.get('en');
  */
-export async function getGlossary(lang: string = defaultLang) {
+export async function getGlossary(lang: string = config.language) {
    const path = resolvePath(p.glossary, { lang });
    return edgeStatsClient.get<PaginatedData<GlossaryEntry>>(path);
 }
@@ -73,7 +71,7 @@ export async function getGlossary(lang: string = defaultLang) {
  * @example
  * const allFranchises = await getFranchises('en');
  */
-export async function getFranchises(lang: string = defaultLang) {
+export async function getFranchises(lang: string = config.language) {
    const path = resolvePath(p.franchises, { lang });
    return edgeStatsClient.get<PaginatedData<Franchise>>(path);
 }

@@ -13,7 +13,7 @@ The library exposes a small, functional surface over the NHL "Game Center" and r
 - Written in TypeScript and published as ESM/CJS
 - Thin functional wrappers over official NHL API routes
 - Fully-typed Game Center responses (game, team, player, draft, misc)
-- Simple environment-based configuration for timeouts, language and logging
+- Code-defined configuration for timeouts, language and logging
 
 ## Installation
 
@@ -54,29 +54,26 @@ const player = await gc.player.landing(8478402);
 
 ## Configuration
 
-Basic behavior is configured via environment variables and the exported `envConfig` helper from `config/env`:
-
-```bash
-# Request timeout in milliseconds (default: 5000)
-export NHLE_API_TIMEOUT=10000
-
-# Language for responses ("en" or "fr", default: "en")
-export NHLE_API_LANGUAGE=en
-
-# Logging level: silent | error | warn | info | debug (default: "warn")
-export NHLE_API_LOGLEVEL=debug
-```
-
-You can inspect the resolved configuration at runtime:
+Basic behavior is configured in `src/config/index.ts`:
 
 ```ts
-import { envConfig, logEnvConfig } from 'nhle-api';
-
-console.log(envConfig.timeout, envConfig.language, envConfig.logLevel);
-logEnvConfig(); // logs only variables that are explicitly set
+export const config = {
+   timeout: 10000,
+   language: 'en',
+   logLevel: 'debug',
+};
 ```
 
-See `docs/ENVIRONMENT_CONFIG.md` for more details.
+You can inspect the active configuration at runtime:
+
+```ts
+import { config, logConfig } from 'nhle-api';
+
+console.log(config.timeout, config.language, config.logLevel);
+logConfig();
+```
+
+See `docs/CONFIGURATION.md` for more details.
 
 ## Top-Level Exports
 
@@ -89,8 +86,8 @@ import { gc } from 'nhle-api';
 // Edge Advanced stats (in progress, API surface may change)
 import { adv } from 'nhle-api';
 
-// Environment configuration helpers
-import { envConfig, logEnvConfig } from 'nhle-api';
+// Code-defined configuration helpers
+import { config, logConfig } from 'nhle-api';
 
 // Shared type exports (Game Center response types, parameter types, etc.)
 import type { GameLandingResponse } from 'nhle-api';
@@ -219,7 +216,7 @@ if (result.success) {
 ## Roadmap / Status
 
 - ✅ Game Center endpoints fully wired with response types
-- ✅ Environment configuration utilities (`envConfig`, `logEnvConfig`)
+- ✅ Code-defined configuration utilities (`config`, `logConfig`)
 - ✅ Error handling via `NHLError` and structured error responses internally
 - 🚧 Edge Advanced (`adv`) API surface and types are in development
 - ⏳ Edge Stats (`stats`) API will be added in a future minor release
@@ -228,7 +225,7 @@ For a detailed list of changes and recent work on response types and endpoint co
 
 ## Docs
 
-- [Environment Configuration](docs/ENVIRONMENT_CONFIG.md) - Environment configuration and default values
+- [Configuration](docs/CONFIGURATION.md) - Code-defined configuration and default values
 - [Query Builder Guide](docs/QUERY_BUILDER_GUIDE.md) - Cayenne query builder for stats APIs
 
 ## Contributing

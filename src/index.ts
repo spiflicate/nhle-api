@@ -7,8 +7,9 @@
 
 // Re-export all public API functions
 export * from './api/index.js';
+export type { LogLevel, NHLConfig } from './config/index.js';
 // Re-export configuration utilities
-export { envConfig, logEnvConfig } from './config/env.js';
+export { config, logConfig } from './config/index.js';
 // Re-export constants
 export * from './constants/index.js';
 // Re-export types

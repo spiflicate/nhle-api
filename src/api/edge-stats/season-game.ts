@@ -8,7 +8,7 @@
  */
 
 import { edgeStatsClient } from '#/client/index.ts';
-import { envConfig } from '#/config/env.ts';
+import { config } from '#/config/index.ts';
 import { resolvePath } from '#/utils/utils.ts';
 import { dataPaths as p } from './paths.ts';
 import type {
@@ -19,8 +19,6 @@ import type {
    ShiftChart,
 } from './types.ts';
 
-const defaultLang = envConfig.language;
-
 /**
  * Get season information
  *
@@ -30,7 +28,7 @@ const defaultLang = envConfig.language;
  * @example
  * const seasonInfo = await getSeasons('en');
  */
-export async function getSeasons(lang: string = defaultLang) {
+export async function getSeasons(lang: string = config.language) {
    const path = resolvePath(p.season, { lang });
    return edgeStatsClient.get<PaginatedData<Season>>(path);
 }
@@ -44,7 +42,7 @@ export async function getSeasons(lang: string = defaultLang) {
  * @example
  * const gameInfo = await getGames('en');
  */
-export async function getGames(lang: string = defaultLang) {
+export async function getGames(lang: string = config.language) {
    const path = resolvePath(p.game, { lang });
    return edgeStatsClient.get<PaginatedData<Game>>(path);
 }
@@ -61,7 +59,7 @@ export async function getGames(lang: string = defaultLang) {
  */
 export async function getShiftChart(
    gameId: string | number,
-   lang: string = defaultLang,
+   lang: string = config.language,
 ) {
    const path = resolvePath(p.shiftCharts, { lang });
    const cayenneExp = `gameId=${gameId}`;

@@ -8,7 +8,7 @@
  */
 
 import { edgeStatsClient } from '#/client/index.ts';
-import { envConfig } from '#/config/env.ts';
+import { config } from '#/config/index.ts';
 import {
    buildCayenneExp,
    CayenneQueryBuilder,
@@ -22,8 +22,6 @@ import type {
    TeamStats,
 } from './types.ts';
 
-const defaultLang = envConfig.language;
-
 /**
  * Get list of all teams
  *
@@ -33,7 +31,7 @@ const defaultLang = envConfig.language;
  * @example
  * const allTeams = await teams.getAll('en');
  */
-export async function getAll(lang: string = defaultLang) {
+export async function getAll(lang: string = config.language) {
    const path = resolvePath(p.team.all, { lang });
    return edgeStatsClient.get(path);
 }
@@ -48,7 +46,10 @@ export async function getAll(lang: string = defaultLang) {
  * @example
  * const team = await teams.getById(10, 'en');
  */
-export async function getById(teamId: number, lang: string = defaultLang) {
+export async function getById(
+   teamId: number,
+   lang: string = config.language,
+) {
    const path = resolvePath(p.team.byId, { lang, teamId });
    return edgeStatsClient.get<Team>(path);
 }
@@ -76,7 +77,7 @@ export async function getById(teamId: number, lang: string = defaultLang) {
 export async function getStatsWithParams(
    report: string,
    params: StatsQueryParams,
-   lang: string = defaultLang,
+   lang: string = config.language,
 ) {
    const path = resolvePath(p.team.report, { lang, report });
    return edgeStatsClient.get<PaginatedData<TeamStats>>(path, params);
@@ -110,7 +111,7 @@ export async function getStatsWithParams(
 export async function getStatsWithBuilder(
    report: string,
    buildQuery: (builder: CayenneQueryBuilder) => StatsQueryParams,
-   lang: string = defaultLang,
+   lang: string = config.language,
 ) {
    const builder = new CayenneQueryBuilder();
    const params = buildQuery(builder);
@@ -154,7 +155,7 @@ export async function getStatsWithFilters(
       limit?: number;
       start?: number;
    },
-   lang: string = defaultLang,
+   lang: string = config.language,
 ) {
    // Build cayenneExp from high-level filters
    const cayenneFilters: Record<string, string | number> = {};
