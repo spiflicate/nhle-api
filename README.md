@@ -101,6 +101,24 @@ import type { GameLandingResponse } from 'nhle-api';
 - `adv` (Edge Advanced) is available but still considered in development, but ready for preliminary use.
 - The `stats` (Edge Stats) namespace is not exported at the moment and will be introduced in a future release once implementation is ready.
 
+## Toolkit Entry Point
+
+Use the `nhle-api/toolkit` subpath when you only need NHL constants and shared helpers. It does not expose API endpoint namespaces or environment configuration:
+
+```ts
+import {
+   NHL,
+   getCurrentSeason,
+   resolvePath,
+} from 'nhle-api/toolkit';
+
+const season = getCurrentSeason();
+const teamPath = resolvePath('/teams/{team}', { team: 'TOR' });
+```
+
+This entry point exports `NHL`, date helpers, `resolvePath`, team branding
+data, historical team palettes, and official logo URL helpers.
+
 ## Game Center API (`gc`)
 
 `gc` is the primary namespace for accessing live and historical NHL data.

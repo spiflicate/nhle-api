@@ -59,3 +59,8 @@
       "arktype": "^2.1.29"
    }
 }
+      },
+      "./toolkit": {
+         "types": "./lib/toolkit.d.ts",
+         "require": "./lib/toolkit.cjs",
+         "import": "./lib/toolkit.js"
