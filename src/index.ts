@@ -12,5 +12,6 @@ export type { LogLevel, NHLConfig } from './config/index.js';
 export { config, logConfig } from './config/index.js';
 // Re-export constants
 export * from './constants/index.js';
+export { logger, writeLog } from './logging/index.js';
 // Re-export types
 export * from './types/index.js';

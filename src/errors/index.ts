@@ -3,6 +3,9 @@
  * Provides structured error classification and logging for API interactions
  */
 
+import { config as clientConfig } from '#/config/index.ts';
+import { writeLog } from '#/logging/index.ts';
+
 export const ErrorCategory = {
    /** Network-level errors (connection refused, timeout, etc.) */
    NETWORK: 'NETWORK',
@@ -211,7 +214,8 @@ export class ErrorHandler {
 
    constructor(config: ErrorConfig = {}) {
       this.config = {
-         logLevel: config.logLevel ?? LogLevel.ERROR,
+         logLevel:
+            config.logLevel ?? toErrorLogLevel(clientConfig.logLevel),
          logger: config.logger ?? this.defaultLogger.bind(this),
          includeStack: config.includeStack ?? true,
       };
@@ -227,14 +231,12 @@ export class ErrorHandler {
    ): void {
       if (level > this.config.logLevel) return;
 
-      const logFn =
-         level === LogLevel.ERROR
-            ? console.error
-            : level === LogLevel.WARN
-              ? console.warn
-              : console.log;
-
-      logFn(`[NHL API] ${message}`, context);
+      writeLog(
+         toClientLogLevel(level),
+         `[NHL API] ${message}`,
+         context,
+         toClientThreshold(this.config.logLevel),
+      );
    }
 
    /**
@@ -375,6 +377,46 @@ export class ErrorHandler {
    configure(config: Partial<ErrorConfig>): void {
       this.config = { ...this.config, ...config };
    }
+}
+
+function toErrorLogLevel(
+   level: 'silent' | 'error' | 'warn' | 'info' | 'debug',
+): LogLevel {
+   switch (level) {
+      case 'silent':
+         return LogLevel.NONE;
+      case 'error':
+         return LogLevel.ERROR;
+      case 'warn':
+         return LogLevel.WARN;
+      case 'info':
+         return LogLevel.INFO;
+      case 'debug':
+         return LogLevel.DEBUG;
+   }
+}
+
+function toClientLogLevel(
+   level: LogLevel,
+): Exclude<'silent' | 'error' | 'warn' | 'info' | 'debug', 'silent'> {
+   switch (level) {
+      case LogLevel.ERROR:
+         return 'error' as const;
+      case LogLevel.WARN:
+         return 'warn' as const;
+      case LogLevel.INFO:
+         return 'info' as const;
+      case LogLevel.DEBUG:
+         return 'debug' as const;
+      default:
+         return 'debug' as const;
+   }
+}
+
+function toClientThreshold(level: LogLevel) {
+   return level === LogLevel.NONE
+      ? ('silent' as const)
+      : toClientLogLevel(level);
 }
 
 /**
