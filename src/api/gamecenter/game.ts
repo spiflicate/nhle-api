@@ -27,9 +27,9 @@ import type {
    Year,
 } from '#/types/index.ts';
 import {
-   getCurrentDate,
+   getCurrentNHLDate,
+   getCurrentNHLYear,
    getCurrentSeason,
-   getCurrentYear,
 } from '#/utils/date.ts';
 import {
    GameIdAndEventId,
@@ -304,7 +304,7 @@ async function pptReplayEvent(
 export async function schedule(
    date?: Date | string,
 ): Promise<APIResult<LeagueSchedule>> {
-   const parsedDate = NHLDate(date ?? getCurrentDate());
+   const parsedDate = NHLDate(date ?? getCurrentNHLDate());
    if (isParseError(parsedDate)) {
       return {
          success: false,
@@ -354,7 +354,7 @@ export async function scheduleCalendar(
 export async function playoffBracket(
    year?: Year,
 ): Promise<APIResult<PlayoffBracket>> {
-   const parsedYear = YearAT(year ?? getCurrentYear());
+   const parsedYear = YearAT(year ?? getCurrentNHLYear());
    if (isParseError(parsedYear)) {
       return {
          success: false,
@@ -459,7 +459,7 @@ export async function whereToWatch(): Promise<APIResult<WhereToWatch>> {
 export async function networkTVSchedule(
    date?: Date | string,
 ): Promise<APIResult<NetworkTVSchedule>> {
-   const parsedDate = NHLDate(date ?? getCurrentDate());
+   const parsedDate = NHLDate(date ?? getCurrentNHLDate());
    if (isParseError(parsedDate)) {
       return {
          success: false,

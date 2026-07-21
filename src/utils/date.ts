@@ -1,16 +1,24 @@
 /**
- * Date utility functions for NHL API
- * Provides functions for formatting dates and handling seasons
+ * NHL season and date utilities.
+ *
+ * These helpers define the calendar semantics used by NHL API parameters.
+ * Calendar values are evaluated in the NHL's eastern time zone
+ * (`America/New_York`), regardless of the process's local time zone. Use
+ * `getDate` and `getMonth` when converting `Date` values for API calls.
  */
 
+/** Canonical timezone for NHL calendar dates and API date parameters. */
 export const NHL_TIMEZONE = 'America/New_York';
 
 /**
- * Formats a date object into a string in the format YYYY-MM-DD
- * @param date - The date object to format
- * @returns The formatted date string
+ * Formats a date as the NHL API's `YYYY-MM-DD` calendar parameter.
+ *
+ * The calendar date is resolved in {@link NHL_TIMEZONE}, not UTC.
+ * @param date - A valid date to format.
+ * @returns The date formatted as `YYYY-MM-DD`.
+ * @throws RangeError If `date` is invalid.
  */
-export const getDate = (date: Date): string =>
+export const getNHLDate = (date: Date): string =>
    new Intl.DateTimeFormat('en-CA', {
       timeZone: NHL_TIMEZONE,
       year: 'numeric',
@@ -18,18 +26,20 @@ export const getDate = (date: Date): string =>
       day: '2-digit',
    }).format(date);
 /**
- * Returns the current date formatted as YYYY-MM-DD.
- * This is a convenience method that calls getDate with the current date.
- * @returns The current date formatted as YYYY-MM-DD
+ * Returns the current date as `YYYY-MM-DD` in the NHL eastern time zone.
+ * @returns The current date formatted as `YYYY-MM-DD`.
  */
-export const getCurrentDate = (): string => getDate(new Date());
+export const getCurrentNHLDate = (): string => getNHLDate(new Date());
 
 /**
- * Formats a date object into a string representing the month in YYYY-MM format
- * @param date - The date object to format
- * @returns The formatted month string
+ * Formats a date as the NHL API's `YYYY-MM` calendar parameter.
+ *
+ * The calendar month is resolved in {@link NHL_TIMEZONE}, not UTC.
+ * @param date - A valid date to format.
+ * @returns The month formatted as `YYYY-MM`.
+ * @throws RangeError If `date` is invalid.
  */
-export const getMonth = (date: Date): string => {
+export const getNHLMonth = (date: Date): string => {
    return new Intl.DateTimeFormat('en-CA', {
       timeZone: NHL_TIMEZONE,
       year: 'numeric',
@@ -38,16 +48,16 @@ export const getMonth = (date: Date): string => {
 };
 
 /**
- * Returns the current month formatted as YYYY-MM
- * This is a convenience method that calls getMonth with the current date
- * @returns The current month formatted as YYYY-MM
+ * Returns the current month as `YYYY-MM` in the NHL eastern time zone.
+ * @returns The current month formatted as `YYYY-MM`.
  */
-export const getCurrentMonth = (): string => getMonth(new Date());
+export const getCurrentNHLMonth = (): string => getNHLMonth(new Date());
 
 /**
- * Formats a date object into a string representing the year in YYYY format
- * @param date - The date object to format
- * @returns The formatted year string
+ * Formats a date as `YYYY` in the NHL eastern time zone.
+ * @param date - A valid date to format.
+ * @returns The year formatted as `YYYY`.
+ * @throws RangeError If `date` is invalid.
  */
 export const getYear = (date: Date): string =>
    new Intl.DateTimeFormat('en-CA', {
@@ -55,16 +65,21 @@ export const getYear = (date: Date): string =>
       year: 'numeric',
    }).format(date);
 /**
- * Returns the current year formatted as YYYY
- * This is a convenience method that calls getYear with the current date
- * @returns The current year formatted as YYYY
+ * Returns the current year as `YYYY` in the NHL eastern time zone.
+ * @returns The current year formatted as `YYYY`.
  */
-export const getCurrentYear = (): string => getYear(new Date());
+export const getCurrentNHLYear = (): string => getYear(new Date());
 /**
- * Returns the season associated with the specified date in the format yyyyYYYY (e.g., 20232024)
- * @param date - The date object to parse the season from
- * @returns The current season formatted as yyyyYYYY\
- * @throws Error if the provided date is invalid
+ * Returns the NHL season label associated with a date as `yyyyYYYY` (for
+ * example, `20232024`). The season label starts on July 1: dates from
+ * January through June belong to the season that started in the previous
+ * calendar year, while dates from July through December belong to the season
+ * starting in the current calendar year.
+ *
+ * The month is resolved in {@link NHL_TIMEZONE}.
+ * @param date - A valid `Date` or a date string accepted by the `Date` constructor.
+ * @returns The season formatted as `yyyyYYYY`.
+ * @throws RangeError If the date is invalid.
  */
 export const getSeason = (date: string | Date): string => {
    const format = new Intl.DateTimeFormat('en-CA', {
@@ -83,13 +98,17 @@ export const getSeason = (date: string | Date): string => {
    return `${year}${parseInt(year, 10) + 1}`;
 };
 /**
- * Returns the current season in the format yyyyYYYY (e.g., 20232024)
- * This is a convenience method that calls getSeason with the current date
- * @returns The current season formatted as yyyyYYYY
+ * Returns the current NHL season as `yyyyYYYY` in the NHL eastern time zone.
+ * @returns The current season formatted as `yyyyYYYY`.
  */
 export const getCurrentSeason = (): string => getSeason(new Date());
 
+/** Lower bound used when validating NHL API date ranges. */
 export const NHL_START_DATE = new Date('1917-12-01');
+
+/**
+ * Upper bound for the current NHL season, set to June 30 of its ending year.
+ */
 export const NHL_END_DATE = new Date(
    `${getCurrentSeason().slice(4, 8)}-06-30`,
 );

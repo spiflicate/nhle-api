@@ -20,7 +20,7 @@ import type {
    TeamStats,
    TeamStatsSeason,
 } from '#/types/index.ts';
-import { getCurrentDate } from '#/utils/date.ts';
+import { getCurrentNHLDate } from '#/utils/date.ts';
 import {
    BaseParams,
    isParseError,
@@ -180,7 +180,7 @@ export async function statsSeason(
 export async function standings(
    date?: Date | string,
 ): Promise<APIResult<NHLStandings>> {
-   const parsed = NHLDate(date ?? getCurrentDate());
+   const parsed = NHLDate(date ?? getCurrentNHLDate());
    if (isParseError(parsed)) {
       return {
          success: false,

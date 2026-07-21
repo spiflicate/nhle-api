@@ -15,7 +15,7 @@
 
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import * as team from '#/api/gamecenter/team.ts';
-import { getCurrentDate, getCurrentSeason } from '#/utils/date.ts';
+import { getCurrentNHLDate, getCurrentSeason } from '#/utils/date.ts';
 import { expectSuccess, expectValidationError } from '../helpers.ts';
 
 describe('Team Module', () => {
@@ -225,7 +225,7 @@ describe('Team Module', () => {
 
    test('standings should fetch standings with default current date', async () => {
       const result = await team.standings();
-      const date = getCurrentDate();
+      const date = getCurrentNHLDate();
       expectSuccess(result);
       expect(mockCalls[0]).toContain(`standings/${date}`);
    });
@@ -267,7 +267,7 @@ describe('Team Module', () => {
       test('week should fetch club schedule for current date when omitted', async () => {
          const teamParam = 'TOR';
          const result = await team.schedule.week(teamParam);
-         const date = getCurrentDate();
+         const date = getCurrentNHLDate();
          expectSuccess(result);
          expect(mockCalls[0]).toContain(
             `club-schedule/${teamParam}/week/${date}`,

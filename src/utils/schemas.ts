@@ -1,7 +1,11 @@
 import { type } from 'arktype';
 import { EDGE, NHL } from '#/constants/index.ts';
 import { ValidationError } from '#/errors/index.ts';
-import { getCurrentDate } from '#/utils/date.ts';
+import {
+   getCurrentNHLDate,
+   getNHLDate,
+   getNHLMonth,
+} from '#/utils/date.ts';
 
 export function isParseError(value: unknown): value is type.errors {
    return value instanceof type.errors;
@@ -34,7 +38,7 @@ export const NHLMonth = type('Date | string')
       }
       return false;
    })
-   .pipe((v) => (typeof v === 'string' ? v : v.toISOString().slice(0, 7)))
+   .pipe((v) => (typeof v === 'string' ? v : getNHLMonth(v)))
    .describe(
       'a valid month, either as a string (formatted as YYYY-MM) or a Date object',
    );
@@ -43,7 +47,7 @@ export const NHLDate = type('Date | string.date.iso')
    .pipe((v) =>
       typeof v === 'string'
          ? new Date(v).toISOString().slice(0, 10)
-         : v.toISOString().slice(0, 10),
+         : getNHLDate(v),
    )
    .describe(
       'a valid date, either as a string (ISO date string) or a Date object',
@@ -308,8 +312,8 @@ export const SeriesParams = type({
 
 export const ScheduleParams = type({
    team: TeamAbbrev,
-   date: NHLDate.or('undefined').pipe((v) => v ?? getCurrentDate()),
+   date: NHLDate.or('undefined').pipe((v) => v ?? getCurrentNHLDate()),
    month: NHLMonth.or('undefined').pipe(
-      (v) => v ?? getCurrentDate().slice(0, 7),
+      (v) => v ?? getCurrentNHLDate().slice(0, 7),
    ),
 });

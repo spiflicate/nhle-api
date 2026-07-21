@@ -6,7 +6,7 @@ import { nhlClient } from '#/client/index.ts';
 import type { APIResult } from '#/client/types.ts';
 import { ValidationError } from '#/errors/index.ts';
 import type { Score, Scoreboard, TeamAbbrev } from '#/types/index.ts';
-import { getCurrentDate } from '#/utils/date.ts';
+import { getCurrentNHLDate } from '#/utils/date.ts';
 import {
    isParseError,
    NHLDate,
@@ -31,7 +31,7 @@ import { scorePaths as p } from './paths.ts';
 export async function score(
    date?: Date | string,
 ): Promise<APIResult<Score>> {
-   const parsed = NHLDate(date ?? getCurrentDate());
+   const parsed = NHLDate(date ?? getCurrentNHLDate());
    if (isParseError(parsed)) {
       return {
          success: false,

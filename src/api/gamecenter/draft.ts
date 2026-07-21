@@ -13,7 +13,7 @@ import type {
    DraftTracker,
    Year,
 } from '#/types/index.ts';
-import { getCurrentYear } from '#/utils/date.ts';
+import { getCurrentNHLYear } from '#/utils/date.ts';
 import {
    DraftParams,
    isParseError,
@@ -98,7 +98,7 @@ export function rankings(year?: Year): {
    const getRankings = async (
       type: '1' | '2' | '3' | '4',
    ): Promise<APIResult<DraftRankings>> => {
-      const parsedYear = YearType(year ?? getCurrentYear());
+      const parsedYear = YearType(year ?? getCurrentNHLYear());
       if (isParseError(parsedYear)) {
          return {
             success: false,
