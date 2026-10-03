@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `nhle-api/toolkit` entry point with constants, date helpers, `resolvePath`, `normalizeAbbrev`, the Cayenne query builder, and team branding (colors and logo URLs)
 - `NHLClient` accepts an options object (`baseUrl`, `timeout`, `language`, `headers`, `errorConfig`)
 - Level-aware `logger` and `writeLog`
+- `gc.misc.meta.lookup({ players, teams })` for bulk player and team metadata (`BulkMeta`)
+- `categories` and `limit` options on `gc.player.statsLeaders.skaters` and `.goalies` (`limit: -1` returns every player); the result type narrows to the requested categories
 - Daily API drift check (`bun run drift`, GitHub workflow "API drift") covering every public function
 
 ### Changed
