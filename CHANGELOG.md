@@ -33,6 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Edge skater and team paths, goalie top-10 save percentage paths and top-10 filter codes (23 endpoints)
 - `postalLookup` sends Canadian postal codes in the only form the API matches
 - `stats.skaters.getStats()` requested an unresolved `{report}` path, report functions sent no `cayenneExp` (HTTP 500), and `getStatsWithFilters` dropped most filters
+- Functions that default to the current season used 2025-26 (the last hardcoded season); the default now follows today's date
 
 ### Deprecated
 

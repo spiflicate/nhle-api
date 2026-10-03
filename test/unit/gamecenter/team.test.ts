@@ -238,7 +238,7 @@ describe('Team Module', () => {
    });
 
    test('standings should fetch standings for Date object', async () => {
-      const date = new Date('2023-10-10');
+      const date = new Date('2023-10-10T12:00:00-04:00');
       const result = await team.standings(date);
       expectSuccess(result);
       expect(mockCalls[0]).toContain(
@@ -286,7 +286,7 @@ describe('Team Module', () => {
 
       test('week should accept Date object', async () => {
          const teamParam = 'TOR';
-         const date = new Date('2023-11-04');
+         const date = new Date('2023-11-04T12:00:00-04:00');
          const result = await team.schedule.week(teamParam, date);
          expectSuccess(result);
          expect(mockCalls[0]).toContain(

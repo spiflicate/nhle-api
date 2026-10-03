@@ -1,3 +1,5 @@
+import { getCurrentSeason } from '#/utils/date.ts';
+
 // Values are based on the NHL API documentation and other sources.
 // Last updated: 2025-10-23
 
@@ -292,7 +294,8 @@ export const START_YEAR = YEAR_RANGE.START;
 export const END_YEAR = YEAR_RANGE.END;
 /**  */
 export const CURRENT = {
-   SEASON: SEASON_RANGE.END,
+   /** The season for today's date, so the default never goes stale. */
+   SEASON: Number(getCurrentSeason()),
    YEAR: YEAR_RANGE.END,
 };
 /**  */
