@@ -293,6 +293,19 @@ When an API really has changed:
 
 Checks for date- or location-dependent data (scoreboard, draft tracker) are marked `volatile`: a field missing today is only noted, and `--update` adds to their baseline instead of replacing it. When you add a library function, add a check in `scripts/drift/checks.ts`; `test/unit/drift.test.ts` fails if a public function has none.
 
+## Releasing
+
+1. Move the `Unreleased` notes in `CHANGELOG.md` under the new version.
+2. Bump the version and tag it: `npm version patch` (or `minor`/`major`).
+3. Push the commit and tag: `git push --follow-tags`.
+
+The **Release** workflow checks that the tag matches `package.json`, runs the full CI suite and `check:package`, publishes to npm, and creates a GitHub release. It uses [npm trusted publishing](https://docs.npmjs.com/trusted-publishers), so there is no npm token in the repo, and npm adds provenance automatically.
+
+One-time setup on npmjs.com:
+
+1. Open the `nhle-api` package's **Settings → Trusted publishing** and add GitHub Actions with user `spiflicate`, repository `nhle-api` and workflow `release.yml`.
+2. Under **Publishing access**, choose "Require two-factor authentication and disallow tokens".
+
 ## Support
 
 If you find this library helpful, consider supporting its development:

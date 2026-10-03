@@ -18,12 +18,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `NHLClient` accepts an options object (`baseUrl`, `timeout`, `language`, `headers`, `errorConfig`)
 - Level-aware `logger` and `writeLog`
 - Daily API drift check (`bun run drift`, GitHub workflow "API drift") covering every public function
+- CI on pull requests (lint, typecheck, tests, build, publint and are-the-types-wrong) and a tag-triggered release workflow that publishes with npm trusted publishing
 
 ### Changed
 
 - `config` is read on every request, so changing it at runtime takes effect; environment variable configuration was removed
 - Invalid `adv` parameters resolve to a failed result with a `ValidationError` instead of rejecting
 - Date parameters use the NHL's timezone (America/New_York)
+- `require` resolves `.d.cts` type declarations; the package declares `sideEffects: false` and `engines.node >= 18`
 - Stats API: `getPlayerInfo`, `getLeaders`, `getGames`, `teams.getAll` and `teams.getById` take query params before `lang`; `teams.getById` returns a list, matching the API
 
 ### Fixed
