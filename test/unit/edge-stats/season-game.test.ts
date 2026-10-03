@@ -86,7 +86,7 @@ describe('Season/Game/Draft Modules', () => {
 
    describe('Games', () => {
       test('should fetch game data', async () => {
-         const result = await season.getGames('en');
+         const result = await season.getGames({}, 'en');
          expectSuccess(result);
          if (result.success) {
             expect(result.data.data).toBeInstanceOf(Array);

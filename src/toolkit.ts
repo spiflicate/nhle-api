@@ -6,16 +6,17 @@
  */
 
 export { NHL } from './constants/index.ts';
-// export type {
-//    CayenneCondition,
-//    CayenneExpression,
-//    CayenneGroup,
-// } from './utils/cayenne-query-builder.ts';
-// export {
-//    buildCayenneExp,
-//    CayenneQueryBuilder,
-//    createCayenneQuery,
-// } from './utils/cayenne-query-builder.ts';
+export type {
+   CayenneCondition,
+   CayenneExpression,
+   CayenneGroup,
+} from './utils/cayenne-query-builder.ts';
+export {
+   buildCayenneExp,
+   CayenneQueryBuilder,
+   createCayenneQuery,
+} from './utils/cayenne-query-builder.ts';
 export * from './utils/date.ts';
+export { normalizeAbbrev } from './utils/normalize.ts';
 export * from './utils/team-branding.ts';
 export { resolvePath } from './utils/utils.ts';

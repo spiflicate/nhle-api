@@ -7,183 +7,168 @@
  * from the NHL Stats API.
  */
 
-import { edgeStatsClient } from '#/client/index.js';
-import { config } from '#/config/index.js';
-import {
-   buildCayenneExp,
-   CayenneQueryBuilder,
-} from '#/utils/cayenne-query-builder.js';
-import { resolvePath } from '#/utils/utils.js';
-import { dataPaths as p } from './paths.js';
+import { edgeStatsClient } from '#/client/index.ts';
+import { config } from '#/config/index.ts';
+import { CayenneQueryBuilder } from '#/utils/cayenne-query-builder.ts';
+import { resolvePath } from '#/utils/utils.ts';
+import { dataPaths as p } from './paths.ts';
+import { filterParams, reportParams } from './query.ts';
 import type {
    APIResultPaginated,
    GoalieLeader,
    GoalieMilestone,
+   GoalieReport,
    GoalieStats,
    PaginatedData,
+   StatsFilters,
+   StatsPagination,
    StatsQueryParams,
-} from './types.js';
+   StatsSorting,
+} from './types.ts';
 
 /**
- * Get goalie leaders for a specific attribute
+ * Get goalie leaders for a stat category
  *
- * @param attribute - The attribute to rank by (e.g., 'gaa', 'wins', 'shutouts')
+ * Without a filter the leaders are all-time; filter by season with
+ * `{ cayenneExp: 'season=20242025 and gameType=2' }`.
+ *
+ * @param statCategory - 'gaa', 'savePctg' or 'shutouts'
+ * @param params - Query parameters (the endpoint ignores `limit`)
  * @param lang - Language code (default: configured language)
  * @returns Promise resolving to goalie leaders
  *
  * @example
- * const leaders = await goalies.getLeaders('gaa', 'en');
+ * const leaders = await stats.goalies.getLeaders('gaa', {
+ *    cayenneExp: 'season=20242025 and gameType=2',
+ * });
  */
 export async function getLeaders(
    statCategory: keyof typeof p.goalie.leaders,
+   params: StatsQueryParams = {},
    lang: string = config.language,
 ): Promise<APIResultPaginated<GoalieLeader>> {
    const path = resolvePath(p.goalie.leaders[statCategory], { lang });
-   return edgeStatsClient.get<PaginatedData<GoalieLeader>>(path);
+   return edgeStatsClient.get<PaginatedData<GoalieLeader>>(path, params);
+}
+
+/**
+ * Get a goalie report
+ *
+ * @param report - The report name (default: 'summary')
+ * @param params - Query parameters including cayenneExp for filtering
+ * @param lang - Language code (default: configured language)
+ * @returns Promise resolving to goalie statistics
+ *
+ * @example
+ * const result = await stats.goalies.getStats('summary', {
+ *    cayenneExp: 'seasonId=20242025 and gameTypeId=2',
+ *    sort: 'wins',
+ *    dir: 'desc',
+ *    limit: 10,
+ * });
+ */
+export async function getStats(
+   report: GoalieReport = 'summary',
+   params: StatsQueryParams = {},
+   lang: string = config.language,
+): Promise<APIResultPaginated<GoalieStats>> {
+   const path = resolvePath(p.goalie.report, { lang, report });
+   return edgeStatsClient.get<PaginatedData<GoalieStats>>(
+      path,
+      reportParams(params),
+   );
 }
 
 /**
  * Get goalie stats with low-level query parameters
  * This is the most flexible approach - you build the query parameters yourself
  *
- * @param report - The report type (e.g., 'summary', 'detailed')
+ * @param report - The report name (e.g., 'summary', 'advanced')
  * @param params - Query parameters including cayenneExp for filtering
  * @param lang - Language code (default: configured language)
  * @returns Promise resolving to goalie statistics
  *
  * @example
- * // Option 1: Using low-level params directly
- * const stats = await goalies.getStatsWithParams(
- *   'summary',
- *   {
- *     cayenneExp: 'seasonId=20232024 and gameTypeId=2',
- *     sort: 'wins',
- *     limit: 10,
- *     dir: 'desc'
- *   },
- *   'en'
- * );
+ * const result = await stats.goalies.getStatsWithParams('summary', {
+ *    cayenneExp: 'seasonId=20232024 and gameTypeId=2',
+ *    sort: 'wins',
+ *    limit: 10,
+ *    dir: 'desc',
+ * });
  */
 export async function getStatsWithParams(
-   report: string,
+   report: GoalieReport,
    params: StatsQueryParams,
    lang: string = config.language,
 ): Promise<APIResultPaginated<GoalieStats>> {
-   const path = resolvePath(p.goalie.report, { lang, report });
-   return edgeStatsClient.get<PaginatedData<GoalieStats>>(path, params);
+   return getStats(report, params, lang);
 }
 
 /**
  * Get goalie stats using a fluent query builder
- * This approach uses the CayenneQueryBuilder for constructing complex filters
  *
- * @param report - The report type (e.g., 'summary', 'detailed')
+ * @param report - The report name (e.g., 'summary', 'advanced')
  * @param buildQuery - Function that receives a CayenneQueryBuilder and returns params
  * @param lang - Language code (default: configured language)
  * @returns Promise resolving to goalie statistics
  *
  * @example
- * // Option 2: Using the query builder
- * const stats = await goalies.getStatsWithBuilder(
- *   'summary',
- *   (q) => ({
- *     cayenneExp: q
- *       .equals('seasonId', '20232024')
- *       .equals('gameTypeId', 2)
- *       .build(),
- *     sort: 'wins',
- *     limit: 10,
- *     dir: 'desc' as const
- *   }),
- *   'en'
- * );
+ * const result = await stats.goalies.getStatsWithBuilder('summary', (q) => ({
+ *    cayenneExp: q.equals('seasonId', 20232024).equals('gameTypeId', 2).build(),
+ *    sort: 'wins',
+ *    limit: 10,
+ *    dir: 'desc' as const,
+ * }));
  */
 export async function getStatsWithBuilder(
-   report: string,
+   report: GoalieReport,
    buildQuery: (builder: CayenneQueryBuilder) => StatsQueryParams,
    lang: string = config.language,
 ): Promise<APIResultPaginated<GoalieStats>> {
-   const builder = new CayenneQueryBuilder();
-   const params = buildQuery(builder);
-   const path = resolvePath(p.goalie.report, { lang, report });
-   return edgeStatsClient.get<PaginatedData<GoalieStats>>(path, params);
+   return getStats(report, buildQuery(new CayenneQueryBuilder()), lang);
 }
 
 /**
  * Get goalie stats with high-level convenience parameters
- * This approach hides the cayenneExp complexity with friendly parameters
+ * Every filter is matched with equality.
  *
- * @param report - The report type (e.g., 'summary', 'detailed')
- * @param filters - High-level filter object
+ * @param report - The report name (e.g., 'summary', 'advanced')
+ * @param filters - Field filters, e.g. `{ seasonId: 20232024, gameTypeId: 2 }`
  * @param sorting - Sorting options
  * @param pagination - Pagination options
  * @param lang - Language code (default: configured language)
  * @returns Promise resolving to goalie statistics
  *
  * @example
- * // Option 3: Using high-level convenience parameters
- * const stats = await goalies.getStatsWithFilters(
- *   'summary',
- *   { seasonId: '20232024', gameTypeId: 2 },
- *   { sortBy: 'wins', direction: 'desc' },
- *   { limit: 10, start: 0 },
- *   'en'
+ * const result = await stats.goalies.getStatsWithFilters(
+ *    'summary',
+ *    { seasonId: '20232024', gameTypeId: 2 },
+ *    { sortBy: 'wins', direction: 'desc' },
+ *    { limit: 10, start: 0 },
  * );
  */
 export async function getStatsWithFilters(
-   report: string,
-   filters?: {
-      seasonId?: string | number;
-      gameTypeId?: number;
-      playerId?: number;
-      [key: string]: unknown;
-   },
-   sorting?: {
-      sortBy?: string;
-      direction?: 'asc' | 'desc';
-   },
-   pagination?: {
-      limit?: number;
-      start?: number;
-   },
+   report: GoalieReport,
+   filters?: StatsFilters,
+   sorting?: StatsSorting,
+   pagination?: StatsPagination,
    lang: string = config.language,
 ): Promise<APIResultPaginated<GoalieStats>> {
-   // Build cayenneExp from high-level filters
-   const cayenneFilters: Record<string, string | number> = {};
-   if (filters?.seasonId) cayenneFilters.seasonId = filters.seasonId;
-   if (filters?.gameTypeId) cayenneFilters.gameTypeId = filters.gameTypeId;
-   if (filters?.playerId) cayenneFilters.playerId = filters.playerId;
-
-   const params: Record<string, unknown> = {
-      cayenneExp: Object.keys(cayenneFilters).length
-         ? buildCayenneExp(cayenneFilters)
-         : '',
-   };
-   if (sorting?.sortBy) {
-      params.sort = sorting.sortBy;
-   }
-   if (sorting?.direction) {
-      params.dir = sorting.direction;
-   }
-   if (pagination?.limit) {
-      params.limit = pagination.limit;
-   }
-   if (pagination?.start) {
-      params.start = pagination.start;
-   }
-
-   const path = resolvePath(p.goalie.report, { lang, report });
-   return edgeStatsClient.get<PaginatedData<GoalieStats>>(path, params);
+   return getStats(
+      report,
+      filterParams(filters, sorting, pagination),
+      lang,
+   );
 }
 
 /**
- * Get goalie milestones
+ * Get active goalies approaching a career milestone
  *
  * @param lang - Language code (default: configured language)
  * @returns Promise resolving to goalie milestones
  *
  * @example
- * const milestones = await goalies.getMilestones();
+ * const milestones = await stats.goalies.getMilestones();
  */
 export async function getMilestones(
    lang: string = config.language,

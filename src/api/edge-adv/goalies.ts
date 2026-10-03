@@ -15,9 +15,21 @@
  */
 
 import { nhlClient } from '#/client/index.ts';
-import { NHLError } from '#/errors/index.ts';
+import type { APIResult } from '#/client/types.ts';
+import type {
+   EdgeGoalieComparison,
+   EdgeGoalieDetail,
+   EdgeGoalieLanding,
+   EdgeGoalieSavePercentage,
+   EdgeGoalieSavePercentage5v5,
+   EdgeGoalieSavePercentage5v5Top10,
+   EdgeGoalieSavePercentageTop10,
+   EdgeGoalieShotLocation,
+   EdgeGoalieShotLocationTop10,
+} from '#/types/responses/edge-adv.ts';
 import {
    BaseParams,
+   invalidParams,
    isParseError,
    PlayerParams,
    SaveLocationCategory as SaveLocationCategorySchema,
@@ -42,8 +54,8 @@ import { goaliesPaths as p } from './paths.ts';
  * Goalie Edge Advanced Stats API helpers.
  *
  * Lightweight wrapper exposing functions that call the underlying nhlClient
- * for goalie-related endpoints. Each method returns the raw Promise from the
- * client.get call.
+ * for goalie-related endpoints. Each function resolves to an APIResult; invalid
+ * parameters give a ValidationError result without a request.
  */
 
 /**
@@ -51,22 +63,17 @@ import { goaliesPaths as p } from './paths.ts';
  * @param playerId - The player's numeric id.
  * @param season - Optional season (numeric season format or 'now' via argParse).
  * @param gameType - Optional game type id.
- * @returns Promise resolving to the raw API response.
+ * @returns Promise resolving to an APIResult with the response data.
  */
 export async function player(
    playerId: PlayerId,
    season?: Season,
    gameType?: GameType,
-): Promise<unknown> {
+): Promise<APIResult<EdgeGoalieDetail>> {
    const parsed = PlayerParams({ playerId, season, gameType });
-   if (isParseError(parsed))
-      return Promise.reject(
-         new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.player,
-         }),
-      );
+   if (isParseError(parsed)) return invalidParams(parsed, p.player);
    const path = resolvePath(p.player, parsed);
-   return nhlClient.get(path);
+   return nhlClient.get<EdgeGoalieDetail>(path);
 }
 
 /**
@@ -74,42 +81,32 @@ export async function player(
  * @param playerId - The player's numeric id.
  * @param season - Optional season (numeric season format or 'now' via argParse).
  * @param gameType - Optional game type id.
- * @returns Promise resolving to the raw API response.
+ * @returns Promise resolving to an APIResult with the response data.
  */
 export async function compare(
    playerId: PlayerId,
    season?: Season,
    gameType?: GameType,
-): Promise<unknown> {
+): Promise<APIResult<EdgeGoalieComparison>> {
    const parsed = PlayerParams({ playerId, season, gameType });
-   if (isParseError(parsed))
-      return Promise.reject(
-         new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.compare,
-         }),
-      );
+   if (isParseError(parsed)) return invalidParams(parsed, p.compare);
    const path = resolvePath(p.compare, parsed);
-   return nhlClient.get(path);
+   return nhlClient.get<EdgeGoalieComparison>(path);
 }
 /**
  * Get goalie landing / leaders for a season.
  * @param season - Optional season (numeric season format or 'now' via argParse).
  * @param gameType - Optional game type id.
- * @returns Promise resolving to the raw API response.
+ * @returns Promise resolving to an APIResult with the response data.
  */
 export async function leaders(
    season?: Season,
    gameType?: GameType,
-): Promise<unknown> {
+): Promise<APIResult<EdgeGoalieLanding>> {
    const parsed = BaseParams({ season, gameType });
-   if (isParseError(parsed))
-      return Promise.reject(
-         new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.leaders,
-         }),
-      );
+   if (isParseError(parsed)) return invalidParams(parsed, p.leaders);
    const path = resolvePath(p.leaders, parsed);
-   return nhlClient.get(path);
+   return nhlClient.get<EdgeGoalieLanding>(path);
 }
 
 /**
@@ -117,22 +114,18 @@ export async function leaders(
  * @param playerId - The player's numeric id.
  * @param season - Optional season (numeric season format or 'now' via argParse).
  * @param gameType - Optional game type id.
- * @returns Promise resolving to the raw API response.
+ * @returns Promise resolving to an APIResult with the response data.
  */
 export async function savePercentage5v5(
    playerId: PlayerId,
    season?: Season,
    gameType?: GameType,
-): Promise<unknown> {
+): Promise<APIResult<EdgeGoalieSavePercentage5v5>> {
    const parsed = PlayerParams({ playerId, season, gameType });
    if (isParseError(parsed))
-      return Promise.reject(
-         new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.savePercentage5v5,
-         }),
-      );
+      return invalidParams(parsed, p.savePercentage5v5);
    const path = resolvePath(p.savePercentage5v5, parsed);
-   return nhlClient.get(path);
+   return nhlClient.get<EdgeGoalieSavePercentage5v5>(path);
 }
 
 /**
@@ -140,22 +133,17 @@ export async function savePercentage5v5(
  * @param playerId - The player's numeric id.
  * @param season - Optional season (numeric season format or 'now' via argParse).
  * @param gameType - Optional game type id.
- * @returns Promise resolving to the raw API response.
+ * @returns Promise resolving to an APIResult with the response data.
  */
 export async function savePercentage(
    playerId: PlayerId,
    season?: Season,
    gameType?: GameType,
-): Promise<unknown> {
+): Promise<APIResult<EdgeGoalieSavePercentage>> {
    const parsed = PlayerParams({ playerId, season, gameType });
-   if (isParseError(parsed))
-      return Promise.reject(
-         new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.savePercentage,
-         }),
-      );
+   if (isParseError(parsed)) return invalidParams(parsed, p.savePercentage);
    const path = resolvePath(p.savePercentage, parsed);
-   return nhlClient.get(path);
+   return nhlClient.get<EdgeGoalieSavePercentage>(path);
 }
 
 /**
@@ -163,22 +151,17 @@ export async function savePercentage(
  * @param playerId - The player's numeric id.
  * @param season - Optional season (numeric season format or 'now' via argParse).
  * @param gameType - Optional game type id.
- * @returns Promise resolving to the raw API response.
+ * @returns Promise resolving to an APIResult with the response data.
  */
 export async function saveLocation(
    playerId: PlayerId,
    season?: Season,
    gameType?: GameType,
-): Promise<unknown> {
+): Promise<APIResult<EdgeGoalieShotLocation>> {
    const parsed = PlayerParams({ playerId, season, gameType });
-   if (isParseError(parsed))
-      return Promise.reject(
-         new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.saveLocation,
-         }),
-      );
+   if (isParseError(parsed)) return invalidParams(parsed, p.saveLocation);
    const path = resolvePath(p.saveLocation, parsed);
-   return nhlClient.get(path);
+   return nhlClient.get<EdgeGoalieShotLocation>(path);
 }
 
 /**
@@ -195,25 +178,21 @@ export const top10 = {
  * @param sortBy - Sorting key for the leaderboard.
  * @param season - Optional season (numeric or 'now').
  * @param gameType - Optional game type id.
- * @returns Promise resolving to the raw API response.
+ * @returns Promise resolving to an APIResult with the response data.
  */
 async function top10SavePercentage(
    season?: Season,
    gameType?: GameType,
    sortBy?: SavePercentageSort,
-): Promise<unknown> {
+): Promise<APIResult<EdgeGoalieSavePercentageTop10>> {
    const Parser = BaseParams.merge({
       sortBy: withDefault(SavePercentageSortSchema, 'GAMES'),
    });
    const parsed = Parser({ season, gameType, sortBy });
    if (isParseError(parsed))
-      return Promise.reject(
-         new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.top10.savePercentage,
-         }),
-      );
+      return invalidParams(parsed, p.top10.savePercentage);
    const path = resolvePath(p.top10.savePercentage, parsed);
-   return nhlClient.get(path);
+   return nhlClient.get<EdgeGoalieSavePercentageTop10>(path);
 }
 
 /**
@@ -221,25 +200,21 @@ async function top10SavePercentage(
  * @param sortBy - Sorting key for the leaderboard.
  * @param season - Optional season (numeric or 'now').
  * @param gameType - Optional game type id.
- * @returns Promise resolving to the raw API response.
+ * @returns Promise resolving to an APIResult with the response data.
  */
 async function top10SavePercentage5v5(
    season?: Season,
    gameType?: GameType,
    sortBy?: SavePercentage5v5Sort,
-): Promise<unknown> {
+): Promise<APIResult<EdgeGoalieSavePercentage5v5Top10>> {
    const Parser = BaseParams.merge({
       sortBy: withDefault(SavePercentage5v5SortSchema, '5v5-SV%'),
    });
    const parsed = Parser({ season, gameType, sortBy });
    if (isParseError(parsed))
-      return Promise.reject(
-         new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.top10.savePercentage5v5,
-         }),
-      );
+      return invalidParams(parsed, p.top10.savePercentage5v5);
    const path = resolvePath(p.top10.savePercentage5v5, parsed);
-   return nhlClient.get(path);
+   return nhlClient.get<EdgeGoalieSavePercentage5v5Top10>(path);
 }
 
 /**
@@ -248,14 +223,14 @@ async function top10SavePercentage5v5(
  * @param sortBy - Sorting key for the leaderboard (see SaveLocationSortEnum).
  * @param season - Optional season (e.g. 20242025).
  * @param gameType - Optional game type.
- * @returns Promise resolving to the raw API response.
+ * @returns Promise resolving to an APIResult with the response data.
  */
 async function top10SaveLocation(
    season?: Season,
    gameType?: GameType,
    category?: SaveLocationCategory,
    sortBy?: SaveLocationSort,
-): Promise<unknown> {
+): Promise<APIResult<EdgeGoalieShotLocationTop10>> {
    const Parser = BaseParams.merge({
       category: withDefault(SaveLocationCategorySchema, 'SV%'),
       sortBy: withDefault(SaveLocationSortSchema, 'ALL'),
@@ -267,11 +242,7 @@ async function top10SaveLocation(
       sortBy,
    });
    if (isParseError(parsed))
-      return Promise.reject(
-         new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.top10.saveLocation,
-         }),
-      );
+      return invalidParams(parsed, p.top10.saveLocation);
    const path = resolvePath(p.top10.saveLocation, parsed);
-   return nhlClient.get(path);
+   return nhlClient.get<EdgeGoalieShotLocationTop10>(path);
 }

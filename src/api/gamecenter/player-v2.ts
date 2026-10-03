@@ -4,7 +4,7 @@
  * bio, stats and game log. Exposed as `gc.player.v2`.
  */
 
-import { createNHLClient } from '#/client/index.ts';
+import { BASE_URLS, createNHLClient } from '#/client/index.ts';
 import type { APIResult } from '#/client/types.ts';
 import { ValidationError } from '#/errors/index.ts';
 import type {
@@ -19,7 +19,7 @@ import { BaseParams, isParseError, PlayerId } from '#/utils/schemas.ts';
 import { resolvePath } from '#/utils/utils.ts';
 import { playerV2Paths as p } from './paths.ts';
 
-const nhlV2Client = createNHLClient('https://api-web.nhle.com/v2');
+const nhlV2Client = createNHLClient(BASE_URLS.gamecenterV2);
 
 /** Validate a player id and GET one of the `player/{playerId}/...` paths */
 async function getForPlayer<T>(

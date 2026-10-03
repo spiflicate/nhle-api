@@ -8,6 +8,7 @@ import type {
    PenaltyDescKey,
    PenaltyTypeCode,
    PeriodType,
+   PositionCode,
    Reason,
    ShotType,
    TvBroadcast,
@@ -136,7 +137,7 @@ interface RosterSpot {
    firstName: LocalizedText;
    lastName: LocalizedText;
    sweaterNumber: number;
-   positionCode: Position;
+   positionCode: PositionCode;
    headshot: string;
 }
 
@@ -174,7 +175,7 @@ interface PenaltyBoxElement {
    playerId: number;
    name: LocalizedText;
    sweaterNumber: number;
-   positionCode: Position;
+   positionCode: PositionCode;
    headshot: string;
    totalSOI?: number;
    secondsRemaining?: number;
@@ -184,7 +185,7 @@ interface GoalieElement {
    playerId: number;
    name: LocalizedText;
    sweaterNumber: number;
-   positionCode: Position;
+   positionCode: PositionCode;
    headshot: string;
    totalSOI?: number;
 }
@@ -209,7 +210,7 @@ interface PurpleForward {
    playerId: number;
    name: LocalizedText;
    sweaterNumber: number;
-   positionCode: Position;
+   positionCode: PositionCode;
    headshot: string;
    totalSOI?: number;
 }

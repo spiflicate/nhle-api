@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import * as goalies from '#/api/edge-adv/goalies.ts';
-import { NHLError } from '#/errors/index.ts';
+import { ValidationError } from '#/errors/index.ts';
 import { testData } from '../../test-utils.ts';
 
 describe('Edge-Adv Goalies Module', () => {
@@ -125,20 +125,17 @@ describe('Edge-Adv Goalies Module', () => {
       expect(mockCalls[0]).toContain('edge/goalie-shot-location-top-10');
    });
 
-   test('player should reject invalid player ID', async () => {
-      try {
-         await goalies.player(
-            'invalid' as unknown as number,
-            testData.seasonId,
-            'REG',
-         );
-         expect.unreachable('Expected player to reject invalid player ID');
-      } catch (error) {
-         expect(error).toBeInstanceOf(NHLError);
-         if (error instanceof NHLError) {
-            expect(error.category).toBe('VALIDATION');
-            expect(error.context.endpoint).toContain('goalie-detail');
-         }
+   test('player should return a ValidationError for an invalid player ID', async () => {
+      const result = await goalies.player(
+         'invalid' as unknown as number,
+         testData.seasonId,
+         'REG',
+      );
+      expect(result.success).toBeFalse();
+      if (!result.success) {
+         expect(result.error).toBeInstanceOf(ValidationError);
+         expect(result.error.context.endpoint).toContain('goalie-detail');
       }
+      expect(mockCalls).toHaveLength(0);
    });
 });
