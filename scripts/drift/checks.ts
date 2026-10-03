@@ -17,6 +17,7 @@ const TEAM = 'TOR';
 const TEAM_ID = 10; // TOR
 const SKATER = 8478402; // Connor McDavid
 const GOALIE = 8478048; // Igor Shesterkin
+const RETIRED = 8447400; // Wayne Gretzky: no team, no draft, no TOI
 
 export interface DriftCheck {
    /** `namespace.function`, plus a variant in parentheses when needed */
@@ -134,6 +135,73 @@ const gamecenter: DriftCheck[] = [
    {
       name: 'gc.player.statsLeaders.goalies',
       run: () => gc.player.statsLeaders.goalies(SEASON, REG),
+   },
+
+   // gc.player.v2: home, bio and stats show this season's games and the
+   // current roster, so their shapes for active players change over time.
+   // Their baselines also hold the shapes of other active players.
+   { name: 'gc.player.v2.header', run: () => gc.player.v2.header(SKATER) },
+   {
+      name: 'gc.player.v2.header (goalie)',
+      run: () => gc.player.v2.header(GOALIE),
+   },
+   {
+      name: 'gc.player.v2.header (retired)',
+      run: () => gc.player.v2.header(RETIRED),
+   },
+   {
+      name: 'gc.player.v2.home',
+      run: () => gc.player.v2.home(SKATER),
+      volatile: true,
+   },
+   {
+      name: 'gc.player.v2.home (goalie)',
+      run: () => gc.player.v2.home(GOALIE),
+      volatile: true,
+   },
+   {
+      name: 'gc.player.v2.home (retired)',
+      run: () => gc.player.v2.home(RETIRED),
+   },
+   {
+      name: 'gc.player.v2.bio',
+      run: () => gc.player.v2.bio(SKATER),
+      volatile: true,
+   },
+   {
+      name: 'gc.player.v2.bio (goalie)',
+      run: () => gc.player.v2.bio(GOALIE),
+      volatile: true,
+   },
+   {
+      name: 'gc.player.v2.bio (retired)',
+      run: () => gc.player.v2.bio(RETIRED),
+   },
+   {
+      name: 'gc.player.v2.stats',
+      run: () => gc.player.v2.stats(SKATER),
+      volatile: true,
+   },
+   {
+      name: 'gc.player.v2.stats (goalie)',
+      run: () => gc.player.v2.stats(GOALIE),
+      volatile: true,
+   },
+   {
+      name: 'gc.player.v2.stats (retired)',
+      run: () => gc.player.v2.stats(RETIRED),
+   },
+   {
+      name: 'gc.player.v2.gameLog',
+      run: () => gc.player.v2.gameLog(SKATER, SEASON, REG),
+   },
+   {
+      name: 'gc.player.v2.gameLog (goalie)',
+      run: () => gc.player.v2.gameLog(GOALIE, SEASON, REG),
+   },
+   {
+      name: 'gc.player.v2.gameLog (retired)',
+      run: () => gc.player.v2.gameLog(RETIRED, 19851986, REG),
    },
 
    // gc.team
