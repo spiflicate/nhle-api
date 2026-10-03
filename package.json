@@ -8,22 +8,37 @@
    "type": "module",
    "exports": {
       ".": {
-         "types": "./lib/index.d.ts",
-         "require": "./lib/index.cjs",
-         "import": "./lib/index.js"
+         "import": {
+            "types": "./lib/index.d.ts",
+            "default": "./lib/index.js"
+         },
+         "require": {
+            "types": "./lib/index.d.cts",
+            "default": "./lib/index.cjs"
+         }
       },
       "./toolkit": {
-         "types": "./lib/toolkit.d.ts",
-         "require": "./lib/toolkit.cjs",
-         "import": "./lib/toolkit.js"
-      }
+         "import": {
+            "types": "./lib/toolkit.d.ts",
+            "default": "./lib/toolkit.js"
+         },
+         "require": {
+            "types": "./lib/toolkit.d.cts",
+            "default": "./lib/toolkit.cjs"
+         }
+      },
+      "./package.json": "./package.json"
    },
+   "sideEffects": false,
    "files": [
       "lib",
       "README.md",
       "LICENSE",
       "CHANGELOG.md"
    ],
+   "engines": {
+      "node": ">=18"
+   },
    "scripts": {
       "build": "bunx tsup",
       "dev": "bunx tsup --watch",
@@ -31,7 +46,10 @@
       "test": "bun test",
       "test:watch": "bun test --watch",
       "drift": "bun scripts/check-drift.ts",
-      "prepublishOnly": "bun run build"
+      "prepublishOnly": "bun run build",
+      "lint": "bunx biome check .",
+      "format": "bunx biome check --write .",
+      "check:package": "bunx publint && bunx @arethetypeswrong/cli --pack . --profile node16"
    },
    "keywords": [
       "nhl",
@@ -46,7 +64,7 @@
    "license": "MIT",
    "repository": {
       "type": "git",
-      "url": "https://github.com/spiflicate/nhle-api.git"
+      "url": "git+https://github.com/spiflicate/nhle-api.git"
    },
    "bugs": {
       "url": "https://github.com/spiflicate/nhle-api/issues"
@@ -63,5 +81,8 @@
    },
    "dependencies": {
       "arktype": "^2.2.3"
+   },
+   "publishConfig": {
+      "access": "public"
    }
 }
