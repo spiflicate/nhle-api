@@ -25,6 +25,7 @@ export interface NHLClientWithErrorConfig extends NHLClientConfig {
 const BASE_URLS = {
    gamecenter: 'https://api-web.nhle.com/v1',
    edgeStats: 'https://api.nhle.com/stats/rest',
+   wsr: 'https://wsr.nhle.com',
 };
 
 /**
@@ -54,10 +55,18 @@ export class NHLClient {
     * Creates a new NHL API client instance
     * @param baseURL - Optional custom base URL or predefined API endpoint key
     * @param errorConfig - Optional error handling configuration
+    * @param headers - Optional headers sent with every request
     */
-   constructor(baseURL?: string, errorConfig?: ErrorConfig) {
+   constructor(
+      baseURL?: string,
+      errorConfig?: ErrorConfig,
+      headers?: Record<string, string>,
+   ) {
       this.config = { ...DEFAULT_CONFIG };
       if (baseURL) this.config.baseUrl = baseURL;
+      if (headers) {
+         this.config.headers = { ...this.config.headers, ...headers };
+      }
 
       // Initialize error handler with provided config
       this.errorHandler = new ErrorHandler(errorConfig);
@@ -171,13 +180,15 @@ export class NHLClient {
  *
  * @param baseURL - Optional custom base URL or predefined API endpoint key
  * @param errorConfig - Optional error handling configuration
+ * @param headers - Optional headers sent with every request
  * @returns A new NHL API client instance
  */
 export function createNHLClient(
    baseURL?: string,
    errorConfig?: ErrorConfig,
+   headers?: Record<string, string>,
 ): NHLClient {
-   return new NHLClient(baseURL, errorConfig);
+   return new NHLClient(baseURL, errorConfig, headers);
 }
 
 /**
@@ -190,4 +201,15 @@ const nhlClient = createNHLClient(BASE_URLS.gamecenter);
  */
 const edgeStatsClient = createNHLClient(BASE_URLS.edgeStats);
 
-export { edgeStatsClient, nhlClient };
+/**
+ * Client instance for the wsr.nhle.com tracking replay files. The host
+ * answers 403 unless the request looks like it came from nhl.com: a
+ * Referer on www.nhl.com and a browser-style User-Agent (runtime
+ * defaults such as `node` or `Bun/1.x` are refused).
+ */
+const wsrClient = createNHLClient(BASE_URLS.wsr, undefined, {
+   Referer: 'https://www.nhl.com/',
+   'User-Agent': 'Mozilla/5.0 (compatible; nhle-api)',
+});
+
+export { edgeStatsClient, nhlClient, wsrClient };

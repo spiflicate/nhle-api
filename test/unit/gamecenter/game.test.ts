@@ -15,6 +15,7 @@
  * - WSC.playByPlay() - Get play-by-play data from WSC endpoint
  * - pptReplay.goal() - Get goal replay data for a specific game and event
  * - pptReplay.event() - Get event replay data for a specific date
+ * - pptReplay.frames() - Get tracked puck and player positions for a goal
  * - whereToWatch() - Get where-to-watch information
  * - networkTVSchedule() - Get TV schedule for a specific date
  */
@@ -310,6 +311,41 @@ describe('Game Module', () => {
          if (!result.success) {
             expect(result.error).toBeInstanceOf(ValidationError);
          }
+      });
+   });
+
+   describe('pptReplay.frames', () => {
+      test('fetches the season sprite file with nhl.com headers', async () => {
+         let request: RequestInit | undefined;
+         globalThis.fetch = (async (url: string, init?: RequestInit) => {
+            mockCalls.push(String(url));
+            request = init;
+            return {
+               ok: true,
+               json: async () => [],
+            } as unknown as Response;
+         }) as unknown as typeof globalThis.fetch;
+
+         const result = await game.pptReplay.frames('2025030411', 55);
+         expect(result.success).toBeTrue();
+         expect(mockCalls[0]).toBe(
+            'https://wsr.nhle.com/sprites/20252026/2025030411/ev55.json',
+         );
+         const headers = request?.headers as Record<string, string>;
+         expect(headers.Referer).toBe('https://www.nhl.com/');
+         expect(headers['User-Agent']).toStartWith('Mozilla/5.0');
+      });
+
+      test('rejects an invalid event ID', async () => {
+         const result = await game.pptReplay.frames(
+            2024020500,
+            'invalid' as unknown as number,
+         );
+         expect(result.success).toBeFalse();
+         if (!result.success) {
+            expect(result.error).toBeInstanceOf(ValidationError);
+         }
+         expect(mockCalls).toHaveLength(0);
       });
    });
 

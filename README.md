@@ -137,6 +137,7 @@ data, historical team palettes, and official logo URL helpers.
 - `wsc.playByPlay(gameId)` – Play-by-play from the web service collection
 - `pptReplay.goal(gameId, eventId)` – Goal replay data for a specific event
 - `pptReplay.event(date?)` – Replay events for a given date (does not appear to be functional at this time)
+- `pptReplay.frames(gameId, eventId)` – Tracked puck and player positions around a goal, about 10 frames per second (the file behind `pptReplayUrl`)
 
 ### `gc.score` – Scores & Scoreboards
 
