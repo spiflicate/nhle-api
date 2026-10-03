@@ -1,4 +1,5 @@
-import { CayenneQueryBuilder, skaters } from '#/api/edge-stats/index.ts';
+import { skaters } from '#/api/edge-stats/index.ts';
+import { CayenneQueryBuilder } from '#/utils/cayenne-query-builder.ts';
 
 const builder = new CayenneQueryBuilder();
 

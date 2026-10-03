@@ -22,23 +22,15 @@ export interface NHLClientWithErrorConfig extends NHLClientConfig {
    errorConfig?: ErrorConfig;
 }
 
-const BASE_URLS = {
+/** Base URLs of the NHL APIs the library calls. */
+export const BASE_URLS = {
    gamecenter: 'https://api-web.nhle.com/v1',
    edgeStats: 'https://api.nhle.com/stats/rest',
    wsr: 'https://wsr.nhle.com',
-};
+} as const;
 
-/**
- * Default configuration for the NHL API client
- * Uses the code-defined configuration defaults.
- */
-const DEFAULT_CONFIG: Required<NHLClientConfig> = {
-   baseUrl: BASE_URLS.gamecenter,
-   timeout: config.timeout,
-   headers: {
-      Accept: 'application/json',
-   },
-   language: config.language,
+const DEFAULT_HEADERS: Record<string, string> = {
+   Accept: 'application/json',
 };
 
 /**
@@ -48,28 +40,48 @@ const DEFAULT_CONFIG: Required<NHLClientConfig> = {
  * comprehensive error handling using the ErrorHandler utility.
  */
 export class NHLClient {
-   private config: Required<NHLClientConfig>;
+   private options: NHLClientConfig;
    private errorHandler: ErrorHandler;
 
    /**
     * Creates a new NHL API client instance
-    * @param baseURL - Optional custom base URL or predefined API endpoint key
+    *
+    * Options left unset (timeout, language) follow the shared `config`
+    * object at request time, so changing `config` after import still
+    * applies to this client.
+    *
+    * @param baseURLOrOptions - Base URL, or client options
     * @param errorConfig - Optional error handling configuration
-    * @param headers - Optional headers sent with every request
+    *
+    * @example
+    * const client = new NHLClient('https://api-web.nhle.com/v1');
+    * const slow = new NHLClient({ timeout: 15000, language: 'fr' });
     */
    constructor(
-      baseURL?: string,
+      baseURLOrOptions?: string | NHLClientWithErrorConfig,
       errorConfig?: ErrorConfig,
-      headers?: Record<string, string>,
    ) {
-      this.config = { ...DEFAULT_CONFIG };
-      if (baseURL) this.config.baseUrl = baseURL;
-      if (headers) {
-         this.config.headers = { ...this.config.headers, ...headers };
-      }
+      const options =
+         typeof baseURLOrOptions === 'string'
+            ? { baseUrl: baseURLOrOptions }
+            : (baseURLOrOptions ?? {});
+      const { errorConfig: optionsErrorConfig, ...clientOptions } = options;
+      this.options = clientOptions;
 
       // Initialize error handler with provided config
-      this.errorHandler = new ErrorHandler(errorConfig);
+      this.errorHandler = new ErrorHandler(
+         errorConfig ?? optionsErrorConfig,
+      );
+   }
+
+   /** Base URL, timeout, headers and language in effect for the next request. */
+   private get config(): Required<NHLClientConfig> {
+      return {
+         baseUrl: this.options.baseUrl ?? BASE_URLS.gamecenter,
+         timeout: this.options.timeout ?? config.timeout,
+         headers: { ...DEFAULT_HEADERS, ...this.options.headers },
+         language: this.options.language ?? config.language,
+      };
    }
 
    /**
@@ -105,19 +117,17 @@ export class NHLClient {
       endpoint: string,
       params?: Record<string, unknown>,
    ): Promise<APIResult<T>> {
+      const { timeout, headers, language } = this.config;
       const url = this.buildUrl(endpoint, params);
       const controller = new AbortController();
-      const timeoutId = setTimeout(
-         () => controller.abort(),
-         this.config.timeout,
-      );
+      const timeoutId = setTimeout(() => controller.abort(), timeout);
 
       try {
          const response = await fetch(url, {
             method: 'GET',
             headers: {
-               ...this.config.headers,
-               'Accept-Language': this.config.language,
+               ...headers,
+               'Accept-Language': language,
             },
             signal: controller.signal,
          });
@@ -180,15 +190,13 @@ export class NHLClient {
  *
  * @param baseURL - Optional custom base URL or predefined API endpoint key
  * @param errorConfig - Optional error handling configuration
- * @param headers - Optional headers sent with every request
  * @returns A new NHL API client instance
  */
 export function createNHLClient(
-   baseURL?: string,
+   baseURLOrOptions?: string | NHLClientWithErrorConfig,
    errorConfig?: ErrorConfig,
-   headers?: Record<string, string>,
 ): NHLClient {
-   return new NHLClient(baseURL, errorConfig, headers);
+   return new NHLClient(baseURLOrOptions, errorConfig);
 }
 
 /**
@@ -207,9 +215,12 @@ const edgeStatsClient = createNHLClient(BASE_URLS.edgeStats);
  * Referer on www.nhl.com and a browser-style User-Agent (runtime
  * defaults such as `node` or `Bun/1.x` are refused).
  */
-const wsrClient = createNHLClient(BASE_URLS.wsr, undefined, {
-   Referer: 'https://www.nhl.com/',
-   'User-Agent': 'Mozilla/5.0 (compatible; nhle-api)',
+const wsrClient = createNHLClient({
+   baseUrl: BASE_URLS.wsr,
+   headers: {
+      Referer: 'https://www.nhl.com/',
+      'User-Agent': 'Mozilla/5.0 (compatible; nhle-api)',
+   },
 });
 
 export { edgeStatsClient, nhlClient, wsrClient };

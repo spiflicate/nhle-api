@@ -5,6 +5,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- `stats` namespace for the Stats API (`api.nhle.com/stats/rest`): skater, goalie and team reports, leaders, milestones, teams, seasons, games, shift charts, drafts, config, countries, glossary and franchises
+- `getStats(report, params)` for skaters, goalies and teams, with `SkaterReport`, `GoalieReport` and `TeamReport` unions of the report names
+- Response types for every `adv` function (`EdgeSkaterDetail`, `EdgeTeamZoneTime`, ...) and `LocalizedText`
+- `video.metadata(videoId)` for Brightcove video titles, descriptions and sources
+- `gc.game.pptReplay.frames(gameId, eventId)` for the tracked puck and player positions around a goal (wsr.nhle.com), typed as `PPTReplayFrames`
+- Root exports: `APIResult`, `NHLClient`, `createNHLClient`, `BASE_URLS`, the error classes (`NHLError`, `NotFoundError`, `ValidationError`...), `ErrorCategory`, `ErrorLogLevel`, and the Cayenne query builder
+- `nhle-api/toolkit` entry point with constants, date helpers, `resolvePath`, `normalizeAbbrev`, the Cayenne query builder, and team branding (colors and logo URLs)
+- `NHLClient` accepts an options object (`baseUrl`, `timeout`, `language`, `headers`, `errorConfig`)
+- Level-aware `logger` and `writeLog`
+- Daily API drift check (`bun run drift`, GitHub workflow "API drift") covering every public function
+
+### Changed
+
+- `config` is read on every request, so changing it at runtime takes effect; environment variable configuration was removed
+- Invalid `adv` parameters resolve to a failed result with a `ValidationError` instead of rejecting
+- Date parameters use the NHL's timezone (America/New_York)
+- Stats API: `getPlayerInfo`, `getLeaders`, `getGames`, `teams.getAll` and `teams.getById` take query params before `lang`; `teams.getById` returns a list, matching the API
+
+### Fixed
+
+- The build failed under TypeScript 7; builds use TypeScript 5.9
+- Published types left out `config`, `logConfig`, `logger` and `writeLog`
+- Edge skater and team paths, goalie top-10 save percentage paths and top-10 filter codes (23 endpoints)
+- `postalLookup` sends Canadian postal codes in the only form the API matches
+- `stats.skaters.getStats()` requested an unresolved `{report}` path, report functions sent no `cayenneExp` (HTTP 500), and `getStatsWithFilters` dropped most filters
+
+### Deprecated
+
+- `gc.game.whereToWatch()`: the endpoint now returns 404
+
+### Removed
+
+- The unused `NHLScoreboard` type
+
 ## [0.5.4] - 2026-02-10
 
 ### Added

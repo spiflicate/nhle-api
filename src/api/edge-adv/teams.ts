@@ -10,9 +10,25 @@
  */
 
 import { nhlClient } from '#/client/index.ts';
-import { NHLError } from '#/errors/index.ts';
+import type { APIResult } from '#/client/types.ts';
+import type {
+   EdgeTeamComparison,
+   EdgeTeamDetail,
+   EdgeTeamLanding,
+   EdgeTeamShotLocation,
+   EdgeTeamShotLocationTop10,
+   EdgeTeamShotSpeed,
+   EdgeTeamShotSpeedTop10,
+   EdgeTeamSkatingDistance,
+   EdgeTeamSkatingDistanceTop10,
+   EdgeTeamSkatingSpeed,
+   EdgeTeamSkatingSpeedTop10,
+   EdgeTeamZoneTime,
+   EdgeTeamZoneTimeTop10,
+} from '#/types/responses/edge-adv.ts';
 import {
    BaseParams,
+   invalidParams,
    isParseError,
    PositionFilter as PositionFilterSchema,
    ShotLocationCategory as ShotLocationCategorySchema,
@@ -45,8 +61,8 @@ import { teamsPaths as p } from './paths.ts';
  * Team Edge Advanced Stats API helpers.
  *
  * Lightweight wrapper exposing functions that call the underlying nhlClient
- * for team-related endpoints. Each method returns the raw Promise from the
- * client.get call.
+ * for team-related endpoints. Each function resolves to an APIResult; invalid
+ * parameters give a ValidationError result without a request.
  */
 
 /**
@@ -59,16 +75,11 @@ export async function stats(
    teamId: TeamId,
    season?: Season,
    gameType?: GameType,
-): Promise<unknown> {
+): Promise<APIResult<EdgeTeamDetail>> {
    const parsed = TeamParams({ teamId, season, gameType });
-   if (isParseError(parsed))
-      return Promise.reject(
-         new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.stats,
-         }),
-      );
+   if (isParseError(parsed)) return invalidParams(parsed, p.stats);
    const path = resolvePath(p.stats, parsed);
-   return nhlClient.get(path);
+   return nhlClient.get<EdgeTeamDetail>(path);
 }
 
 /**
@@ -78,17 +89,12 @@ export async function compare(
    teamId: TeamId,
    season?: Season,
    gameType?: GameType,
-): Promise<unknown> {
+): Promise<APIResult<EdgeTeamComparison>> {
    gameType ??= 'REG';
    const parsed = TeamParams({ teamId, season, gameType });
-   if (isParseError(parsed))
-      return Promise.reject(
-         new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.compare,
-         }),
-      );
+   if (isParseError(parsed)) return invalidParams(parsed, p.compare);
    const path = resolvePath(p.compare, parsed);
-   return nhlClient.get(path);
+   return nhlClient.get<EdgeTeamComparison>(path);
 }
 
 /**
@@ -97,16 +103,11 @@ export async function compare(
 export async function leaders(
    season?: Season,
    gameType?: GameType,
-): Promise<unknown> {
+): Promise<APIResult<EdgeTeamLanding>> {
    const parsed = BaseParams({ season, gameType });
-   if (isParseError(parsed))
-      return Promise.reject(
-         new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.leaders,
-         }),
-      );
+   if (isParseError(parsed)) return invalidParams(parsed, p.leaders);
    const path = resolvePath(p.leaders, parsed);
-   return nhlClient.get(path);
+   return nhlClient.get<EdgeTeamLanding>(path);
 }
 
 /**
@@ -116,16 +117,11 @@ export async function shotLocation(
    teamId: TeamId,
    season?: Season,
    gameType?: GameType,
-): Promise<unknown> {
+): Promise<APIResult<EdgeTeamShotLocation>> {
    const parsed = TeamParams({ teamId, season, gameType });
-   if (isParseError(parsed))
-      return Promise.reject(
-         new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.shotLocation,
-         }),
-      );
+   if (isParseError(parsed)) return invalidParams(parsed, p.shotLocation);
    const path = resolvePath(p.shotLocation, parsed);
-   return nhlClient.get(path);
+   return nhlClient.get<EdgeTeamShotLocation>(path);
 }
 
 /**
@@ -135,16 +131,11 @@ export async function shotSpeed(
    teamId: TeamId,
    season?: Season,
    gameType?: GameType,
-): Promise<unknown> {
+): Promise<APIResult<EdgeTeamShotSpeed>> {
    const parsed = TeamParams({ teamId, season, gameType });
-   if (isParseError(parsed))
-      return Promise.reject(
-         new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.shotSpeed,
-         }),
-      );
+   if (isParseError(parsed)) return invalidParams(parsed, p.shotSpeed);
    const path = resolvePath(p.shotSpeed, parsed);
-   return nhlClient.get(path);
+   return nhlClient.get<EdgeTeamShotSpeed>(path);
 }
 
 /**
@@ -154,16 +145,12 @@ export async function skatingDistance(
    teamId: TeamId,
    season?: Season,
    gameType?: GameType,
-): Promise<unknown> {
+): Promise<APIResult<EdgeTeamSkatingDistance>> {
    const parsed = TeamParams({ teamId, season, gameType });
    if (isParseError(parsed))
-      return Promise.reject(
-         new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.skatingDistance,
-         }),
-      );
+      return invalidParams(parsed, p.skatingDistance);
    const path = resolvePath(p.skatingDistance, parsed);
-   return nhlClient.get(path);
+   return nhlClient.get<EdgeTeamSkatingDistance>(path);
 }
 
 /**
@@ -173,16 +160,11 @@ export async function skatingSpeed(
    teamId: TeamId,
    season?: Season,
    gameType?: GameType,
-): Promise<unknown> {
+): Promise<APIResult<EdgeTeamSkatingSpeed>> {
    const parsed = TeamParams({ teamId, season, gameType });
-   if (isParseError(parsed))
-      return Promise.reject(
-         new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.skatingSpeed,
-         }),
-      );
+   if (isParseError(parsed)) return invalidParams(parsed, p.skatingSpeed);
    const path = resolvePath(p.skatingSpeed, parsed);
-   return nhlClient.get(path);
+   return nhlClient.get<EdgeTeamSkatingSpeed>(path);
 }
 
 /**
@@ -192,16 +174,11 @@ export async function zoneTime(
    teamId: TeamId,
    season?: Season,
    gameType?: GameType,
-): Promise<unknown> {
+): Promise<APIResult<EdgeTeamZoneTime>> {
    const parsed = TeamParams({ teamId, season, gameType });
-   if (isParseError(parsed))
-      return Promise.reject(
-         new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.zoneTime,
-         }),
-      );
+   if (isParseError(parsed)) return invalidParams(parsed, p.zoneTime);
    const path = resolvePath(p.zoneTime, parsed);
-   return nhlClient.get(path);
+   return nhlClient.get<EdgeTeamZoneTime>(path);
 }
 
 export const top10 = {
@@ -220,7 +197,7 @@ async function top10ShotLocation(
    position?: PositionFilter,
    category?: ShotLocationCategory,
    sortBy?: ShotLocationSort,
-): Promise<unknown> {
+): Promise<APIResult<EdgeTeamShotLocationTop10>> {
    const Parser = BaseParams.merge({
       position: withDefault(PositionFilterSchema, 'ALL'),
       category: withDefault(ShotLocationCategorySchema, 'G'),
@@ -234,13 +211,9 @@ async function top10ShotLocation(
       sortBy,
    });
    if (isParseError(parsed))
-      return Promise.reject(
-         new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.top10.shotLocation,
-         }),
-      );
+      return invalidParams(parsed, p.top10.shotLocation);
    const path = resolvePath(p.top10.shotLocation, parsed);
-   return nhlClient.get(path);
+   return nhlClient.get<EdgeTeamShotLocationTop10>(path);
 }
 /**
  * Top-10 team shot speed lists.
@@ -250,7 +223,7 @@ async function top10ShotSpeed(
    gameType?: GameType,
    position?: PositionFilter,
    sortBy?: ShotSpeedSort,
-): Promise<unknown> {
+): Promise<APIResult<EdgeTeamShotSpeedTop10>> {
    const Parser = BaseParams.merge({
       position: withDefault(PositionFilterSchema, 'ALL'),
       sortBy: withDefault(ShotSpeedSortSchema, 'MAX'),
@@ -262,13 +235,9 @@ async function top10ShotSpeed(
       sortBy,
    });
    if (isParseError(parsed))
-      return Promise.reject(
-         new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.top10.shotSpeed,
-         }),
-      );
+      return invalidParams(parsed, p.top10.shotSpeed);
    const path = resolvePath(p.top10.shotSpeed, parsed);
-   return nhlClient.get(path);
+   return nhlClient.get<EdgeTeamShotSpeedTop10>(path);
 }
 /**
  * Top-10 team skating distance lists.
@@ -279,7 +248,7 @@ async function top10SkatingDistance(
    position?: PositionFilter,
    strength?: SkatersStrength,
    sortBy?: SkatingDistanceSort,
-): Promise<unknown> {
+): Promise<APIResult<EdgeTeamSkatingDistanceTop10>> {
    const Parser = BaseParams.merge({
       position: withDefault(PositionFilterSchema, 'ALL'),
       strength: withDefault(SkatersStrengthSchema, 'ALL'),
@@ -293,13 +262,9 @@ async function top10SkatingDistance(
       sortBy,
    });
    if (isParseError(parsed))
-      return Promise.reject(
-         new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.top10.skatingDistance,
-         }),
-      );
+      return invalidParams(parsed, p.top10.skatingDistance);
    const path = resolvePath(p.top10.skatingDistance, parsed);
-   return nhlClient.get(path);
+   return nhlClient.get<EdgeTeamSkatingDistanceTop10>(path);
 }
 /**
  * Top-10 team skating speed lists.
@@ -309,7 +274,7 @@ async function top10SkatingSpeed(
    gameType?: GameType,
    position?: PositionFilter,
    sortBy?: SkatingSpeedSort,
-): Promise<unknown> {
+): Promise<APIResult<EdgeTeamSkatingSpeedTop10>> {
    const Parser = BaseParams.merge({
       position: withDefault(PositionFilterSchema, 'ALL'),
       sortBy: withDefault(SkatingSpeedSortSchema, 'TOP'),
@@ -321,13 +286,9 @@ async function top10SkatingSpeed(
       sortBy,
    });
    if (isParseError(parsed))
-      return Promise.reject(
-         new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.top10.skatingSpeed,
-         }),
-      );
+      return invalidParams(parsed, p.top10.skatingSpeed);
    const path = resolvePath(p.top10.skatingSpeed, parsed);
-   return nhlClient.get(path);
+   return nhlClient.get<EdgeTeamSkatingSpeedTop10>(path);
 }
 /**
  * Top-10 team zone time lists.
@@ -337,7 +298,7 @@ async function top10ZoneTime(
    gameType?: GameType,
    strength?: SkatersStrength,
    sortBy?: ZoneTimeSort,
-): Promise<unknown> {
+): Promise<APIResult<EdgeTeamZoneTimeTop10>> {
    const Parser = BaseParams.merge({
       strength: withDefault(SkatersStrengthSchema, 'ALL'),
       sortBy: withDefault(ZoneTimeSortSchema, 'OZ'),
@@ -348,12 +309,7 @@ async function top10ZoneTime(
       strength,
       sortBy,
    });
-   if (isParseError(parsed))
-      return Promise.reject(
-         new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.top10.zoneTime,
-         }),
-      );
+   if (isParseError(parsed)) return invalidParams(parsed, p.top10.zoneTime);
    const path = resolvePath(p.top10.zoneTime, parsed);
-   return nhlClient.get(path);
+   return nhlClient.get<EdgeTeamZoneTimeTop10>(path);
 }

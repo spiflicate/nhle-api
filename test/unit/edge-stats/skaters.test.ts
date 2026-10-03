@@ -73,13 +73,13 @@ describe('Skaters Module', () => {
    });
 
    test('getPlayerInfo should fetch player information', async () => {
-      const result = await skaters.getPlayerInfo('en');
+      const result = await skaters.getPlayerInfo({}, 'en');
       expectSuccess(result);
       expect(mockCalls[0]).toContain('/en/players');
    });
 
    test('getLeaders should fetch skater leaders with attribute', async () => {
-      const result = await skaters.getLeaders('points', 'en');
+      const result = await skaters.getLeaders('points', {}, 'en');
       expectSuccess(result);
       expect(mockCalls[0]).toContain('/leaders/skaters/points');
    });
@@ -90,10 +90,22 @@ describe('Skaters Module', () => {
       expect(mockCalls[0]).toContain('/milestones/skaters');
    });
 
-   test('getStats should fetch skater stats', async () => {
-      const result = await skaters.getStats('en');
+   test('getStats should default to the summary report', async () => {
+      const result = await skaters.getStats();
       expectSuccess(result);
-      expect(mockCalls[0]).toContain('/en/skater');
+      expect(mockCalls[0]).toContain('/en/skater/summary?cayenneExp=');
+   });
+
+   test('getStatsWithFilters should keep every filter', async () => {
+      await skaters.getStatsWithFilters('realtime', {
+         seasonId: 20242025,
+         teamId: 10,
+      });
+      const url = new URL(mockCalls[0] ?? '');
+      expect(url.pathname).toEndWith('/en/skater/realtime');
+      expect(url.searchParams.get('cayenneExp')).toBe(
+         'seasonId=20242025 and teamId=10',
+      );
    });
 
    test('getStatsWithParams should fetch with custom params', async () => {
@@ -144,7 +156,7 @@ describe('Skaters Module', () => {
    });
 
    test('should support French language', async () => {
-      await skaters.getPlayerInfo('fr');
+      await skaters.getPlayerInfo({}, 'fr');
       expect(mockCalls[0]).toContain('/fr/players');
    });
 

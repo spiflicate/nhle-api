@@ -10,11 +10,6 @@
  * - Miscellaneous (config, shifts, glossary, etc.)
  */
 
-export {
-   buildCayenneExp,
-   CayenneQueryBuilder,
-   createCayenneQuery,
-} from '#/utils/cayenne-query-builder.ts';
 export * as goalies from './goalies.ts';
 export * as misc from './misc.ts';
 export * as season from './season-game.ts';

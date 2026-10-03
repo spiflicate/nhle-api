@@ -8,12 +8,13 @@ A modern TypeScript wrapper around the public NHL GameCenter and EdgeStats APIs 
 
 ## Overview
 
-The library exposes a small, functional surface over the NHL "Game Center" and related APIs and ships with rich response types for all Game Center endpoints.
+The library exposes a small, functional surface over the NHL "Game Center", Edge and Stats APIs and ships with response types for every endpoint.
 
 - Written in TypeScript and published as ESM/CJS
 - Thin functional wrappers over official NHL API routes
-- Fully-typed Game Center responses (game, team, player, draft, misc)
-- Code-defined configuration for timeouts, language and logging
+- Typed responses for Game Center (`gc`), Edge advanced stats (`adv`), the Stats API (`stats`) and video metadata (`video`)
+- Every function resolves to an `APIResult` instead of throwing
+- Runtime configuration for timeouts, language and logging
 
 ## Installation
 
@@ -54,67 +55,65 @@ const player = await gc.player.landing(8478402);
 
 ## Configuration
 
-Basic behavior is configured in `src/config/index.ts`:
-
-```ts
-export const config = {
-   timeout: 10000,
-   language: 'en',
-   logLevel: 'debug',
-};
-```
-
-You can inspect the active configuration at runtime:
+`config` holds the shared defaults. Change it at runtime; every request reads it, so changes apply even after the API modules are loaded:
 
 ```ts
 import { config, logConfig } from 'nhle-api';
 
-console.log(config.timeout, config.language, config.logLevel);
+config.timeout = 10000; // ms, default 5000
+config.language = 'fr'; // 'en' (default) or 'fr'
+config.logLevel = 'error'; // 'silent' | 'error' | 'warn' (default) | 'info' | 'debug'
+
 logConfig();
 ```
 
-See `docs/CONFIGURATION.md` for more details.
+See `docs/CONFIGURATION.md` for per-client settings.
 
 ## Top-Level Exports
 
-The package root `nhle-api` re-exports the main API namespaces, configuration utilities, constants, and public types:
+The package root `nhle-api` re-exports the API namespaces, configuration, the HTTP client, error classes, constants and types:
 
 ```ts
-// Game Center API (fully typed)
-import { gc } from 'nhle-api';
+// API namespaces
+import { adv, gc, stats, video } from 'nhle-api';
 
-// Edge Advanced stats (in progress, API surface may change)
-import { adv } from 'nhle-api';
+// Configuration and logging
+import { config, logConfig, logger } from 'nhle-api';
 
-// Code-defined configuration helpers
-import { config, logConfig } from 'nhle-api';
+// Result type and errors
+import { NHLError, NotFoundError, ValidationError } from 'nhle-api';
+import type { APIResult } from 'nhle-api';
 
-// Shared type exports (Game Center response types, parameter types, etc.)
-import type { GameLandingResponse } from 'nhle-api';
+// Your own client (custom base URL, headers, timeout, error handling)
+import { NHLClient, createNHLClient } from 'nhle-api';
+
+// Cayenne filter builder for `stats`
+import { CayenneQueryBuilder } from 'nhle-api';
+
+// Response and parameter types
+import type { EdgeSkaterDetail, GamecenterLanding, Season } from 'nhle-api';
 ```
-
-### Notes on Edge APIs
-
-- `adv` (Edge Advanced) is available but still considered in development, but ready for preliminary use.
-- The `stats` (Edge Stats) namespace is not exported at the moment and will be introduced in a future release once implementation is ready.
 
 ## Toolkit Entry Point
 
-Use the `nhle-api/toolkit` subpath when you only need NHL constants and shared helpers. It does not expose API endpoint namespaces or environment configuration:
+Use the `nhle-api/toolkit` subpath when you only need NHL constants and shared helpers. It does not load the API clients or configuration:
 
 ```ts
 import {
    NHL,
    getCurrentSeason,
+   normalizeAbbrev,
    resolvePath,
 } from 'nhle-api/toolkit';
 
 const season = getCurrentSeason();
-const teamPath = resolvePath('/teams/{team}', { team: 'TOR' });
+const team = normalizeAbbrev('TB'); // 'TBL'
+const teamPath = resolvePath('/teams/{team}', { team });
 ```
 
-This entry point exports `NHL`, date helpers, `resolvePath`, team branding
-data, historical team palettes, and official logo URL helpers.
+This entry point exports `NHL`, date helpers, `normalizeAbbrev`, `resolvePath`,
+the Cayenne query builder, team branding data, historical team palettes, and
+official logo URL helpers.
 
 ## Game Center API (`gc`)
 
@@ -181,48 +180,91 @@ data, historical team palettes, and official logo URL helpers.
 - `location()` – Location info for current context
 - `partnerGame(country, date?)` – Partner game information
 
-## Types
+## Edge Advanced Stats (`adv`)
 
-The library exports strongly-typed response shapes and parameter types for all Game Center endpoints from the `types` bundle:
+NHL Edge puck and player tracking data (`api-web.nhle.com/v1/edge`), with response types for every function (`EdgeSkaterDetail`, `EdgeTeamZoneTime`, ...).
 
-- Response types for `gc.game.*`, `gc.team.*`, `gc.player.*`, `gc.draft.*`, `gc.misc.*`
-- Common enums and helper types (position codes, team codes, schedule state, etc.)
-
-
-
-### Error Handling and `NHLError`
-
-Under the hood, low-level HTTP requests use a shared `NHLClient` and `ErrorHandler` which normalize HTTP/network failures into a single `NHLError` shape.
-
-- All non-2xx responses and network/timeout failures are converted to an `NHLError` instance.
-- Errors are categorized (client/server/network) with optional context (endpoint, method, status code).
-- High-level helpers expose these via the `APIResponse<T>` union so you can safely branch on `status` without catching exceptions.
-
-Typical usage pattern:
+- `adv.skaters`: `detail`, `comparison`, `leaders`, `shotLocation`, `shotSpeed`, `skatingDistance`, `skatingSpeed`, `zoneTime`, and `top10.{distance, shotLocation, shotSpeed, speed, zoneTime}`
+- `adv.goalies`: `player`, `compare`, `leaders`, `savePercentage`, `savePercentage5v5`, `saveLocation`, and `top10.{savePercentage, savePercentage5v5, saveLocation}`
+- `adv.teams`: `stats`, `compare`, `leaders`, `shotLocation`, `shotSpeed`, `skatingDistance`, `skatingSpeed`, `zoneTime`, and `top10.{shotLocation, shotSpeed, skatingDistance, skatingSpeed, zoneTime}`
+- `adv.byTheNumbers()`: the Edge home page's daily highlights
 
 ```ts
-import { gc } from 'nhle-api';
-import type { APIResponse, GamecenterLanding } from 'nhle-api';
+const result = await adv.skaters.detail(8478402, 20242025, 2);
+if (result.success) console.log(result.data.skatingSpeed.speedMax.imperial);
+```
 
-const result: APIResponse<GamecenterLanding> = await gc.game.landing(2023020001);
+## Stats API (`stats`)
+
+The stats.nhl.com reports (`api.nhle.com/stats/rest`). List endpoints answer `{ data, total }` and accept `cayenneExp`, `sort`, `dir`, `limit` and `start`.
+
+- `stats.skaters` / `stats.goalies` / `stats.teams`: `getStats(report, params)` for any report (`summary`, `realtime`, `powerplay`...; `SkaterReport`, `GoalieReport` and `TeamReport` list them), plus `getStatsWithParams`, `getStatsWithBuilder` and `getStatsWithFilters`
+- `stats.skaters.getPlayerInfo(params)`, `getLeaders(category, params)`, `getMilestones()`; the same leaders and milestones for goalies
+- `stats.teams.getAll(params)`, `getById(teamId, params)`
+- `stats.season`: `getSeasons()`, `getGames(params)`, `getShiftChart(gameId)`, `getDraft()`
+- `stats.misc`: `getConfig()` (every report's columns), `getCountries()`, `getGlossary()`, `getFranchises()`
+
+```ts
+import { stats } from 'nhle-api';
+
+const result = await stats.skaters.getStats('summary', {
+   cayenneExp: 'seasonId=20242025 and gameTypeId=2',
+   sort: 'points',
+   dir: 'desc',
+   limit: 10,
+});
+
+// Or with the query builder
+const goalies = await stats.goalies.getStatsWithBuilder('summary', (q) => ({
+   cayenneExp: q.equals('seasonId', 20242025).greaterThan('gamesPlayed', 20).build(),
+   sort: 'savePct',
+   dir: 'desc',
+}));
+```
+
+See [docs/QUERY_BUILDER_GUIDE.md](docs/QUERY_BUILDER_GUIDE.md) for the builder.
+
+## Video (`video`)
+
+- `video.metadata(videoId)`: title, descriptions, duration, poster and playable sources (with the best MP4 as `url`) for a Brightcove video id, such as a goal's `highlightClip` in `gc.game.landing`
+
+## Types
+
+Response types are exported for every endpoint: Game Center (`GamecenterLanding`, `TeamRoster`...), Edge (`Edge*`) and the Stats API (`stats.SkaterStats`, `stats.Team`...), along with parameter types (`Season`, `GameId`, `TeamAbbrev`...) and shared shapes such as `LocalizedText`.
+
+### Results and errors
+
+Functions never throw for API failures. Each resolves to an `APIResult<T>`:
+
+- `{ success: true, data }` on success.
+- `{ success: false, error }` otherwise, where `error` is an `NHLError` subclass: `NotFoundError` (404), `ClientError` (other 4xx), `ServerError` (5xx), `RateLimitError` (429), `NetworkError`, or `ValidationError` for parameters rejected before any request.
+- `error.category` and `error.context` (endpoint, status code, response body) carry the details.
+
+```ts
+import { gc, NotFoundError } from 'nhle-api';
+import type { APIResult, GamecenterLanding } from 'nhle-api';
+
+const result: APIResult<GamecenterLanding> = await gc.game.landing(2023020001);
 
 if (result.success) {
-   console.log(result.data);
+   console.log(result.data.venue.default);
+} else if (result.error instanceof NotFoundError) {
+   console.log('No such game');
 } else {
-   // NHLError instance with rich metadata
-   console.error(result.error.message);
+   console.error(result.error.category, result.error.message);
 }
 ```
 
 ## Roadmap / Status
 
-- ✅ Game Center endpoints fully wired with response types
-- ✅ Code-defined configuration utilities (`config`, `logConfig`)
-- ✅ Error handling via `NHLError` and structured error responses internally
-- 🚧 Edge Advanced (`adv`) API surface and types are in development
-- ⏳ Edge Stats (`stats`) API will be added in a future minor release
+- ✅ Game Center endpoints with response types
+- ✅ Edge Advanced (`adv`) endpoints with response types
+- ✅ Stats API (`stats`) endpoints with typed reports
+- ✅ Runtime configuration (`config`) and per-client settings (`NHLClient`)
+- ✅ Error classes and `APIResult` exported
+- ✅ Daily drift check against the live APIs
 
-For a detailed list of changes and recent work on response types and endpoint coverage, see `CHANGELOG.md`.
+For a detailed list of changes, see `CHANGELOG.md`.
 
 ## Docs
 
