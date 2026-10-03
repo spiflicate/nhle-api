@@ -40,3 +40,12 @@ export {
 export { type LogContext, logger, writeLog } from './logging/index.js';
 // Re-export types
 export * from './types/index.js';
+// Cayenne filter builder for the stats namespace
+export {
+   buildCayenneExp,
+   type CayenneCondition,
+   type CayenneExpression,
+   type CayenneGroup,
+   CayenneQueryBuilder,
+   createCayenneQuery,
+} from './utils/cayenne-query-builder.js';

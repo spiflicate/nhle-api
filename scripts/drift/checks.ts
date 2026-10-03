@@ -3,7 +3,7 @@
  * data. Stable ids point at a finished season, game and draft, so their
  * shapes should only change when the NHL APIs do.
  */
-import { adv, gc } from '#/api/index.ts';
+import { adv, gc, stats } from '#/api/index.ts';
 import type { APIResult } from '#/client/types.ts';
 
 const SEASON = 20242025;
@@ -372,4 +372,167 @@ const edge: DriftCheck[] = [
    },
 ];
 
-export const checks: DriftCheck[] = [...gamecenter, ...edge];
+/** Season filters for the stats API (field names differ per endpoint) */
+const STATS_SEASON = `seasonId=${SEASON} and gameTypeId=${REG}`;
+const LEADERS_SEASON = `season=${SEASON} and gameType=${REG}`;
+const FILTERS = { seasonId: SEASON, gameTypeId: REG };
+const PAGE = { limit: 5 };
+
+const statsApi: DriftCheck[] = [
+   // stats.skaters
+   {
+      name: 'stats.skaters.getPlayerInfo',
+      run: () =>
+         stats.skaters.getPlayerInfo({ cayenneExp: `id=${SKATER}` }),
+   },
+   {
+      name: 'stats.skaters.getLeaders',
+      run: () =>
+         stats.skaters.getLeaders('points', { cayenneExp: LEADERS_SEASON }),
+   },
+   {
+      name: 'stats.skaters.getMilestones',
+      run: () => stats.skaters.getMilestones(),
+      volatile: true,
+   },
+   {
+      name: 'stats.skaters.getStats',
+      run: () =>
+         stats.skaters.getStats('summary', {
+            cayenneExp: STATS_SEASON,
+            ...PAGE,
+         }),
+   },
+   {
+      name: 'stats.skaters.getStatsWithParams',
+      run: () =>
+         stats.skaters.getStatsWithParams('realtime', {
+            cayenneExp: STATS_SEASON,
+            ...PAGE,
+         }),
+   },
+   {
+      name: 'stats.skaters.getStatsWithBuilder',
+      run: () =>
+         stats.skaters.getStatsWithBuilder('timeonice', (q) => ({
+            cayenneExp: q
+               .equals('seasonId', SEASON)
+               .equals('gameTypeId', REG)
+               .build(),
+            ...PAGE,
+         })),
+   },
+   {
+      name: 'stats.skaters.getStatsWithFilters',
+      run: () =>
+         stats.skaters.getStatsWithFilters('bios', FILTERS, {}, PAGE),
+   },
+   // stats.goalies
+   {
+      name: 'stats.goalies.getLeaders',
+      run: () =>
+         stats.goalies.getLeaders('savePctg', {
+            cayenneExp: LEADERS_SEASON,
+         }),
+   },
+   {
+      name: 'stats.goalies.getMilestones',
+      run: () => stats.goalies.getMilestones(),
+      volatile: true,
+   },
+   {
+      name: 'stats.goalies.getStats',
+      run: () =>
+         stats.goalies.getStats('summary', {
+            cayenneExp: STATS_SEASON,
+            ...PAGE,
+         }),
+   },
+   {
+      name: 'stats.goalies.getStatsWithParams',
+      run: () =>
+         stats.goalies.getStatsWithParams('advanced', {
+            cayenneExp: STATS_SEASON,
+            ...PAGE,
+         }),
+   },
+   {
+      name: 'stats.goalies.getStatsWithBuilder',
+      run: () =>
+         stats.goalies.getStatsWithBuilder('savesByStrength', (q) => ({
+            cayenneExp: q
+               .equals('seasonId', SEASON)
+               .equals('gameTypeId', REG)
+               .build(),
+            ...PAGE,
+         })),
+   },
+   {
+      name: 'stats.goalies.getStatsWithFilters',
+      run: () =>
+         stats.goalies.getStatsWithFilters('bios', FILTERS, {}, PAGE),
+   },
+   // stats.teams
+   { name: 'stats.teams.getAll', run: () => stats.teams.getAll() },
+   {
+      name: 'stats.teams.getById',
+      run: () => stats.teams.getById(TEAM_ID, { include: 'logos' }),
+   },
+   {
+      name: 'stats.teams.getStats',
+      run: () =>
+         stats.teams.getStats('summary', { cayenneExp: STATS_SEASON }),
+   },
+   {
+      name: 'stats.teams.getStatsWithParams',
+      run: () =>
+         stats.teams.getStatsWithParams('powerplay', {
+            cayenneExp: STATS_SEASON,
+            ...PAGE,
+         }),
+   },
+   {
+      name: 'stats.teams.getStatsWithBuilder',
+      run: () =>
+         stats.teams.getStatsWithBuilder('realtime', (q) => ({
+            cayenneExp: q
+               .equals('seasonId', SEASON)
+               .equals('gameTypeId', REG)
+               .build(),
+            ...PAGE,
+         })),
+   },
+   {
+      name: 'stats.teams.getStatsWithFilters',
+      run: () =>
+         stats.teams.getStatsWithFilters('penaltykill', FILTERS, {}, PAGE),
+   },
+   // stats.season
+   {
+      name: 'stats.season.getSeasons',
+      run: () => stats.season.getSeasons(),
+   },
+   {
+      name: 'stats.season.getGames',
+      run: () =>
+         stats.season.getGames({ cayenneExp: `gameDate="${DATE}"` }),
+   },
+   {
+      name: 'stats.season.getShiftChart',
+      run: () => stats.season.getShiftChart(GAME),
+   },
+   { name: 'stats.season.getDraft', run: () => stats.season.getDraft() },
+   // stats.misc
+   { name: 'stats.misc.getConfig', run: () => stats.misc.getConfig() },
+   {
+      name: 'stats.misc.getCountries',
+      run: () => stats.misc.getCountries(),
+   },
+   { name: 'stats.misc.getGlossary', run: () => stats.misc.getGlossary() },
+   {
+      name: 'stats.misc.getFranchises',
+      run: () => stats.misc.getFranchises(),
+   },
+];
+
+export const checks: DriftCheck[] = [...gamecenter, ...edge, ...statsApi];

@@ -8,10 +8,12 @@
  */
 
 import { edgeStatsClient } from '#/client/index.ts';
+import type { APIResult } from '#/client/types.ts';
 import { config } from '#/config/index.ts';
 import { resolvePath } from '#/utils/utils.ts';
 import { dataPaths as p } from './paths.ts';
 import type {
+   APIResultPaginated,
    Config,
    Country,
    Franchise,
@@ -22,13 +24,15 @@ import type {
 /**
  * Get configuration information
  *
- * @param lang - Language code (default: 'en')
+ * @param lang - Language code (default: configured language)
  * @returns Promise resolving to configuration data
  *
  * @example
  * const config = await getConfig('en');
  */
-export async function getConfig(lang: string = config.language) {
+export async function getConfig(
+   lang: string = config.language,
+): Promise<APIResult<Config>> {
    const path = resolvePath(p.config, { lang });
    return edgeStatsClient.get<Config>(path);
 }
@@ -37,13 +41,15 @@ export async function getConfig(lang: string = config.language) {
  * Get country information
  * Returns list of all countries with a hockey presence
  *
- * @param lang - Language code (default: 'en')
+ * @param lang - Language code (default: configured language)
  * @returns Promise resolving to country data
  *
  * @example
  * const countries = await getCountries('en');
  */
-export async function getCountries(lang: string = config.language) {
+export async function getCountries(
+   lang: string = config.language,
+): Promise<APIResultPaginated<Country>> {
    const path = resolvePath(p.countries, { lang });
    return edgeStatsClient.get<PaginatedData<Country>>(path);
 }
@@ -51,13 +57,15 @@ export async function getCountries(lang: string = config.language) {
 /**
  * Get the glossary for a specific language
  *
- * @param lang - Language code (default: 'en')
+ * @param lang - Language code (default: configured language)
  * @returns Promise resolving to glossary data
  *
  * @example
  * const glossary = await glossary.get('en');
  */
-export async function getGlossary(lang: string = config.language) {
+export async function getGlossary(
+   lang: string = config.language,
+): Promise<APIResultPaginated<GlossaryEntry>> {
    const path = resolvePath(p.glossary, { lang });
    return edgeStatsClient.get<PaginatedData<GlossaryEntry>>(path);
 }
@@ -65,13 +73,15 @@ export async function getGlossary(lang: string = config.language) {
 /**
  * Get franchise information
  *
- * @param lang - Language code (default: 'en')
+ * @param lang - Language code (default: configured language)
  * @returns Promise resolving to franchise data
  *
  * @example
  * const allFranchises = await getFranchises('en');
  */
-export async function getFranchises(lang: string = config.language) {
+export async function getFranchises(
+   lang: string = config.language,
+): Promise<APIResultPaginated<Franchise>> {
    const path = resolvePath(p.franchises, { lang });
    return edgeStatsClient.get<PaginatedData<Franchise>>(path);
 }
