@@ -35,7 +35,7 @@ describe('Edge-Adv Summary Module', () => {
    test('byTheNumbers should fetch edge by-the-numbers summary', async () => {
       const result = await summary.byTheNumbers();
       expect(result.success).toBeTrue();
-      expect(result.data).toBeDefined();
+      if (result.success) expect(result.data).toBeDefined();
       expect(mockCalls[0]).toContain('edge/by-the-numbers/now');
    });
 });

@@ -7,14 +7,16 @@
  * ======================================================================
  */
 import { nhlClient } from '#/client/index.ts';
+import type { APIResult } from '#/client/types.ts';
+import type { EdgeByTheNumbers } from '#/types/responses/edge-adv.ts';
 import { summaryPaths as p } from './paths.ts';
 
 /**
  * Edge Advanced Stats API helpers.
  *
  * Lightweight wrapper exposing functions that call the underlying nhlClient
- * for related endpoints. Each method returns the raw Promise from the
- * client.get call.
+ * for related endpoints. Each function resolves to an APIResult; invalid
+ * parameters give a ValidationError result without a request.
  */
 
 /**
@@ -22,6 +24,6 @@ import { summaryPaths as p } from './paths.ts';
  * insights from the previous days games.
  * @returns A promise that resolves to the "by the numbers" data.
  */
-export async function byTheNumbers() {
-   return nhlClient.get(p.byTheNumbers);
+export async function byTheNumbers(): Promise<APIResult<EdgeByTheNumbers>> {
+   return nhlClient.get<EdgeByTheNumbers>(p.byTheNumbers);
 }

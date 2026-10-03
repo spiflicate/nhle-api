@@ -36,12 +36,8 @@ export interface DriftCheck {
    volatile?: boolean;
 }
 
-/**
- * The adv functions are typed `unknown` but resolve to an APIResult.
- * Their top-10 lists are called without filters, so the checks also
- * cover the default filter values.
- */
-const result = (p: Promise<unknown>) => p as Promise<APIResult<unknown>>;
+// The adv top-10 lists are called without filters, so the checks also
+// cover the default filter values.
 
 /** A goal in GAME, for the replay endpoints */
 async function goalEventId(): Promise<number> {
@@ -221,154 +217,154 @@ const gamecenter: DriftCheck[] = [
 const edge: DriftCheck[] = [
    {
       name: 'adv.byTheNumbers',
-      run: () => result(adv.byTheNumbers()),
+      run: () => adv.byTheNumbers(),
       volatile: true,
    },
 
    // adv.skaters
    {
       name: 'adv.skaters.detail',
-      run: () => result(adv.skaters.detail(SKATER, SEASON, REG)),
+      run: () => adv.skaters.detail(SKATER, SEASON, REG),
    },
    {
       name: 'adv.skaters.comparison',
-      run: () => result(adv.skaters.comparison(SKATER, SEASON, REG)),
+      run: () => adv.skaters.comparison(SKATER, SEASON, REG),
    },
    {
       name: 'adv.skaters.leaders',
-      run: () => result(adv.skaters.leaders(SEASON, REG)),
+      run: () => adv.skaters.leaders(SEASON, REG),
    },
    {
       name: 'adv.skaters.shotLocation',
-      run: () => result(adv.skaters.shotLocation(SKATER, SEASON, REG)),
+      run: () => adv.skaters.shotLocation(SKATER, SEASON, REG),
    },
    {
       name: 'adv.skaters.shotSpeed',
-      run: () => result(adv.skaters.shotSpeed(SKATER, SEASON, REG)),
+      run: () => adv.skaters.shotSpeed(SKATER, SEASON, REG),
    },
    {
       name: 'adv.skaters.skatingDistance',
-      run: () => result(adv.skaters.skatingDistance(SKATER, SEASON, REG)),
+      run: () => adv.skaters.skatingDistance(SKATER, SEASON, REG),
    },
    {
       name: 'adv.skaters.skatingSpeed',
-      run: () => result(adv.skaters.skatingSpeed(SKATER, SEASON, REG)),
+      run: () => adv.skaters.skatingSpeed(SKATER, SEASON, REG),
    },
    {
       name: 'adv.skaters.zoneTime',
-      run: () => result(adv.skaters.zoneTime(SKATER, SEASON, REG)),
+      run: () => adv.skaters.zoneTime(SKATER, SEASON, REG),
    },
    {
       name: 'adv.skaters.top10.distance',
-      run: () => result(adv.skaters.top10.distance(SEASON, REG)),
+      run: () => adv.skaters.top10.distance(SEASON, REG),
    },
    {
       name: 'adv.skaters.top10.shotLocation',
-      run: () => result(adv.skaters.top10.shotLocation(SEASON, REG)),
+      run: () => adv.skaters.top10.shotLocation(SEASON, REG),
    },
    {
       name: 'adv.skaters.top10.shotSpeed',
-      run: () => result(adv.skaters.top10.shotSpeed(SEASON, REG)),
+      run: () => adv.skaters.top10.shotSpeed(SEASON, REG),
    },
    {
       name: 'adv.skaters.top10.speed',
-      run: () => result(adv.skaters.top10.speed(SEASON, REG)),
+      run: () => adv.skaters.top10.speed(SEASON, REG),
    },
    {
       name: 'adv.skaters.top10.zoneTime',
-      run: () => result(adv.skaters.top10.zoneTime(SEASON, REG)),
+      run: () => adv.skaters.top10.zoneTime(SEASON, REG),
    },
 
    // adv.goalies
    {
       name: 'adv.goalies.player',
-      run: () => result(adv.goalies.player(GOALIE, SEASON, REG)),
+      run: () => adv.goalies.player(GOALIE, SEASON, REG),
    },
    {
       name: 'adv.goalies.compare',
-      run: () => result(adv.goalies.compare(GOALIE, SEASON, REG)),
+      run: () => adv.goalies.compare(GOALIE, SEASON, REG),
    },
    {
       name: 'adv.goalies.leaders',
-      run: () => result(adv.goalies.leaders(SEASON, REG)),
+      run: () => adv.goalies.leaders(SEASON, REG),
    },
    {
       name: 'adv.goalies.savePercentage',
-      run: () => result(adv.goalies.savePercentage(GOALIE, SEASON, REG)),
+      run: () => adv.goalies.savePercentage(GOALIE, SEASON, REG),
    },
    {
       name: 'adv.goalies.savePercentage5v5',
-      run: () => result(adv.goalies.savePercentage5v5(GOALIE, SEASON, REG)),
+      run: () => adv.goalies.savePercentage5v5(GOALIE, SEASON, REG),
    },
    {
       name: 'adv.goalies.saveLocation',
-      run: () => result(adv.goalies.saveLocation(GOALIE, SEASON, REG)),
+      run: () => adv.goalies.saveLocation(GOALIE, SEASON, REG),
    },
    {
       name: 'adv.goalies.top10.savePercentage',
-      run: () => result(adv.goalies.top10.savePercentage(SEASON, REG)),
+      run: () => adv.goalies.top10.savePercentage(SEASON, REG),
    },
    {
       name: 'adv.goalies.top10.savePercentage5v5',
-      run: () => result(adv.goalies.top10.savePercentage5v5(SEASON, REG)),
+      run: () => adv.goalies.top10.savePercentage5v5(SEASON, REG),
    },
    {
       name: 'adv.goalies.top10.saveLocation',
-      run: () => result(adv.goalies.top10.saveLocation(SEASON, REG)),
+      run: () => adv.goalies.top10.saveLocation(SEASON, REG),
    },
 
    // adv.teams
    {
       name: 'adv.teams.stats',
-      run: () => result(adv.teams.stats(TEAM_ID, SEASON, REG)),
+      run: () => adv.teams.stats(TEAM_ID, SEASON, REG),
    },
    {
       name: 'adv.teams.compare',
-      run: () => result(adv.teams.compare(TEAM_ID, SEASON, REG)),
+      run: () => adv.teams.compare(TEAM_ID, SEASON, REG),
    },
    {
       name: 'adv.teams.leaders',
-      run: () => result(adv.teams.leaders(SEASON, REG)),
+      run: () => adv.teams.leaders(SEASON, REG),
    },
    {
       name: 'adv.teams.shotLocation',
-      run: () => result(adv.teams.shotLocation(TEAM_ID, SEASON, REG)),
+      run: () => adv.teams.shotLocation(TEAM_ID, SEASON, REG),
    },
    {
       name: 'adv.teams.shotSpeed',
-      run: () => result(adv.teams.shotSpeed(TEAM_ID, SEASON, REG)),
+      run: () => adv.teams.shotSpeed(TEAM_ID, SEASON, REG),
    },
    {
       name: 'adv.teams.skatingDistance',
-      run: () => result(adv.teams.skatingDistance(TEAM_ID, SEASON, REG)),
+      run: () => adv.teams.skatingDistance(TEAM_ID, SEASON, REG),
    },
    {
       name: 'adv.teams.skatingSpeed',
-      run: () => result(adv.teams.skatingSpeed(TEAM_ID, SEASON, REG)),
+      run: () => adv.teams.skatingSpeed(TEAM_ID, SEASON, REG),
    },
    {
       name: 'adv.teams.zoneTime',
-      run: () => result(adv.teams.zoneTime(TEAM_ID, SEASON, REG)),
+      run: () => adv.teams.zoneTime(TEAM_ID, SEASON, REG),
    },
    {
       name: 'adv.teams.top10.shotLocation',
-      run: () => result(adv.teams.top10.shotLocation(SEASON, REG)),
+      run: () => adv.teams.top10.shotLocation(SEASON, REG),
    },
    {
       name: 'adv.teams.top10.shotSpeed',
-      run: () => result(adv.teams.top10.shotSpeed(SEASON, REG)),
+      run: () => adv.teams.top10.shotSpeed(SEASON, REG),
    },
    {
       name: 'adv.teams.top10.skatingDistance',
-      run: () => result(adv.teams.top10.skatingDistance(SEASON, REG)),
+      run: () => adv.teams.top10.skatingDistance(SEASON, REG),
    },
    {
       name: 'adv.teams.top10.skatingSpeed',
-      run: () => result(adv.teams.top10.skatingSpeed(SEASON, REG)),
+      run: () => adv.teams.top10.skatingSpeed(SEASON, REG),
    },
    {
       name: 'adv.teams.top10.zoneTime',
-      run: () => result(adv.teams.top10.zoneTime(SEASON, REG)),
+      run: () => adv.teams.top10.zoneTime(SEASON, REG),
    },
 ];
 

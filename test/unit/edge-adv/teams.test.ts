@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import * as teams from '#/api/edge-adv/teams.ts';
-import { NHLError } from '#/errors/index.ts';
+import { ValidationError } from '#/errors/index.ts';
 import { testData } from '../../test-utils.ts';
 
 describe('Edge-Adv Teams Module', () => {
@@ -195,20 +195,17 @@ describe('Edge-Adv Teams Module', () => {
       );
    });
 
-   test('stats should reject invalid team ID', async () => {
-      try {
-         await teams.stats(
-            'invalid' as unknown as number,
-            testData.seasonId,
-            'REG',
-         );
-         expect.unreachable('Expected stats to reject invalid team ID');
-      } catch (error) {
-         expect(error).toBeInstanceOf(NHLError);
-         if (error instanceof NHLError) {
-            expect(error.category).toBe('VALIDATION');
-            expect(error.context.endpoint).toContain('team-detail');
-         }
+   test('stats should return a ValidationError for an invalid team ID', async () => {
+      const result = await teams.stats(
+         'invalid' as unknown as number,
+         testData.seasonId,
+         'REG',
+      );
+      expect(result.success).toBeFalse();
+      if (!result.success) {
+         expect(result.error).toBeInstanceOf(ValidationError);
+         expect(result.error.context.endpoint).toContain('team-detail');
       }
+      expect(mockCalls).toHaveLength(0);
    });
 });
