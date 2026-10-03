@@ -27,6 +27,7 @@
       "test/**/*.d.ts",
       "../untitled folder/example-data/*.ts",
       "scripts/*",
+      "scripts/drift/*.ts",
       "../untitled folder/errors.ts",
       "../untitled folder/val.ts"
    ],
