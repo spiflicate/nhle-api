@@ -175,6 +175,20 @@ describe('Misc Module', () => {
       expect(mockCalls[0]).toContain('postal-lookup/V6B');
    });
 
+   test('postalLookup should send Canadian codes as A1A 1A1', async () => {
+      for (const code of ['m5v3l9', 'M5V-3L9', 'M5V 3L9']) {
+         mockCalls = [];
+         await misc.postalLookup(code);
+         expect(mockCalls[0]).toEndWith('postal-lookup/M5V%203L9');
+      }
+   });
+
+   test('postalLookup should send US ZIP codes unchanged', async () => {
+      mockCalls = [];
+      await misc.postalLookup('10001');
+      expect(mockCalls[0]).toEndWith('postal-lookup/10001');
+   });
+
    test('postalLookup should reject invalid postal code', async () => {
       const result = await misc.postalLookup('invalid');
       expectValidationError(result);

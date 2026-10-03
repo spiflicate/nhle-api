@@ -24,6 +24,7 @@ import {
    SaveLocationSort as SaveLocationSortSchema,
    SavePercentage5v5Sort as SavePercentage5v5SortSchema,
    SavePercentageSort as SavePercentageSortSchema,
+   withDefault,
 } from '#/utils/schemas.ts';
 import type {
    GameType,
@@ -202,16 +203,16 @@ async function top10SavePercentage(
    sortBy?: SavePercentageSort,
 ): Promise<unknown> {
    const Parser = BaseParams.merge({
-      sortBy: SavePercentageSortSchema.default('GAMES'),
+      sortBy: withDefault(SavePercentageSortSchema, 'GAMES'),
    });
    const parsed = Parser({ season, gameType, sortBy });
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.top10.SavePercentage,
+            endpoint: p.top10.savePercentage,
          }),
       );
-   const path = resolvePath(p.top10.SavePercentage, parsed);
+   const path = resolvePath(p.top10.savePercentage, parsed);
    return nhlClient.get(path);
 }
 
@@ -228,16 +229,16 @@ async function top10SavePercentage5v5(
    sortBy?: SavePercentage5v5Sort,
 ): Promise<unknown> {
    const Parser = BaseParams.merge({
-      sortBy: SavePercentage5v5SortSchema.default('5v5-SV%'),
+      sortBy: withDefault(SavePercentage5v5SortSchema, '5v5-SV%'),
    });
    const parsed = Parser({ season, gameType, sortBy });
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.top10.SavePercentage5v5,
+            endpoint: p.top10.savePercentage5v5,
          }),
       );
-   const path = resolvePath(p.top10.SavePercentage5v5, parsed);
+   const path = resolvePath(p.top10.savePercentage5v5, parsed);
    return nhlClient.get(path);
 }
 
@@ -256,8 +257,8 @@ async function top10SaveLocation(
    sortBy?: SaveLocationSort,
 ): Promise<unknown> {
    const Parser = BaseParams.merge({
-      category: SaveLocationCategorySchema.default('SV%'),
-      sortBy: SaveLocationSortSchema.default('ALL'),
+      category: withDefault(SaveLocationCategorySchema, 'SV%'),
+      sortBy: withDefault(SaveLocationSortSchema, 'ALL'),
    });
    const parsed = Parser({
       season,
@@ -268,9 +269,9 @@ async function top10SaveLocation(
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.top10.SaveLocation,
+            endpoint: p.top10.saveLocation,
          }),
       );
-   const path = resolvePath(p.top10.SaveLocation, parsed);
+   const path = resolvePath(p.top10.saveLocation, parsed);
    return nhlClient.get(path);
 }

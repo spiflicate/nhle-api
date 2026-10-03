@@ -1,4 +1,4 @@
-import { type } from 'arktype';
+import { type Out, type Type, type } from 'arktype';
 import { EDGE, NHL } from '#/constants/index.ts';
 import { ValidationError } from '#/errors/index.ts';
 import {
@@ -148,10 +148,14 @@ export const CountryCode = type(/^[a-zA-Z]{2}$/)
    .pipe((v) => v.toLowerCase())
    .describe('a valid ISO 3166-1 alpha-2 country code, e.g. US, CA, RU');
 
+// The API only matches Canadian codes written as `A1A 1A1`.
 export const PostalCode = type(/^[a-zA-Z]\d[a-zA-Z][ -]?\d[a-zA-Z]\d$/)
    .or(type(/^\d{5}$/))
+   .pipe((v) =>
+      v.length === 5 ? v : `${v.slice(0, 3)} ${v.slice(-3)}`.toUpperCase(),
+   )
    .describe(
-      'a valid postal code, either US ZIP code (5 digit) or Canadian postal code (A1A 1A1 format; space required)',
+      'a valid postal code, either US ZIP code (5 digit) or Canadian postal code (A1A 1A1, A1A1A1 or A1A-1A1)',
    );
 
 export const PlayerId = type('number')
@@ -239,12 +243,13 @@ export const SkatingSpeedSort = type
    )
    .pipe((v) => EDGE.SkatingSpeedSortEnum[v]);
 
-export const SkatingDistanceSort = type.enumerated(
-   ...(Object.keys(
-      EDGE.SkatingDistanceSortEnum,
-   ) as (keyof typeof EDGE.SkatingDistanceSortEnum)[]),
-);
-// .pipe((v) => C.SkatingDistanceSortEnum[v]);
+export const SkatingDistanceSort = type
+   .enumerated(
+      ...(Object.keys(
+         EDGE.SkatingDistanceSortEnum,
+      ) as (keyof typeof EDGE.SkatingDistanceSortEnum)[]),
+   )
+   .pipe((v) => EDGE.SkatingDistanceSortEnum[v]);
 
 export const ShotLocationCategory = type
    .enumerated(
@@ -261,6 +266,24 @@ export const ZoneTimeSort = type
       ) as (keyof typeof EDGE.ZoneTimeSortEnum)[]),
    )
    .pipe((v) => EDGE.ZoneTimeSortEnum[v]);
+
+/**
+ * Accepts `undefined` for an optional filter and resolves it to the
+ * filter's value for `fallback`. Unlike `.default()`, this also covers
+ * parameters that are passed explicitly as `undefined`.
+ */
+export function withDefault<i extends string, o extends string>(
+   schema: Type<(In: i) => Out<o>>,
+   fallback: NoInfer<i>,
+): [Type<(In: i | undefined) => Out<o>>, '=', i] {
+   const resolved = schema.assert(fallback);
+   const optional = schema
+      .or('undefined')
+      .pipe((v) => v ?? resolved) as unknown as Type<
+      (In: i | undefined) => Out<o>
+   >;
+   return [optional, '=', fallback];
+}
 
 /** utility types */
 
@@ -281,8 +304,8 @@ export const TeamParams = BaseParams.merge({
 });
 
 export const top10Params = BaseParams.merge({
-   position: PositionFilter.default('ALL'),
-   strength: SkatersStrength.default('ALL'),
+   position: withDefault(PositionFilter, 'ALL'),
+   strength: withDefault(SkatersStrength, 'ALL'),
 });
 
 export const DraftParams = type({

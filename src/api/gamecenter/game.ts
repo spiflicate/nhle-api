@@ -436,6 +436,8 @@ export async function playoffSeriesSchedule(
 
 /**
  * Get information about where games are available to watch
+ * @deprecated The NHL retired this endpoint, and it now returns 404
+ * (`NotFoundError`). It will be removed in a future major version.
  * @returns Promise resolving to streaming and broadcast availability information
  * @example
  * ```ts

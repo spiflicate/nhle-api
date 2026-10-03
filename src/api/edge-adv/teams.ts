@@ -22,6 +22,7 @@ import {
    SkatingDistanceSort as SkatingDistanceSortSchema,
    SkatingSpeedSort as SkatingSpeedSortSchema,
    TeamParams,
+   withDefault,
    ZoneTimeSort as ZoneTimeSortSchema,
 } from '#/utils/schemas.ts';
 import type {
@@ -221,9 +222,9 @@ async function top10ShotLocation(
    sortBy?: ShotLocationSort,
 ): Promise<unknown> {
    const Parser = BaseParams.merge({
-      position: PositionFilterSchema.default('ALL'),
-      category: ShotLocationCategorySchema.default('G'),
-      sortBy: ShotLocationSortSchema.default('ALL'),
+      position: withDefault(PositionFilterSchema, 'ALL'),
+      category: withDefault(ShotLocationCategorySchema, 'G'),
+      sortBy: withDefault(ShotLocationSortSchema, 'ALL'),
    });
    const parsed = Parser({
       season,
@@ -235,7 +236,7 @@ async function top10ShotLocation(
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.shotLocation,
+            endpoint: p.top10.shotLocation,
          }),
       );
    const path = resolvePath(p.top10.shotLocation, parsed);
@@ -251,8 +252,8 @@ async function top10ShotSpeed(
    sortBy?: ShotSpeedSort,
 ): Promise<unknown> {
    const Parser = BaseParams.merge({
-      position: PositionFilterSchema.default('ALL'),
-      sortBy: ShotSpeedSortSchema.default('MAX'),
+      position: withDefault(PositionFilterSchema, 'ALL'),
+      sortBy: withDefault(ShotSpeedSortSchema, 'MAX'),
    });
    const parsed = Parser({
       season,
@@ -263,7 +264,7 @@ async function top10ShotSpeed(
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.shotSpeed,
+            endpoint: p.top10.shotSpeed,
          }),
       );
    const path = resolvePath(p.top10.shotSpeed, parsed);
@@ -280,9 +281,9 @@ async function top10SkatingDistance(
    sortBy?: SkatingDistanceSort,
 ): Promise<unknown> {
    const Parser = BaseParams.merge({
-      position: PositionFilterSchema.default('ALL'),
-      strength: SkatersStrengthSchema.default('ALL'),
-      sortBy: SkatingDistanceSortSchema.default('TOTAL'),
+      position: withDefault(PositionFilterSchema, 'ALL'),
+      strength: withDefault(SkatersStrengthSchema, 'ALL'),
+      sortBy: withDefault(SkatingDistanceSortSchema, 'TOTAL'),
    });
    const parsed = Parser({
       season,
@@ -294,7 +295,7 @@ async function top10SkatingDistance(
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.skatingDistance,
+            endpoint: p.top10.skatingDistance,
          }),
       );
    const path = resolvePath(p.top10.skatingDistance, parsed);
@@ -310,8 +311,8 @@ async function top10SkatingSpeed(
    sortBy?: SkatingSpeedSort,
 ): Promise<unknown> {
    const Parser = BaseParams.merge({
-      position: PositionFilterSchema.default('ALL'),
-      sortBy: SkatingSpeedSortSchema.default('TOP'),
+      position: withDefault(PositionFilterSchema, 'ALL'),
+      sortBy: withDefault(SkatingSpeedSortSchema, 'TOP'),
    });
    const parsed = Parser({
       season,
@@ -322,7 +323,7 @@ async function top10SkatingSpeed(
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.skatingSpeed,
+            endpoint: p.top10.skatingSpeed,
          }),
       );
    const path = resolvePath(p.top10.skatingSpeed, parsed);
@@ -338,8 +339,8 @@ async function top10ZoneTime(
    sortBy?: ZoneTimeSort,
 ): Promise<unknown> {
    const Parser = BaseParams.merge({
-      strength: SkatersStrengthSchema.default('ALL'),
-      sortBy: ZoneTimeSortSchema.default('OZ'),
+      strength: withDefault(SkatersStrengthSchema, 'ALL'),
+      sortBy: withDefault(ZoneTimeSortSchema, 'OZ'),
    });
    const parsed = Parser({
       season,
@@ -350,7 +351,7 @@ async function top10ZoneTime(
    if (isParseError(parsed))
       return Promise.reject(
          new NHLError(parsed.summary, 'VALIDATION', {
-            endpoint: p.zoneTime,
+            endpoint: p.top10.zoneTime,
          }),
       );
    const path = resolvePath(p.top10.zoneTime, parsed);
