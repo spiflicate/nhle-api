@@ -1,11 +1,16 @@
-# Publishes to npm when a version tag (v1.2.3) is pushed, using npm
-# trusted publishing (OIDC): no npm token is stored in the repo. The tag
-# must match package.json's version.
+# Stages a release on npm when a version tag (v1.2.3) is pushed, using
+# npm trusted publishing (OIDC): no npm token is stored in the repo. The
+# tag must match package.json's version.
+#
+# The workflow only runs `npm stage publish`. The version goes live once a
+# maintainer approves it with 2FA, on npmjs.com (package -> Staged Packages)
+# or with `npm stage approve <stage-id>`.
 #
 # One-time setup on npmjs.com (package Settings -> Trusted publishing):
-# GitHub Actions, user spiflicate, repo nhle-api, workflow release.yml.
-# Then set Publishing access to "Require two-factor authentication and
-# disallow tokens". Trusted publishing needs Node >= 22.14 and npm >= 11.5.1.
+# GitHub Actions, user spiflicate, repo nhle-api, workflow release.yml, with
+# "Allow npm publish" and "Allow npm dist-tag" left unchecked. Then set
+# Publishing access to "Require two-factor authentication and disallow
+# tokens". Staged publishing needs Node >= 22.14 and npm >= 11.15.0.
 name: Release
 
 on:
@@ -47,19 +52,20 @@ jobs:
       - run: bun run build
       - run: bun run check:package
 
-      # Trusted publishing needs npm 11.5.1 or later.
-      - run: npm install -g npm@^11.5.1
+      # Staged publishing needs npm 11.15.0 or later.
+      - run: npm install -g npm@^11.15.0
 
       # Skips a version that is already on npm, so a tag for a version that
       # was published by hand still gets its GitHub release.
-      - name: Publish to npm
+      - name: Stage the release on npm
         run: |
           name=$(node -p "require('./package.json').name")
           version=$(node -p "require('./package.json').version")
           if npm view "$name@$version" version >/dev/null 2>&1; then
             echo "$name@$version is already on npm, skipping publish"
           else
-            npm publish
+            npm stage publish --provenance
+            echo "Staged $name@$version. Approve it on npmjs.com (Staged Packages tab) or with npm stage approve." >> "$GITHUB_STEP_SUMMARY"
           fi
 
       - name: Create the GitHub release

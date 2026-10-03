@@ -299,11 +299,13 @@ Checks for date- or location-dependent data (scoreboard, draft tracker) are mark
 2. Bump the version and tag it: `npm version patch` (or `minor`/`major`).
 3. Push the commit and tag: `git push --follow-tags`.
 
-The **Release** workflow checks that the tag matches `package.json`, runs the full CI suite and `check:package`, publishes to npm, and creates a GitHub release. It uses [npm trusted publishing](https://docs.npmjs.com/trusted-publishers), so there is no npm token in the repo, and npm adds provenance automatically.
+4. Approve the staged version with 2FA, on npmjs.com (the package's **Staged Packages** tab) or with `npm stage approve <stage-id>`.
+
+The **Release** workflow checks that the tag matches `package.json`, runs the full CI suite and `check:package`, stages the version on npm with provenance, and creates a GitHub release. It uses [npm trusted publishing](https://docs.npmjs.com/trusted-publishers), so there is no npm token in the repo, and [staged publishing](https://docs.npmjs.com/staged-publishing), so nothing goes live until a maintainer approves it.
 
 One-time setup on npmjs.com:
 
-1. Open the `nhle-api` package's **Settings → Trusted publishing** and add GitHub Actions with user `spiflicate`, repository `nhle-api` and workflow `release.yml`.
+1. Open the `nhle-api` package's **Settings → Trusted publishing** and add GitHub Actions with user `spiflicate`, repository `nhle-api` and workflow `release.yml`. Leave "Allow npm publish" and "Allow npm dist-tag" unchecked, so CI can only stage.
 2. Under **Publishing access**, choose "Require two-factor authentication and disallow tokens".
 
 ## Support
