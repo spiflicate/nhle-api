@@ -34,7 +34,7 @@ describe('Edge-Adv Teams Module', () => {
       mockCalls = [];
    });
 
-   test('stats should fetch team comparison stats', async () => {
+   test('stats should fetch team detail stats', async () => {
       const result = await teams.stats(
          testData.teamId,
          testData.seasonId,
@@ -42,7 +42,7 @@ describe('Edge-Adv Teams Module', () => {
       );
       expect(result.success).toBeTrue();
       expect(mockCalls[0]).toContain(
-         `edge/team-comparison/${testData.teamId}/${testData.seasonId}/2`,
+         `edge/team-detail/${testData.teamId}/${testData.seasonId}/2`,
       );
    });
 
@@ -53,7 +53,7 @@ describe('Edge-Adv Teams Module', () => {
       );
       expect(result.success).toBeTrue();
       expect(mockCalls[0]).toContain(
-         `edge/team-detail/${testData.teamId}/${testData.seasonId}/2`,
+         `edge/team-comparison/${testData.teamId}/${testData.seasonId}/2`,
       );
    });
 
@@ -82,7 +82,7 @@ describe('Edge-Adv Teams Module', () => {
          'REG',
       );
       expect(result.success).toBeTrue();
-      expect(mockCalls[0]).toContain('edge/team-shot-location-top-10');
+      expect(mockCalls[0]).toContain('edge/team-shot-speed-detail/');
    });
 
    test('skatingDistance should fetch team skating distance detail', async () => {
@@ -92,7 +92,7 @@ describe('Edge-Adv Teams Module', () => {
          'REG',
       );
       expect(result.success).toBeTrue();
-      expect(mockCalls[0]).toContain('edge/team-shot-speed-detail');
+      expect(mockCalls[0]).toContain('edge/team-skating-distance-detail/');
    });
 
    test('skatingSpeed should fetch team skating speed detail', async () => {
@@ -102,7 +102,7 @@ describe('Edge-Adv Teams Module', () => {
          'REG',
       );
       expect(result.success).toBeTrue();
-      expect(mockCalls[0]).toContain('edge/team-shot-speed-top-10');
+      expect(mockCalls[0]).toContain('edge/team-skating-speed-detail/');
    });
 
    test('zoneTime should fetch team zone time detail', async () => {
@@ -112,7 +112,7 @@ describe('Edge-Adv Teams Module', () => {
          'REG',
       );
       expect(result.success).toBeTrue();
-      expect(mockCalls[0]).toContain('edge/team-skating-distance-detail');
+      expect(mockCalls[0]).toContain('edge/team-zone-time-details/');
    });
 
    test('top10.shotLocation should fetch team shot location top-10 list', async () => {
@@ -124,7 +124,9 @@ describe('Edge-Adv Teams Module', () => {
          'ALL',
       );
       expect(result.success).toBeTrue();
-      expect(mockCalls[0]).toContain('edge/team-skating-distance-top-10');
+      expect(mockCalls[0]).toContain(
+         'edge/team-shot-location-top-10/all/goals/all/',
+      );
    });
 
    test('top10.shotSpeed should fetch team shot speed top-10 list', async () => {
@@ -135,7 +137,9 @@ describe('Edge-Adv Teams Module', () => {
          'MAX',
       );
       expect(result.success).toBeTrue();
-      expect(mockCalls[0]).toContain('edge/team-skating-speed-detail');
+      expect(mockCalls[0]).toContain(
+         'edge/team-shot-speed-top-10/all/max/',
+      );
    });
 
    test('top10.skatingDistance should fetch team skating distance top-10 list', async () => {
@@ -147,7 +151,9 @@ describe('Edge-Adv Teams Module', () => {
          'TOTAL',
       );
       expect(result.success).toBeTrue();
-      expect(mockCalls[0]).toContain('edge/team-skating-speed-top-10');
+      expect(mockCalls[0]).toContain(
+         'edge/team-skating-distance-top-10/all/es/total/',
+      );
    });
 
    test('top10.skatingSpeed should fetch team skating speed top-10 list', async () => {
@@ -158,7 +164,9 @@ describe('Edge-Adv Teams Module', () => {
          'TOP',
       );
       expect(result.success).toBeTrue();
-      expect(mockCalls[0]).toContain('edge/team-zone-time-details');
+      expect(mockCalls[0]).toContain(
+         'edge/team-skating-speed-top-10/all/max/',
+      );
    });
 
    test('top10.zoneTime should fetch team zone time top-10 list', async () => {
@@ -169,7 +177,22 @@ describe('Edge-Adv Teams Module', () => {
          'OZ',
       );
       expect(result.success).toBeTrue();
-      expect(mockCalls[0]).toContain('edge/team-zone-time-top-10');
+      expect(mockCalls[0]).toContain(
+         'edge/team-zone-time-top-10/es/offensive/',
+      );
+   });
+
+   test('top10 filters passed as undefined should use the defaults', async () => {
+      await teams.top10.skatingDistance(
+         testData.seasonId,
+         'REG',
+         undefined,
+         undefined,
+         undefined,
+      );
+      expect(mockCalls[0]).toContain(
+         'edge/team-skating-distance-top-10/all/all/total/',
+      );
    });
 
    test('stats should reject invalid team ID', async () => {
@@ -184,7 +207,7 @@ describe('Edge-Adv Teams Module', () => {
          expect(error).toBeInstanceOf(NHLError);
          if (error instanceof NHLError) {
             expect(error.category).toBe('VALIDATION');
-            expect(error.context.endpoint).toContain('team-comparison');
+            expect(error.context.endpoint).toContain('team-detail');
          }
       }
    });

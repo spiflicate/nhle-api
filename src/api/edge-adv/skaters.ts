@@ -26,6 +26,7 @@ import {
    SkatingDistanceSort as SkatingDistanceSortSchema,
    SkatingSpeedSort as SkatingSpeedSortSchema,
    top10Params,
+   withDefault,
    ZoneTimeSort as ZoneTimeSortSchema,
 } from '#/utils/schemas.ts';
 import type {
@@ -204,7 +205,7 @@ async function top10Distance(
    sortBy?: SkatingDistanceSort,
 ): Promise<unknown> {
    const parsed = top10Params.merge({
-      sortBy: SkatingDistanceSortSchema.default('TOTAL'),
+      sortBy: withDefault(SkatingDistanceSortSchema, 'TOTAL'),
    })({
       season,
       gameType,
@@ -230,8 +231,8 @@ async function top10ShotLocation(
    sortBy?: ShotLocationSort,
 ): Promise<unknown> {
    const parsed = top10Params.merge({
-      category: ShotLocationCategorySchema.default('G'),
-      sortBy: ShotLocationSortSchema.default('ALL'),
+      category: withDefault(ShotLocationCategorySchema, 'G'),
+      sortBy: withDefault(ShotLocationSortSchema, 'ALL'),
    })({
       season,
       gameType,
@@ -256,7 +257,7 @@ async function top10ShotSpeed(
    sortBy?: ShotSpeedSort,
 ): Promise<unknown> {
    const parsed = top10Params.merge({
-      sortBy: ShotSpeedSortSchema.default('MAX'),
+      sortBy: withDefault(ShotSpeedSortSchema, 'MAX'),
    })({
       season,
       gameType,
@@ -280,7 +281,7 @@ async function top10Speed(
    sortBy?: SkatingSpeedSort,
 ): Promise<unknown> {
    const parsed = top10Params.merge({
-      sortBy: SkatingSpeedSortSchema.default('TOP'),
+      sortBy: withDefault(SkatingSpeedSortSchema, 'TOP'),
    })({
       season,
       gameType,
@@ -305,7 +306,7 @@ async function top10ZoneTime(
    sortBy?: ZoneTimeSort,
 ): Promise<unknown> {
    const parsed = top10Params.merge({
-      sortBy: ZoneTimeSortSchema.default('OZ'),
+      sortBy: withDefault(ZoneTimeSortSchema, 'OZ'),
    })({
       season,
       gameType,

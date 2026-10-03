@@ -14,7 +14,7 @@ describe('Edge-Adv Skaters Module', () => {
       globalThis.fetch = (async (url: string) => {
          mockCalls.push(String(url));
 
-         if (url.includes('skater-')) {
+         if (url.includes('edge/skater-')) {
             return {
                ok: true,
                json: async () => ({ ok: true }),
@@ -53,7 +53,7 @@ describe('Edge-Adv Skaters Module', () => {
          'REG',
       );
       expect(result.success).toBeTrue();
-      expect(mockCalls[0]).toContain('skater-shot-location-detail');
+      expect(mockCalls[0]).toContain('edge/skater-shot-location-detail');
    });
 
    test('shotSpeed should fetch skater shot speed detail', async () => {
@@ -63,7 +63,7 @@ describe('Edge-Adv Skaters Module', () => {
          'REG',
       );
       expect(result.success).toBeTrue();
-      expect(mockCalls[0]).toContain('skater-shot-speed-detail');
+      expect(mockCalls[0]).toContain('edge/skater-shot-speed-detail');
    });
 
    test('skatingDistance should fetch skater skating distance detail', async () => {
@@ -73,7 +73,7 @@ describe('Edge-Adv Skaters Module', () => {
          'REG',
       );
       expect(result.success).toBeTrue();
-      expect(mockCalls[0]).toContain('skater-skating-distance-detail');
+      expect(mockCalls[0]).toContain('edge/skater-skating-distance-detail');
    });
 
    test('skatingSpeed should fetch skater skating speed detail', async () => {
@@ -83,7 +83,7 @@ describe('Edge-Adv Skaters Module', () => {
          'REG',
       );
       expect(result.success).toBeTrue();
-      expect(mockCalls[0]).toContain('skater-skating-speed-detail');
+      expect(mockCalls[0]).toContain('edge/skater-skating-speed-detail');
    });
 
    test('zoneTime should fetch skater zone time detail', async () => {
@@ -93,7 +93,7 @@ describe('Edge-Adv Skaters Module', () => {
          'REG',
       );
       expect(result.success).toBeTrue();
-      expect(mockCalls[0]).toContain('skater-zone-time');
+      expect(mockCalls[0]).toContain('edge/skater-zone-time');
    });
 
    test('comparison should fetch skater comparison detail', async () => {
@@ -103,7 +103,7 @@ describe('Edge-Adv Skaters Module', () => {
          'REG',
       );
       expect(result.success).toBeTrue();
-      expect(mockCalls[0]).toContain('skater-comparison');
+      expect(mockCalls[0]).toContain('edge/skater-comparison');
    });
 
    test('leaders should fetch skater landing for a season', async () => {
@@ -123,7 +123,9 @@ describe('Edge-Adv Skaters Module', () => {
          'TOTAL',
       );
       expect(result.success).toBeTrue();
-      expect(mockCalls[0]).toContain('skater-distance-top-10');
+      expect(mockCalls[0]).toContain(
+         'edge/skater-distance-top-10/all/es/total/',
+      );
       expect(mockCalls[0]).toContain(`/${testData.seasonId}/2`);
    });
 
@@ -136,7 +138,7 @@ describe('Edge-Adv Skaters Module', () => {
          'ALL',
       );
       expect(result.success).toBeTrue();
-      expect(mockCalls[0]).toContain('skater-shot-location-top-10');
+      expect(mockCalls[0]).toContain('edge/skater-shot-location-top-10');
    });
 
    test('top10.shotSpeed should fetch skater shot speed top-10 list', async () => {
@@ -147,7 +149,7 @@ describe('Edge-Adv Skaters Module', () => {
          'MAX',
       );
       expect(result.success).toBeTrue();
-      expect(mockCalls[0]).toContain('skater-shot-speed-top-10');
+      expect(mockCalls[0]).toContain('edge/skater-shot-speed-top-10');
    });
 
    test('top10.speed should fetch skater speed top-10 list', async () => {
@@ -158,7 +160,7 @@ describe('Edge-Adv Skaters Module', () => {
          'TOP',
       );
       expect(result.success).toBeTrue();
-      expect(mockCalls[0]).toContain('skater-speed-top-10');
+      expect(mockCalls[0]).toContain('edge/skater-speed-top-10');
    });
 
    test('top10.zoneTime should fetch skater zone time top-10 list', async () => {
@@ -170,7 +172,7 @@ describe('Edge-Adv Skaters Module', () => {
          'OZ',
       );
       expect(result.success).toBeTrue();
-      expect(mockCalls[0]).toContain('skater-zone-time-top-10');
+      expect(mockCalls[0]).toContain('edge/skater-zone-time-top-10');
    });
 
    test('detail should reject invalid player ID', async () => {
@@ -185,7 +187,7 @@ describe('Edge-Adv Skaters Module', () => {
          expect(error).toBeInstanceOf(NHLError);
          if (error instanceof NHLError) {
             expect(error.category).toBe('VALIDATION');
-            expect(error.context.endpoint).toContain('skater-detail');
+            expect(error.context.endpoint).toContain('edge/skater-detail');
          }
       }
    });

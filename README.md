@@ -131,7 +131,7 @@ data, historical team palettes, and official logo URL helpers.
 - `playoffBracket(year?)` – Playoff bracket for a given year
 - `playoffSeries(season?)` – Playoff series information for a season
 - `playoffSeriesSchedule(season, seriesLetter)` – Schedule for a playoff series
-- `whereToWatch()` – Regional broadcast / streaming info
+- `whereToWatch()` – Regional broadcast / streaming info (deprecated: the NHL retired this endpoint and it returns 404)
 - `networkTVSchedule(date?)` – National TV schedule
 - `wsc.gameStory(gameId)` – Game story from the web service collection
 - `wsc.playByPlay(gameId)` – Play-by-play from the web service collection
@@ -249,7 +249,7 @@ When an API really has changed:
 1. Update the response types in `src/types/responses/`.
 2. Accept the new shapes with `bun run drift --update` and commit the baseline.
 
-Checks for date- or location-dependent data (scoreboard, draft tracker, where to watch) are marked `volatile`: a field missing today is only noted, and `--update` adds to their baseline instead of replacing it. When you add a library function, add a check in `scripts/drift/checks.ts`; `test/unit/drift.test.ts` fails if a public function has none.
+Checks for date- or location-dependent data (scoreboard, draft tracker) are marked `volatile`: a field missing today is only noted, and `--update` adds to their baseline instead of replacing it. When you add a library function, add a check in `scripts/drift/checks.ts`; `test/unit/drift.test.ts` fails if a public function has none.
 
 ## Support
 

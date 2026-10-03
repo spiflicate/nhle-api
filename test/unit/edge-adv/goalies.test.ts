@@ -101,7 +101,7 @@ describe('Edge-Adv Goalies Module', () => {
          'GAMES',
       );
       expect(result.success).toBeTrue();
-      expect(mockCalls[0]).toContain('edge/goalie-5v5-top-10');
+      expect(mockCalls[0]).toContain('edge/goalie-edge-save-pctg-top-10/');
    });
 
    test('top10.savePercentage5v5 should fetch goalie 5v5 save percentage top-10 list', async () => {
@@ -111,7 +111,7 @@ describe('Edge-Adv Goalies Module', () => {
          '5v5-SV%',
       );
       expect(result.success).toBeTrue();
-      expect(mockCalls[0]).toContain('edge/goalie-edge-save-pctg-top-10');
+      expect(mockCalls[0]).toContain('edge/goalie-5v5-top-10/');
    });
 
    test('top10.saveLocation should fetch goalie save location top-10 list', async () => {

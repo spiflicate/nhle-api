@@ -38,8 +38,8 @@ export interface DriftCheck {
 
 /**
  * The adv functions are typed `unknown` but resolve to an APIResult.
- * Their top-10 lists get every filter explicitly, since the schema
- * defaults don't fill in parameters passed as `undefined`.
+ * Their top-10 lists are called without filters, so the checks also
+ * cover the default filter values.
  */
 const result = (p: Promise<unknown>) => p as Promise<APIResult<unknown>>;
 
@@ -97,9 +97,10 @@ const gamecenter: DriftCheck[] = [
       run: () => gc.game.playoffSeriesSchedule(SERIES, SEASON),
    },
    {
+      // Retired upstream; this flags the endpoint if it comes back
       name: 'gc.game.whereToWatch',
       run: () => gc.game.whereToWatch(),
-      volatile: true,
+      expectError: 'NotFoundError',
    },
 
    // gc.score, gc.scoreboard
@@ -194,6 +195,10 @@ const gamecenter: DriftCheck[] = [
       run: () => gc.misc.postalLookup('M5V3L9'),
    },
    {
+      name: 'gc.misc.postalLookup (US)',
+      run: () => gc.misc.postalLookup('10001'),
+   },
+   {
       name: 'gc.misc.location',
       run: () => gc.misc.location(),
       volatile: true,
@@ -255,33 +260,23 @@ const edge: DriftCheck[] = [
    },
    {
       name: 'adv.skaters.top10.distance',
-      run: () =>
-         result(
-            adv.skaters.top10.distance(SEASON, REG, 'ALL', 'ALL', 'TOTAL'),
-         ),
+      run: () => result(adv.skaters.top10.distance(SEASON, REG)),
    },
    {
       name: 'adv.skaters.top10.shotLocation',
-      run: () =>
-         result(
-            adv.skaters.top10.shotLocation(SEASON, REG, 'ALL', 'G', 'ALL'),
-         ),
+      run: () => result(adv.skaters.top10.shotLocation(SEASON, REG)),
    },
    {
       name: 'adv.skaters.top10.shotSpeed',
-      run: () =>
-         result(adv.skaters.top10.shotSpeed(SEASON, REG, 'ALL', 'MAX')),
+      run: () => result(adv.skaters.top10.shotSpeed(SEASON, REG)),
    },
    {
       name: 'adv.skaters.top10.speed',
-      run: () => result(adv.skaters.top10.speed(SEASON, REG, 'ALL', 'TOP')),
+      run: () => result(adv.skaters.top10.speed(SEASON, REG)),
    },
    {
       name: 'adv.skaters.top10.zoneTime',
-      run: () =>
-         result(
-            adv.skaters.top10.zoneTime(SEASON, REG, 'ALL', 'ALL', 'OZ'),
-         ),
+      run: () => result(adv.skaters.top10.zoneTime(SEASON, REG)),
    },
 
    // adv.goalies
@@ -311,20 +306,15 @@ const edge: DriftCheck[] = [
    },
    {
       name: 'adv.goalies.top10.savePercentage',
-      run: () =>
-         result(adv.goalies.top10.savePercentage(SEASON, REG, 'PCTG')),
+      run: () => result(adv.goalies.top10.savePercentage(SEASON, REG)),
    },
    {
       name: 'adv.goalies.top10.savePercentage5v5',
-      run: () =>
-         result(
-            adv.goalies.top10.savePercentage5v5(SEASON, REG, '5v5-SV%'),
-         ),
+      run: () => result(adv.goalies.top10.savePercentage5v5(SEASON, REG)),
    },
    {
       name: 'adv.goalies.top10.saveLocation',
-      run: () =>
-         result(adv.goalies.top10.saveLocation(SEASON, REG, 'SV%', 'ALL')),
+      run: () => result(adv.goalies.top10.saveLocation(SEASON, REG)),
    },
 
    // adv.teams
@@ -362,37 +352,23 @@ const edge: DriftCheck[] = [
    },
    {
       name: 'adv.teams.top10.shotLocation',
-      run: () =>
-         result(
-            adv.teams.top10.shotLocation(SEASON, REG, 'ALL', 'G', 'ALL'),
-         ),
+      run: () => result(adv.teams.top10.shotLocation(SEASON, REG)),
    },
    {
       name: 'adv.teams.top10.shotSpeed',
-      run: () =>
-         result(adv.teams.top10.shotSpeed(SEASON, REG, 'ALL', 'MAX')),
+      run: () => result(adv.teams.top10.shotSpeed(SEASON, REG)),
    },
    {
       name: 'adv.teams.top10.skatingDistance',
-      run: () =>
-         result(
-            adv.teams.top10.skatingDistance(
-               SEASON,
-               REG,
-               'ALL',
-               'ALL',
-               'TOTAL',
-            ),
-         ),
+      run: () => result(adv.teams.top10.skatingDistance(SEASON, REG)),
    },
    {
       name: 'adv.teams.top10.skatingSpeed',
-      run: () =>
-         result(adv.teams.top10.skatingSpeed(SEASON, REG, 'ALL', 'TOP')),
+      run: () => result(adv.teams.top10.skatingSpeed(SEASON, REG)),
    },
    {
       name: 'adv.teams.top10.zoneTime',
-      run: () => result(adv.teams.top10.zoneTime(SEASON, REG, 'ALL', 'OZ')),
+      run: () => result(adv.teams.top10.zoneTime(SEASON, REG)),
    },
 ];
 
