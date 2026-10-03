@@ -340,3 +340,38 @@ export const ScheduleParams = type({
       (v) => v ?? getCurrentNHLDate().slice(0, 7),
    ),
 });
+
+export const StatsLeadersLimit = type('number.integer').describe(
+   'an integer (-1 returns every player)',
+);
+
+export const SkaterLeaderCategory = type
+   .enumerated(
+      'goals',
+      'assists',
+      'points',
+      'plusMinus',
+      'goalsPp',
+      'goalsSh',
+      'penaltyMins',
+      'faceoffLeaders',
+      'toi',
+   )
+   .describe('a skater leaders category');
+
+export const GoalieLeaderCategory = type
+   .enumerated('wins', 'shutouts', 'savePctg', 'goalsAgainstAverage')
+   .describe('a goalie leaders category');
+
+export const BulkMetaParams = type({
+   players: PlayerId.array()
+      .or('undefined')
+      .pipe((v) => v ?? []),
+   teams: TeamAbbrev.array()
+      .or('undefined')
+      .pipe((v) => v ?? []),
+}).narrow(
+   (v, ctx) =>
+      v.players.length + v.teams.length > 0 ||
+      ctx.mustBe('at least one player id or team abbreviation'),
+);
