@@ -228,7 +228,6 @@ async function main() {
    const reportAt = args.indexOf('--report');
    const reportPath = reportAt >= 0 ? args[reportAt + 1] : undefined;
 
-   // The shared clients read these when they are created
    config.logLevel = 'silent';
    config.timeout = 15_000;
    const { checks } = await import('./drift/checks.ts');

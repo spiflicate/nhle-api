@@ -1,4 +1,5 @@
 import { type Out, type Type, type } from 'arktype';
+import type { APIResult } from '#/client/types.ts';
 import { EDGE, NHL } from '#/constants/index.ts';
 import { ValidationError } from '#/errors/index.ts';
 import {
@@ -9,6 +10,17 @@ import {
 
 export function isParseError(value: unknown): value is type.errors {
    return value instanceof type.errors;
+}
+
+/** A failed result for parameters that did not pass validation */
+export function invalidParams<T>(
+   errors: type.errors,
+   endpoint: string,
+): APIResult<T> {
+   return {
+      success: false,
+      error: new ValidationError(errors.summary, { endpoint }),
+   };
 }
 
 export function createValidationError(

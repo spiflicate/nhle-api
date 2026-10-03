@@ -1,432 +1,457 @@
 /**
- * High-level response types for the NHL Stats API
+ * Response and parameter types for the NHL Stats API
+ * (https://api.nhle.com/stats/rest)
  *
- * These types are intentionally flexible to support the wide variety of data
- * returned by the API. The key distinction to understand is the difference
- * between default and aggregated responses:
+ * Every list endpoint answers `{ data: T[], total }`. Report rows (skater,
+ * goalie and team reports) vary with the report and with `isAggregate` /
+ * `isGame`, so their types list the `summary` fields and keep an index
+ * signature for the rest.
  *
- * **Default Responses** (when `isAggregate` is not set or false):
- * - Include game/team-specific fields (aggregatedColumns)
- * - Examples: teamId, teamFullName, gameId, gameDate, seasonId, etc.
- * - Does NOT include franchise-level fields (franchiseId, franchiseName)
- *
- * **Aggregated Responses** (when `isAggregate=true`):
- * - REMOVES game/team-specific fields (aggregatedColumns)
- *   because they don't apply to aggregated data
- * - ADDS franchise-level fields (individualColumns)
- *   to provide organizational context
- * - Examples: franchiseId, franchiseName, stats (but no gameId, teamId, etc.)
- *
- * Why fields are removed during aggregation:
- * - gameId/gameDate: Cannot be defined when data spans multiple games
- * - teamId/teamFullName: Specific team instances (franchises persist across relocations)
- * - seasonId: May not apply if aggregating across time periods
- *
- * @see BaseQueryParams.isAggregate
- * @see StatsConfig
+ * With `isAggregate=true`, report rows drop per-instance fields (seasonId,
+ * teamId, gameId) and team reports add franchise fields; see
+ * TeamStatsWithFranchise.
  */
 
 import type { APIResult } from '#/client/types.ts';
 
-/**
- * Generic paginated data structure
- */
+/** List response returned by every Stats API list endpoint */
 export interface PaginatedData<T> {
    data: T[];
+   /** Number of rows matching the query, before `limit` */
    total: number;
-   limit?: number;
-   start?: number;
 }
 
 export type APIResultPaginated<T> = APIResult<PaginatedData<T>>;
 
 /**
- * Player information structure (skater or goalie)
- *
- * Base type for player data. Extended by SkaterStats and GoalieStats for
- * specific stat categories.
+ * Skater report names listed by `/config` (`playerReportData`).
+ * Any other string is accepted for reports added later.
  */
-export interface Player {
-   playerId: number;
-   firstName?: string;
-   lastName?: string;
-   birthDate?: string;
-   nationality?: string;
-   [key: string]: unknown;
+export type SkaterReport =
+   | 'bios'
+   | 'faceoffpercentages'
+   | 'faceoffwins'
+   | 'goalsForAgainst'
+   | 'penalties'
+   | 'penaltyShots'
+   | 'penaltykill'
+   | 'percentages'
+   | 'powerplay'
+   | 'puckPossessions'
+   | 'realtime'
+   | 'scoringRates'
+   | 'scoringpergame'
+   | 'shootout'
+   | 'shottype'
+   | 'summary'
+   | 'summaryshooting'
+   | 'timeonice'
+   | (string & {});
+
+/** Goalie report names listed by `/config` (`goalieReportData`) */
+export type GoalieReport =
+   | 'advanced'
+   | 'bios'
+   | 'daysrest'
+   | 'penaltyShots'
+   | 'savesByStrength'
+   | 'shootout'
+   | 'startedVsRelieved'
+   | 'summary'
+   | (string & {});
+
+/** Team report names listed by `/config` (`teamReportData`) */
+export type TeamReport =
+   | 'daysbetweengames'
+   | 'faceoffpercentages'
+   | 'faceoffwins'
+   | 'goalgames'
+   | 'goalsagainstbystrength'
+   | 'goalsagainstbystrengthgoaliepull'
+   | 'goalsbyperiod'
+   | 'goalsforbystrength'
+   | 'goalsforbystrengthgoaliepull'
+   | 'leadingtrailing'
+   | 'outshootoutshotby'
+   | 'penalties'
+   | 'penaltykill'
+   | 'penaltykilltime'
+   | 'percentages'
+   | 'powerplay'
+   | 'powerplaytime'
+   | 'realtime'
+   | 'savePercentage'
+   | 'scoretrailfirst'
+   | 'shootout'
+   | 'shottype'
+   | 'summary'
+   | 'summaryshooting'
+   | (string & {});
+
+/** A player as listed by `/players` and nested in leader rows */
+export interface PlayerInfo {
+   id: number;
+   currentTeamId: number | null;
+   firstName: string;
+   fullName: string;
+   lastName: string;
+   positionCode: string;
+   sweaterNumber: number | null;
 }
 
-/**
- * Skater statistics response
- *
- * Standard response for skater stats from endpoints like `/skater/summary`.
- * Includes aggregated columns by default. To include franchise data, add
- * `isAggregate=true` query parameter.
- */
-export interface SkaterStats extends Player {
-   seasonId?: number | string;
+/** A team logo, included with `include=logos` */
+export interface TeamLogo {
+   id: number;
+   background: string;
+   endSeason: number;
+   secureUrl: string;
+   startSeason: number;
+   teamId: number;
+   url: string;
+}
+
+/** A team as listed by `/team` and `/team/id/{id}` */
+export interface Team {
+   id: number;
+   franchiseId: number | null;
+   fullName: string;
+   leagueId: number;
+   rawTricode: string;
+   triCode: string;
+   /** Present with `include=logos`, and on leader rows */
+   logos?: TeamLogo[];
+}
+
+/** Row of a skater report (fields of the `summary` report) */
+export interface SkaterStats {
+   playerId: number;
+   skaterFullName?: string;
+   lastName?: string;
+   seasonId?: number;
+   teamAbbrevs?: string;
+   positionCode?: string;
+   shootsCatches?: string;
    gamesPlayed?: number;
    goals?: number;
    assists?: number;
    points?: number;
    plusMinus?: number;
+   pointsPerGame?: number;
+   penaltyMinutes?: number;
+   evGoals?: number;
+   evPoints?: number;
+   ppGoals?: number;
+   ppPoints?: number;
+   shGoals?: number;
+   shPoints?: number;
+   otGoals?: number;
+   gameWinningGoals?: number;
+   shots?: number;
+   shootingPct?: number | null;
+   faceoffWinPct?: number | null;
+   timeOnIcePerGame?: number;
    [key: string]: unknown;
 }
 
-/**
- * Skater leaders response
- */
-export interface SkaterLeader extends SkaterStats {
-   rank?: number;
-}
-
-/**
- * Skater milestones response
- */
-export interface SkaterMilestone extends Player {
-   milestoneName?: string;
-   [key: string]: unknown;
-}
-
-/**
- * Goalie statistics response
- *
- * Standard response for goalie stats from endpoints like `/goalie/summary`.
- * Includes aggregated columns by default. To include franchise data, add
- * `isAggregate=true` query parameter.
- */
-export interface GoalieStats extends Player {
-   seasonId?: number | string;
+/** Row of a goalie report (fields of the `summary` report) */
+export interface GoalieStats {
+   playerId: number;
+   goalieFullName?: string;
+   lastName?: string;
+   seasonId?: number;
+   teamAbbrevs?: string;
+   shootsCatches?: string;
    gamesPlayed?: number;
+   gamesStarted?: number;
    wins?: number;
    losses?: number;
-   overtimeLosses?: number;
+   otLosses?: number | null;
+   ties?: number | null;
    shutouts?: number;
+   goalsAgainst?: number;
+   goalsAgainstAverage?: number;
+   saves?: number;
+   shotsAgainst?: number;
+   savePct?: number | null;
+   timeOnIce?: number;
+   goals?: number;
+   assists?: number;
+   points?: number;
+   penaltyMinutes?: number;
    [key: string]: unknown;
 }
 
-/**
- * Goalie leaders response
- */
-export interface GoalieLeader extends GoalieStats {
-   rank?: number;
-}
-
-/**
- * Goalie milestones response
- */
-export interface GoalieMilestone extends Player {
-   milestoneName?: string;
-   [key: string]: unknown;
-}
-
-/**
- * Team information structure
- *
- * Basic team data. By default, does NOT include franchiseId/franchiseName.
- * To get franchise data, use `isAggregate=true` query parameter.
- *
- * Note: The `franchiseId` property here is optional because it's only
- * included when specifically requested via `isAggregate=true`.
- */
-export interface Team {
-   id?: number;
-   name?: string;
-   abbreviation?: string;
-   /** Only included when isAggregate=true */
-   franchiseId?: number;
-   [key: string]: unknown;
-}
-
-/**
- * Team statistics response
- *
- * Standard response for team stats from endpoints like `/team/summary`.
- * Includes game/team-specific fields by default (teamId, teamFullName, wins, losses, etc.).
- * Does NOT include franchise fields (franchiseId, franchiseName).
- *
- * To get franchise-level data, add the `isAggregate=true` query parameter.
- * This will:
- * - REMOVE game/team-specific fields (gameId, gameDate, teamId, teamFullName, seasonId)
- * - ADD franchise fields (franchiseId, franchiseName)
- *
- * **When to use this type:**
- * - Default responses without isAggregate parameter
- * - Game/season-level team statistics
- * - Data that needs team-specific context (e.g., "This is the Kings' 2024-2025 season performance")
- *
- * **When to use TeamStatsWithFranchise:**
- * - When you've explicitly set `isAggregate=true`
- * - Franchise-level aggregated data
- * - Data that needs organizational context (e.g., "The Kings franchise historical performance")
- *
- * @example
- * // Default response (includes teamId, excludes franchiseId):
- * const stats = await teams.getStats('summary', {
- *   cayenneExp: 'seasonId=20242025'
- * });
- * // Response: { teamId, teamFullName, wins, losses, ... }
- *
- * // With franchise data (includes franchiseId, excludes teamId):
- * const statsWithFranchise = await teams.getStats('summary', {
- *   cayenneExp: 'seasonId=20242025',
- *   isAggregate: true
- * });
- * // Response: { franchiseId, franchiseName, wins, losses, ... }
- *
- * @see TeamStatsWithFranchise
- * @see BaseQueryParams.isAggregate
- */
-export interface TeamStats extends Team {
-   seasonId?: number | string;
+/** Row of a team report (fields of the `summary` report) */
+export interface TeamStats {
+   teamId?: number;
+   teamFullName?: string;
+   seasonId?: number;
    gamesPlayed?: number;
    wins?: number;
    losses?: number;
-   overtimeLosses?: number;
+   otLosses?: number | null;
+   ties?: number | null;
+   points?: number;
+   pointPct?: number;
+   regulationAndOtWins?: number;
+   winsInRegulation?: number;
+   winsInShootout?: number;
+   goalsFor?: number;
+   goalsAgainst?: number;
+   goalsForPerGame?: number;
+   goalsAgainstPerGame?: number;
+   shotsForPerGame?: number;
+   shotsAgainstPerGame?: number;
+   powerPlayPct?: number | null;
+   powerPlayNetPct?: number | null;
+   penaltyKillPct?: number | null;
+   penaltyKillNetPct?: number | null;
+   faceoffWinPct?: number | null;
+   teamShutouts?: number;
    [key: string]: unknown;
 }
 
 /**
- * Team statistics response with franchise data
- *
- * Response type for when `isAggregate=true` is explicitly specified.
- * This changes the field composition:
- * - REMOVES: Game/team-specific fields (gameId, gameDate, teamId, teamFullName, seasonId)
- * - ADDS: Franchise-level identifiers (franchiseId, franchiseName)
- *
- * Use this type annotation when you're explicitly requesting aggregated data at the franchise level.
- *
- * **Field Differences from TeamStats:**
- * | Field | TeamStats | TeamStatsWithFranchise |
- * |-------|-----------|----------------------|
- * | teamId | ✓ Present | ✗ Removed |
- * | teamFullName | ✓ Present | ✗ Removed |
- * | gameId | ✓ Present | ✗ Removed |
- * | gameDate | ✓ Present | ✗ Removed |
- * | franchiseId | ✗ Absent | ✓ Required |
- * | franchiseName | ✗ Absent | ✓ Required |
- * | Stats (wins, losses, etc.) | ✓ Present | ✓ Present |
- *
- * **Why fields change during aggregation:**
- * When aggregating to the franchise level, game-specific and team-instance-specific
- * fields no longer apply. For example:
- * - gameId: Multiple games may be aggregated
- * - teamId: Franchise persists across team relocations/name changes
- * - teamFullName: Team instances change, franchise persists
- *
- * @example
- * // Request franchise-aggregated data:
- * const response = await teams.getStats('summary', {
- *   cayenneExp: 'seasonId=20242025',
- *   isAggregate: true  // ← Required for this type
- * });
- *
- * // Type the response as having franchise data:
- * const teamWithFranchise: TeamStatsWithFranchise = response;
- *
- * // Access franchise context:
- * console.log(teamWithFranchise.franchiseId);    // ← Now available
- * console.log(teamWithFranchise.franchiseName);  // ← Now available
- * console.log(teamWithFranchise.teamId);         // ← NOT available (removed)
- *
- * @see TeamStats
- * @see BaseQueryParams.isAggregate
+ * Row of a team report requested with `isAggregate=true`: per-team and
+ * per-season fields are dropped and franchise fields added.
  */
 export interface TeamStatsWithFranchise extends TeamStats {
-   /** Franchise identifier (persistent organizational unit) */
    franchiseId: number;
-   /** Franchise name */
    franchiseName: string;
 }
 
-/**
- * Franchise information structure
- *
- * Represents a franchise entity from the `/franchise` endpoint.
- * A franchise is a persistent organizational unit in the NHL that survives
- * team relocations, name changes, and other historical transitions.
- *
- * **Franchise vs Team:**
- * - **Franchise**: Persistent organizational unit (e.g., "Kings" from 1967-present)
- *   survives through relocations and name changes
- * - **Team**: Current instance of a team (e.g., "Los Angeles Kings in 2024-2025")
- *   specific location and current name
- *
- * **Accessing Franchise Data:**
- * Franchise information can be retrieved two ways:
- * 1. Direct endpoint: `/franchise` - Get all franchises
- * 2. Team/Player stats with `isAggregate=true` - Adds franchiseId and franchiseName
- *    to stats responses as context
- *
- * @example
- * // Get all franchises directly:
- * const allFranchises = await client.franchise.get('en');
- *
- * // Get franchise context in team stats:
- * const teamStats = await client.team.getStats('summary', {
- *   cayenneExp: 'seasonId=20242025',
- *   isAggregate: true  // ← Adds franchiseId, franchiseName
- * });
- * // Response will include: { franchiseId, franchiseName, stats... }
- * // But will NOT include: gameId, gameDate, teamId, teamFullName
- *
- * @see TeamStatsWithFranchise
- * @see BaseQueryParams.isAggregate
- */
+/** Skater leader row; the stat field is named after the category */
+export interface SkaterLeader {
+   player: PlayerInfo;
+   team: Team;
+   goals?: number;
+   assists?: number;
+   points?: number;
+}
+
+/** Goalie leader row; the stat field is named after the category */
+export interface GoalieLeader {
+   player: PlayerInfo;
+   team: Team;
+   gaa?: number | null;
+   savePctg?: number | null;
+   shutouts?: number;
+}
+
+/** Shared fields of a milestone row */
+interface Milestone {
+   id: number;
+   playerId: number;
+   firstName: string;
+   lastName: string;
+   playerFullName: string;
+   currentTeamId: number;
+   teamAbbrev: string;
+   teamCommonName: string;
+   teamFullName: string;
+   teamPlaceName: string;
+   gameTypeId: number;
+   gamesPlayed: number;
+   /** The stat being approached, e.g. "Goals" or "Shutouts" */
+   milestone: string;
+   milestoneAmount: number;
+}
+
+/** A skater approaching a career milestone */
+export interface SkaterMilestone extends Milestone {
+   goals: number;
+   assists: number;
+   points: number;
+}
+
+/** A goalie approaching a career milestone */
+export interface GoalieMilestone extends Milestone {
+   wins: number;
+   so: number;
+   toiMinutes: number;
+}
+
+/** A franchise from `/franchise` */
 export interface Franchise {
-   /** Franchise ID */
-   id?: number;
-   /** Franchise name (e.g., "Kings", "Maple Leafs") */
-   name?: string;
-   /** Franchise abbreviation */
-   abbreviation?: string;
-   [key: string]: unknown;
+   id: number;
+   fullName: string;
+   teamCommonName: string;
+   teamPlaceName: string;
 }
 
-/**
- * Season information
- */
+/** A season from `/season` */
 export interface Season {
-   id?: string | number;
-   seasonId?: string | number;
-   [key: string]: unknown;
+   /** Season id, e.g. 20242025 */
+   id: number;
+   formattedSeasonId: string;
+   seasonOrdinal: number;
+   startDate: string;
+   endDate: string;
+   preseasonStartdate: string | null;
+   regularSeasonEndDate: string;
+   numberOfGames: number;
+   totalRegularSeasonGames: number;
+   totalPlayoffGames: number;
+   allStarGameInUse: number;
+   conferencesInUse: number;
+   divisionsInUse: number;
+   entryDraftInUse: number;
+   nhlStanleyCupOwner: number;
+   olympicsParticipation: number;
+   pointForOTLossInUse: number;
+   rowInUse: number;
+   supplementalDraftInUse: number;
+   tiesInUse: number;
+   wildcardInUse: number;
+   minimumPlayoffMinutesForGoalieStatsLeaders: number;
+   minimumRegularGamesForGoalieStatsLeaders: number;
 }
 
-/**
- * Game information
- */
+/** A game from `/game` */
 export interface Game {
-   gameId?: string | number;
-   date?: string;
-   homeTeam?: Team;
-   awayTeam?: Team;
-   [key: string]: unknown;
+   /** Game id, e.g. 2024020001 */
+   id: number;
+   season: number;
+   /** 1 = preseason, 2 = regular season, 3 = playoffs */
+   gameType: number;
+   gameNumber: number;
+   gameDate: string;
+   easternStartTime: string;
+   gameScheduleStateId: number;
+   gameStateId: number;
+   period: number | null;
+   homeTeamId: number;
+   homeScore: number | null;
+   visitingTeamId: number;
+   visitingScore: number | null;
 }
 
-/**
- * Draft information
- */
+/** A draft year from `/draft` */
 export interface Draft {
-   draftYear?: number;
-   [key: string]: unknown;
+   id: number;
+   draftYear: number;
+   rounds: number;
 }
 
 /**
- * Configuration response
+ * Report configuration from `/config`: the columns, filters and sort keys
+ * of every skater, goalie and team report.
  */
 export interface Config {
+   playerReportData: Record<string, unknown>;
+   goalieReportData: Record<string, unknown>;
+   teamReportData: Record<string, unknown>;
    [key: string]: unknown;
 }
 
-/**
- * Country information
- */
+/** A country from `/country` */
 export interface Country {
-   code?: string;
-   name?: string;
-   [key: string]: unknown;
+   /** Three-letter code, same as country3Code */
+   id: string;
+   country3Code: string;
+   countryCode: string;
+   countryName: string;
+   nationalityName: string;
+   iocCode: string | null;
+   hasPlayerStats: number;
+   isActive: number;
+   imageUrl: string | null;
+   thumbnailUrl: string | null;
+   olympicUrl: string | null;
 }
 
-/**
- * Shift chart information
- */
+/** One shift (or goal event) from `/shiftcharts` */
 export interface ShiftChart {
-   gameId?: string | number;
-   playerId?: number;
-   [key: string]: unknown;
+   id: number;
+   gameId: number;
+   playerId: number;
+   firstName: string;
+   lastName: string;
+   teamId: number;
+   teamAbbrev: string;
+   teamName: string;
+   hexValue: string;
+   period: number;
+   shiftNumber: number;
+   startTime: string;
+   endTime: string;
+   duration: string | null;
+   /** 517 = shift, 505 = goal */
+   typeCode: number;
+   detailCode: number;
+   eventNumber: number | null;
+   eventDescription: string | null;
+   eventDetails: string | null;
 }
 
-/**
- * Glossary entry
- */
+/** A stat definition from `/glossary` */
 export interface GlossaryEntry {
-   term?: string;
-   definition?: string;
-   [key: string]: unknown;
+   id: number;
+   abbreviation: string;
+   fullName: string;
+   definition: string;
+   firstSeasonForStat: number | null;
+   languageCode: string;
+   lastUpdated: string;
 }
 
 /**
- * Generic API error response
- */
-export interface ApiError {
-   error?: string;
-   message?: string;
-   status?: number;
-   [key: string]: unknown;
-}
-
-/**
- * Query parameters for stats endpoints
+ * Query parameters for Stats API list endpoints
  */
 export interface StatsQueryParams extends Record<string, unknown> {
    /**
-    * Cayenne expression for filtering
+    * Cayenne expression for filtering. Skater and goalie reports fail
+    * (HTTP 500) without one, so the report functions send an empty
+    * expression when none is given.
     */
    cayenneExp?: string;
 
-   /**
-    * Sort field
-    */
+   /** Sort field, or a JSON array of `{property, direction}` */
    sort?: string;
 
-   /**
-    * Sort direction: 'asc' or 'desc'
-    */
+   /** Sort direction: 'asc' or 'desc' */
    dir?: 'asc' | 'desc';
 
-   /**
-    * Number of results to return
-    * -1 returns all results
-    */
+   /** Number of results to return; -1 returns all results */
    limit?: number;
 
-   /**
-    * Starting index for pagination
-    */
+   /** Starting index for pagination */
    start?: number;
 
-   /**
-    * Include additional fields
-    */
+   /** Include related data, e.g. 'logos' on teams */
    include?: string;
 
-   /**
-    * Exclude certain fields
-    */
+   /** Exclude certain fields */
    exclude?: string;
 
-   /**
-    * Fact cayenne expression
-    */
+   /** Cayenne expression applied to the underlying facts (e.g. gamesPlayed>=10) */
    factCayenneExp?: string;
 
-   /**
-    * Aggregate results
-    */
+   /** Aggregate rows across seasons and teams */
    isAggregate?: boolean;
 
-   /**
-    * Game-level stats
-    */
+   /** Return one row per game */
    isGame?: boolean;
 }
 
-export interface ErrorResponse {
-   message: string;
+/** Convenience filters for the `getStatsWithFilters` functions */
+export interface StatsFilters {
+   seasonId?: string | number;
+   gameTypeId?: number;
+   playerId?: number;
+   teamId?: number;
+   /** Any other field, matched with equality */
+   [key: string]: string | number | undefined;
 }
 
-/**
- * Type guard for ErrorResponse
- * @param response - The response to check
- * @returns True if the response is an ErrorResponse, false otherwise
- */
-export function isErrorResponse(
-   response: unknown,
-): response is ErrorResponse {
-   return (
-      typeof response === 'object' &&
-      response !== null &&
-      Object.keys(response).length === 1 &&
-      'message' in response &&
-      typeof response.message === 'string'
-   );
+/** Sorting for the `getStatsWithFilters` functions */
+export interface StatsSorting {
+   sortBy?: string;
+   direction?: 'asc' | 'desc';
+}
+
+/** Pagination for the `getStatsWithFilters` functions */
+export interface StatsPagination {
+   limit?: number;
+   start?: number;
 }

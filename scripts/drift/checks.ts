@@ -3,7 +3,7 @@
  * data. Stable ids point at a finished season, game and draft, so their
  * shapes should only change when the NHL APIs do.
  */
-import { adv, gc } from '#/api/index.ts';
+import { adv, gc, stats, video } from '#/api/index.ts';
 import type { APIResult } from '#/client/types.ts';
 
 const SEASON = 20242025;
@@ -16,6 +16,7 @@ const MONTH = '2025-01';
 const TEAM = 'TOR';
 const TEAM_ID = 10; // TOR
 const SKATER = 8478402; // Connor McDavid
+const VIDEO = 6366156642112; // first goal of GAME
 const GOALIE = 8478048; // Igor Shesterkin
 
 export interface DriftCheck {
@@ -36,12 +37,8 @@ export interface DriftCheck {
    volatile?: boolean;
 }
 
-/**
- * The adv functions are typed `unknown` but resolve to an APIResult.
- * Their top-10 lists are called without filters, so the checks also
- * cover the default filter values.
- */
-const result = (p: Promise<unknown>) => p as Promise<APIResult<unknown>>;
+// The adv top-10 lists are called without filters, so the checks also
+// cover the default filter values.
 
 /** A goal in GAME, for the replay endpoints */
 async function goalEventId(): Promise<number> {
@@ -246,155 +243,332 @@ const gamecenter: DriftCheck[] = [
 const edge: DriftCheck[] = [
    {
       name: 'adv.byTheNumbers',
-      run: () => result(adv.byTheNumbers()),
+      run: () => adv.byTheNumbers(),
       volatile: true,
    },
 
    // adv.skaters
    {
       name: 'adv.skaters.detail',
-      run: () => result(adv.skaters.detail(SKATER, SEASON, REG)),
+      run: () => adv.skaters.detail(SKATER, SEASON, REG),
    },
    {
       name: 'adv.skaters.comparison',
-      run: () => result(adv.skaters.comparison(SKATER, SEASON, REG)),
+      run: () => adv.skaters.comparison(SKATER, SEASON, REG),
    },
    {
       name: 'adv.skaters.leaders',
-      run: () => result(adv.skaters.leaders(SEASON, REG)),
+      run: () => adv.skaters.leaders(SEASON, REG),
    },
    {
       name: 'adv.skaters.shotLocation',
-      run: () => result(adv.skaters.shotLocation(SKATER, SEASON, REG)),
+      run: () => adv.skaters.shotLocation(SKATER, SEASON, REG),
    },
    {
       name: 'adv.skaters.shotSpeed',
-      run: () => result(adv.skaters.shotSpeed(SKATER, SEASON, REG)),
+      run: () => adv.skaters.shotSpeed(SKATER, SEASON, REG),
    },
    {
       name: 'adv.skaters.skatingDistance',
-      run: () => result(adv.skaters.skatingDistance(SKATER, SEASON, REG)),
+      run: () => adv.skaters.skatingDistance(SKATER, SEASON, REG),
    },
    {
       name: 'adv.skaters.skatingSpeed',
-      run: () => result(adv.skaters.skatingSpeed(SKATER, SEASON, REG)),
+      run: () => adv.skaters.skatingSpeed(SKATER, SEASON, REG),
    },
    {
       name: 'adv.skaters.zoneTime',
-      run: () => result(adv.skaters.zoneTime(SKATER, SEASON, REG)),
+      run: () => adv.skaters.zoneTime(SKATER, SEASON, REG),
    },
    {
       name: 'adv.skaters.top10.distance',
-      run: () => result(adv.skaters.top10.distance(SEASON, REG)),
+      run: () => adv.skaters.top10.distance(SEASON, REG),
    },
    {
       name: 'adv.skaters.top10.shotLocation',
-      run: () => result(adv.skaters.top10.shotLocation(SEASON, REG)),
+      run: () => adv.skaters.top10.shotLocation(SEASON, REG),
    },
    {
       name: 'adv.skaters.top10.shotSpeed',
-      run: () => result(adv.skaters.top10.shotSpeed(SEASON, REG)),
+      run: () => adv.skaters.top10.shotSpeed(SEASON, REG),
    },
    {
       name: 'adv.skaters.top10.speed',
-      run: () => result(adv.skaters.top10.speed(SEASON, REG)),
+      run: () => adv.skaters.top10.speed(SEASON, REG),
    },
    {
       name: 'adv.skaters.top10.zoneTime',
-      run: () => result(adv.skaters.top10.zoneTime(SEASON, REG)),
+      run: () => adv.skaters.top10.zoneTime(SEASON, REG),
    },
 
    // adv.goalies
    {
       name: 'adv.goalies.player',
-      run: () => result(adv.goalies.player(GOALIE, SEASON, REG)),
+      run: () => adv.goalies.player(GOALIE, SEASON, REG),
    },
    {
       name: 'adv.goalies.compare',
-      run: () => result(adv.goalies.compare(GOALIE, SEASON, REG)),
+      run: () => adv.goalies.compare(GOALIE, SEASON, REG),
    },
    {
       name: 'adv.goalies.leaders',
-      run: () => result(adv.goalies.leaders(SEASON, REG)),
+      run: () => adv.goalies.leaders(SEASON, REG),
    },
    {
       name: 'adv.goalies.savePercentage',
-      run: () => result(adv.goalies.savePercentage(GOALIE, SEASON, REG)),
+      run: () => adv.goalies.savePercentage(GOALIE, SEASON, REG),
    },
    {
       name: 'adv.goalies.savePercentage5v5',
-      run: () => result(adv.goalies.savePercentage5v5(GOALIE, SEASON, REG)),
+      run: () => adv.goalies.savePercentage5v5(GOALIE, SEASON, REG),
    },
    {
       name: 'adv.goalies.saveLocation',
-      run: () => result(adv.goalies.saveLocation(GOALIE, SEASON, REG)),
+      run: () => adv.goalies.saveLocation(GOALIE, SEASON, REG),
    },
    {
       name: 'adv.goalies.top10.savePercentage',
-      run: () => result(adv.goalies.top10.savePercentage(SEASON, REG)),
+      run: () => adv.goalies.top10.savePercentage(SEASON, REG),
    },
    {
       name: 'adv.goalies.top10.savePercentage5v5',
-      run: () => result(adv.goalies.top10.savePercentage5v5(SEASON, REG)),
+      run: () => adv.goalies.top10.savePercentage5v5(SEASON, REG),
    },
    {
       name: 'adv.goalies.top10.saveLocation',
-      run: () => result(adv.goalies.top10.saveLocation(SEASON, REG)),
+      run: () => adv.goalies.top10.saveLocation(SEASON, REG),
    },
 
    // adv.teams
    {
       name: 'adv.teams.stats',
-      run: () => result(adv.teams.stats(TEAM_ID, SEASON, REG)),
+      run: () => adv.teams.stats(TEAM_ID, SEASON, REG),
    },
    {
       name: 'adv.teams.compare',
-      run: () => result(adv.teams.compare(TEAM_ID, SEASON, REG)),
+      run: () => adv.teams.compare(TEAM_ID, SEASON, REG),
    },
    {
       name: 'adv.teams.leaders',
-      run: () => result(adv.teams.leaders(SEASON, REG)),
+      run: () => adv.teams.leaders(SEASON, REG),
    },
    {
       name: 'adv.teams.shotLocation',
-      run: () => result(adv.teams.shotLocation(TEAM_ID, SEASON, REG)),
+      run: () => adv.teams.shotLocation(TEAM_ID, SEASON, REG),
    },
    {
       name: 'adv.teams.shotSpeed',
-      run: () => result(adv.teams.shotSpeed(TEAM_ID, SEASON, REG)),
+      run: () => adv.teams.shotSpeed(TEAM_ID, SEASON, REG),
    },
    {
       name: 'adv.teams.skatingDistance',
-      run: () => result(adv.teams.skatingDistance(TEAM_ID, SEASON, REG)),
+      run: () => adv.teams.skatingDistance(TEAM_ID, SEASON, REG),
    },
    {
       name: 'adv.teams.skatingSpeed',
-      run: () => result(adv.teams.skatingSpeed(TEAM_ID, SEASON, REG)),
+      run: () => adv.teams.skatingSpeed(TEAM_ID, SEASON, REG),
    },
    {
       name: 'adv.teams.zoneTime',
-      run: () => result(adv.teams.zoneTime(TEAM_ID, SEASON, REG)),
+      run: () => adv.teams.zoneTime(TEAM_ID, SEASON, REG),
    },
    {
       name: 'adv.teams.top10.shotLocation',
-      run: () => result(adv.teams.top10.shotLocation(SEASON, REG)),
+      run: () => adv.teams.top10.shotLocation(SEASON, REG),
    },
    {
       name: 'adv.teams.top10.shotSpeed',
-      run: () => result(adv.teams.top10.shotSpeed(SEASON, REG)),
+      run: () => adv.teams.top10.shotSpeed(SEASON, REG),
    },
    {
       name: 'adv.teams.top10.skatingDistance',
-      run: () => result(adv.teams.top10.skatingDistance(SEASON, REG)),
+      run: () => adv.teams.top10.skatingDistance(SEASON, REG),
    },
    {
       name: 'adv.teams.top10.skatingSpeed',
-      run: () => result(adv.teams.top10.skatingSpeed(SEASON, REG)),
+      run: () => adv.teams.top10.skatingSpeed(SEASON, REG),
    },
    {
       name: 'adv.teams.top10.zoneTime',
-      run: () => result(adv.teams.top10.zoneTime(SEASON, REG)),
+      run: () => adv.teams.top10.zoneTime(SEASON, REG),
    },
 ];
 
-export const checks: DriftCheck[] = [...gamecenter, ...edge];
+/** Season filters for the stats API (field names differ per endpoint) */
+const STATS_SEASON = `seasonId=${SEASON} and gameTypeId=${REG}`;
+const LEADERS_SEASON = `season=${SEASON} and gameType=${REG}`;
+const FILTERS = { seasonId: SEASON, gameTypeId: REG };
+const PAGE = { limit: 5 };
+
+const statsApi: DriftCheck[] = [
+   // stats.skaters
+   {
+      name: 'stats.skaters.getPlayerInfo',
+      run: () =>
+         stats.skaters.getPlayerInfo({ cayenneExp: `id=${SKATER}` }),
+   },
+   {
+      name: 'stats.skaters.getLeaders',
+      run: () =>
+         stats.skaters.getLeaders('points', { cayenneExp: LEADERS_SEASON }),
+   },
+   {
+      name: 'stats.skaters.getMilestones',
+      run: () => stats.skaters.getMilestones(),
+      volatile: true,
+   },
+   {
+      name: 'stats.skaters.getStats',
+      run: () =>
+         stats.skaters.getStats('summary', {
+            cayenneExp: STATS_SEASON,
+            ...PAGE,
+         }),
+   },
+   {
+      name: 'stats.skaters.getStatsWithParams',
+      run: () =>
+         stats.skaters.getStatsWithParams('realtime', {
+            cayenneExp: STATS_SEASON,
+            ...PAGE,
+         }),
+   },
+   {
+      name: 'stats.skaters.getStatsWithBuilder',
+      run: () =>
+         stats.skaters.getStatsWithBuilder('timeonice', (q) => ({
+            cayenneExp: q
+               .equals('seasonId', SEASON)
+               .equals('gameTypeId', REG)
+               .build(),
+            ...PAGE,
+         })),
+   },
+   {
+      name: 'stats.skaters.getStatsWithFilters',
+      run: () =>
+         stats.skaters.getStatsWithFilters('bios', FILTERS, {}, PAGE),
+   },
+   // stats.goalies
+   {
+      name: 'stats.goalies.getLeaders',
+      run: () =>
+         stats.goalies.getLeaders('savePctg', {
+            cayenneExp: LEADERS_SEASON,
+         }),
+   },
+   {
+      name: 'stats.goalies.getMilestones',
+      run: () => stats.goalies.getMilestones(),
+      volatile: true,
+   },
+   {
+      name: 'stats.goalies.getStats',
+      run: () =>
+         stats.goalies.getStats('summary', {
+            cayenneExp: STATS_SEASON,
+            ...PAGE,
+         }),
+   },
+   {
+      name: 'stats.goalies.getStatsWithParams',
+      run: () =>
+         stats.goalies.getStatsWithParams('advanced', {
+            cayenneExp: STATS_SEASON,
+            ...PAGE,
+         }),
+   },
+   {
+      name: 'stats.goalies.getStatsWithBuilder',
+      run: () =>
+         stats.goalies.getStatsWithBuilder('savesByStrength', (q) => ({
+            cayenneExp: q
+               .equals('seasonId', SEASON)
+               .equals('gameTypeId', REG)
+               .build(),
+            ...PAGE,
+         })),
+   },
+   {
+      name: 'stats.goalies.getStatsWithFilters',
+      run: () =>
+         stats.goalies.getStatsWithFilters('bios', FILTERS, {}, PAGE),
+   },
+   // stats.teams
+   { name: 'stats.teams.getAll', run: () => stats.teams.getAll() },
+   {
+      name: 'stats.teams.getById',
+      run: () => stats.teams.getById(TEAM_ID, { include: 'logos' }),
+   },
+   {
+      name: 'stats.teams.getStats',
+      run: () =>
+         stats.teams.getStats('summary', { cayenneExp: STATS_SEASON }),
+   },
+   {
+      name: 'stats.teams.getStatsWithParams',
+      run: () =>
+         stats.teams.getStatsWithParams('powerplay', {
+            cayenneExp: STATS_SEASON,
+            ...PAGE,
+         }),
+   },
+   {
+      name: 'stats.teams.getStatsWithBuilder',
+      run: () =>
+         stats.teams.getStatsWithBuilder('realtime', (q) => ({
+            cayenneExp: q
+               .equals('seasonId', SEASON)
+               .equals('gameTypeId', REG)
+               .build(),
+            ...PAGE,
+         })),
+   },
+   {
+      name: 'stats.teams.getStatsWithFilters',
+      run: () =>
+         stats.teams.getStatsWithFilters('penaltykill', FILTERS, {}, PAGE),
+   },
+   // stats.season
+   {
+      name: 'stats.season.getSeasons',
+      run: () => stats.season.getSeasons(),
+   },
+   {
+      name: 'stats.season.getGames',
+      run: () =>
+         stats.season.getGames({ cayenneExp: `gameDate="${DATE}"` }),
+   },
+   {
+      name: 'stats.season.getShiftChart',
+      run: () => stats.season.getShiftChart(GAME),
+   },
+   { name: 'stats.season.getDraft', run: () => stats.season.getDraft() },
+   // stats.misc
+   { name: 'stats.misc.getConfig', run: () => stats.misc.getConfig() },
+   {
+      name: 'stats.misc.getCountries',
+      run: () => stats.misc.getCountries(),
+   },
+   { name: 'stats.misc.getGlossary', run: () => stats.misc.getGlossary() },
+   {
+      name: 'stats.misc.getFranchises',
+      run: () => stats.misc.getFranchises(),
+   },
+];
+
+const media: DriftCheck[] = [
+   { name: 'video.metadata', run: () => video.metadata(VIDEO) },
+   {
+      name: 'video.metadata (unknown video)',
+      run: () => video.metadata(1),
+      expectError: 'NotFoundError',
+   },
+];
+
+export const checks: DriftCheck[] = [
+   ...gamecenter,
+   ...edge,
+   ...statsApi,
+   ...media,
+];

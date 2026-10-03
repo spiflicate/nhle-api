@@ -34,29 +34,3 @@ export interface NHLClientConfig {
 export type APIResult<T> =
    | { success: true; data: T }
    | { success: false; error: NHLError };
-
-/**
- * NHL API error response structure
- * @deprecated Use NHLError class instead
- */
-export interface NHLApiError {
-   error: string;
-   status: number;
-   statusText: string;
-   headers: Record<string, string>;
-}
-
-/**
- * NHL API client interface
- */
-export interface NHLClient {
-   /**
-    * Send a GET request to the NHL API
-    * @param endpoint - API endpoint path (will be appended to baseUrl)
-    * @param params - Optional query parameters
-    */
-   get: <T = unknown>(
-      endpoint: string,
-      params?: Record<string, unknown>,
-   ) => Promise<T>;
-}

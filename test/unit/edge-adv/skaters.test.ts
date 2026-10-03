@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import * as skaters from '#/api/edge-adv/skaters.ts';
-import { NHLError } from '#/errors/index.ts';
+import { ValidationError } from '#/errors/index.ts';
 import { testData } from '../../test-utils.ts';
 
 describe('Edge-Adv Skaters Module', () => {
@@ -175,20 +175,17 @@ describe('Edge-Adv Skaters Module', () => {
       expect(mockCalls[0]).toContain('edge/skater-zone-time-top-10');
    });
 
-   test('detail should reject invalid player ID', async () => {
-      try {
-         await skaters.detail(
-            'invalid' as unknown as number,
-            testData.seasonId,
-            'REG',
-         );
-         expect.unreachable('Expected detail to reject invalid player ID');
-      } catch (error) {
-         expect(error).toBeInstanceOf(NHLError);
-         if (error instanceof NHLError) {
-            expect(error.category).toBe('VALIDATION');
-            expect(error.context.endpoint).toContain('edge/skater-detail');
-         }
+   test('detail should return a ValidationError for an invalid player ID', async () => {
+      const result = await skaters.detail(
+         'invalid' as unknown as number,
+         testData.seasonId,
+         'REG',
+      );
+      expect(result.success).toBeFalse();
+      if (!result.success) {
+         expect(result.error).toBeInstanceOf(ValidationError);
+         expect(result.error.context.endpoint).toContain('skater-detail');
       }
+      expect(mockCalls).toHaveLength(0);
    });
 });

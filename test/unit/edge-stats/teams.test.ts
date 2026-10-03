@@ -59,13 +59,13 @@ describe('Teams Module', () => {
    });
 
    test('getAll should fetch all teams', async () => {
-      const result = await teams.getAll('en');
+      const result = await teams.getAll({}, 'en');
       expectSuccess(result);
       expect(mockCalls[0]).toContain('/team');
    });
 
    test('getById should fetch team by ID', async () => {
-      const result = await teams.getById(testData.teamId, 'en');
+      const result = await teams.getById(testData.teamId, {}, 'en');
       expectSuccess(result);
       expect(mockCalls[0]).toContain(`/team/id/${testData.teamId}`);
    });
@@ -118,7 +118,7 @@ describe('Teams Module', () => {
    });
 
    test('should support multiple languages', async () => {
-      await teams.getAll('fr');
+      await teams.getAll({}, 'fr');
       expect(mockCalls[0]).toContain('/fr/team');
    });
 

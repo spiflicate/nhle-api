@@ -1,5 +1,9 @@
 import type { TeamAbbrev } from '../../types.ts';
-import type { LocalizedText, PositionCode } from './common.ts';
+import type {
+   LocalizedText,
+   PositionCode,
+   ShootsCatches,
+} from './common.ts';
 
 export interface PlayerSearchResult {
    playerId: string;
@@ -26,7 +30,7 @@ export interface PlayerSpotlight {
    playerId: number;
    name: LocalizedText;
    playerSlug: string;
-   position: Position;
+   position: PositionCode;
    sweaterNumber: number;
    teamId: number;
    headshot: string;
@@ -42,7 +46,7 @@ export interface PlayerLanding {
    lastName: LocalizedText;
    badges: Badge[];
    sweaterNumber: number;
-   position: Position;
+   position: PositionCode;
    headshot: string;
    heroImage: string;
    heightInInches: number;
@@ -53,7 +57,7 @@ export interface PlayerLanding {
    birthCity: LocalizedText;
    birthStateProvince?: LocalizedText;
    birthCountry: string;
-   shootsCatches: Position;
+   shootsCatches: ShootsCatches;
    draftDetails?: DraftDetails;
    playerSlug: string;
    inTop100AllTime: number;
