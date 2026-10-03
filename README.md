@@ -238,6 +238,19 @@ This project is still evolving and feedback is very welcome.
 
 Before filing an issue, check the `CHANGELOG.md` for recent changes and breaking notes, and include the library version you’re using.
 
+## API drift check
+
+The NHL APIs are undocumented and change without notice. `bun run drift` calls every public function against the live APIs (with a finished season, game and draft) and compares each response's structure with `scripts/drift/baseline.json`. It fails when an endpoint stops answering, an error response changes, or a field is added, removed or changes type. Values are ignored, and so are fields that turn `null`. Translations in localized strings (`{ default, fr, cs, ... }`) count as one field.
+
+The **API drift** workflow runs it daily and on demand (Actions → API drift → Run workflow). A failure opens one `api-drift` issue with the report, which the next passing run closes. It never runs on PRs, so upstream changes don't block unrelated work.
+
+When an API really has changed:
+
+1. Update the response types in `src/types/responses/`.
+2. Accept the new shapes with `bun run drift --update` and commit the baseline.
+
+Checks for date- or location-dependent data (scoreboard, draft tracker, where to watch) are marked `volatile`: a field missing today is only noted, and `--update` adds to their baseline instead of replacing it. When you add a library function, add a check in `scripts/drift/checks.ts`; `test/unit/drift.test.ts` fails if a public function has none.
+
 ## Support
 
 If you find this library helpful, consider supporting its development:

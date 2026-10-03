@@ -30,6 +30,7 @@
       "typecheck": "bunx tsc --noEmit",
       "test": "bun test",
       "test:watch": "bun test --watch",
+      "drift": "bun scripts/check-drift.ts",
       "prepublishOnly": "bun run build"
    },
    "keywords": [

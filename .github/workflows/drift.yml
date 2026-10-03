@@ -1,0 +1,79 @@
+# Calls every library function against the live NHL APIs and compares
+# the response shapes with scripts/drift/baseline.json. It runs on its
+# own schedule, never on PRs, so an upstream API change never blocks
+# unrelated work.
+#
+# On the default branch, a failure opens (or refreshes) one issue labelled
+# api-drift, and the next passing run closes it.
+name: API drift
+
+on:
+  schedule:
+    - cron: '23 9 * * *' # daily, 09:23 UTC, when no NHL games are live
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: api-drift
+  cancel-in-progress: false
+
+jobs:
+  drift:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      ON_DEFAULT_BRANCH: ${{ github.ref_name == github.event.repository.default_branch }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+
+      - name: Check the live APIs
+        id: check
+        continue-on-error: true
+        run: bun run drift --report drift-report.md
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: drift-report
+          path: drift-report.md
+          if-no-files-found: ignore
+
+      - name: Open or refresh the drift issue
+        if: steps.check.outcome == 'failure' && env.ON_DEFAULT_BRANCH == 'true'
+        run: |
+          if [ ! -f drift-report.md ]; then
+            echo "The drift check crashed before writing a report." > drift-report.md
+          fi
+          printf '\n---\nLatest run: %s\n' "$RUN_URL" >> drift-report.md
+          gh label create api-drift --color d93f0b \
+            --description 'The live NHL APIs no longer match the library' \
+            2>/dev/null || true
+          issue=$(gh issue list --label api-drift --state open \
+            --json number --jq '.[0].number')
+          if [ -n "$issue" ]; then
+            gh issue edit "$issue" --body-file drift-report.md
+          else
+            gh issue create --label api-drift \
+              --title 'NHL API drift detected' --body-file drift-report.md
+          fi
+
+      - name: Close the drift issue
+        if: steps.check.outcome == 'success' && env.ON_DEFAULT_BRANCH == 'true'
+        run: |
+          for issue in $(gh issue list --label api-drift --state open \
+            --json number --jq '.[].number'); do
+            gh issue close "$issue" \
+              --comment "The APIs match the baseline again: $RUN_URL"
+          done
+
+      - name: Fail the run on drift
+        if: steps.check.outcome == 'failure'
+        run: exit 1
