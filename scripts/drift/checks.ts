@@ -3,7 +3,7 @@
  * data. Stable ids point at a finished season, game and draft, so their
  * shapes should only change when the NHL APIs do.
  */
-import { adv, gc, stats } from '#/api/index.ts';
+import { adv, gc, stats, video } from '#/api/index.ts';
 import type { APIResult } from '#/client/types.ts';
 
 const SEASON = 20242025;
@@ -16,6 +16,7 @@ const MONTH = '2025-01';
 const TEAM = 'TOR';
 const TEAM_ID = 10; // TOR
 const SKATER = 8478402; // Connor McDavid
+const VIDEO = 6366156642112; // first goal of GAME
 const GOALIE = 8478048; // Igor Shesterkin
 
 export interface DriftCheck {
@@ -531,4 +532,18 @@ const statsApi: DriftCheck[] = [
    },
 ];
 
-export const checks: DriftCheck[] = [...gamecenter, ...edge, ...statsApi];
+const media: DriftCheck[] = [
+   { name: 'video.metadata', run: () => video.metadata(VIDEO) },
+   {
+      name: 'video.metadata (unknown video)',
+      run: () => video.metadata(1),
+      expectError: 'NotFoundError',
+   },
+];
+
+export const checks: DriftCheck[] = [
+   ...gamecenter,
+   ...edge,
+   ...statsApi,
+   ...media,
+];

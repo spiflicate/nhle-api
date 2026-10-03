@@ -17,5 +17,6 @@ export {
    createCayenneQuery,
 } from './utils/cayenne-query-builder.ts';
 export * from './utils/date.ts';
+export { normalizeAbbrev } from './utils/normalize.ts';
 export * from './utils/team-branding.ts';
 export { resolvePath } from './utils/utils.ts';

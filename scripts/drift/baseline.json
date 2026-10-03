@@ -7303,5 +7303,27 @@
       "$.data[].teamCommonName": "string",
       "$.data[].teamPlaceName": "string",
       "$.total": "number"
+   },
+   "video.metadata": {
+      "$": "object",
+      "$.description": "string",
+      "$.duration": "number",
+      "$.id": "string",
+      "$.longDescription": "string",
+      "$.poster": "string",
+      "$.publishedAt": "string",
+      "$.sources": "array",
+      "$.sources[]": "object",
+      "$.sources[].codec": "string",
+      "$.sources[].container": "string",
+      "$.sources[].height": "number",
+      "$.sources[].src": "string",
+      "$.sources[].type": "string",
+      "$.sources[].width": "number",
+      "$.tags": "array",
+      "$.tags[]": "string",
+      "$.thumbnail": "string",
+      "$.title": "string",
+      "$.url": "string"
    }
 }
