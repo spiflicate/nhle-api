@@ -210,14 +210,23 @@ export class ValidationError extends NHLError {
  * Error handler utility class
  */
 export class ErrorHandler {
-   private config: Required<ErrorConfig>;
+   private overrides: ErrorConfig;
 
+   /**
+    * @param config - Overrides; an unset `logLevel` follows the shared
+    * `config.logLevel` at log time.
+    */
    constructor(config: ErrorConfig = {}) {
-      this.config = {
+      this.overrides = { ...config };
+   }
+
+   private get config(): Required<ErrorConfig> {
+      return {
          logLevel:
-            config.logLevel ?? toErrorLogLevel(clientConfig.logLevel),
-         logger: config.logger ?? this.defaultLogger.bind(this),
-         includeStack: config.includeStack ?? true,
+            this.overrides.logLevel ??
+            toErrorLogLevel(clientConfig.logLevel),
+         logger: this.overrides.logger ?? this.defaultLogger.bind(this),
+         includeStack: this.overrides.includeStack ?? true,
       };
    }
 
@@ -375,7 +384,7 @@ export class ErrorHandler {
     * Update configuration
     */
    configure(config: Partial<ErrorConfig>): void {
-      this.config = { ...this.config, ...config };
+      this.overrides = { ...this.overrides, ...config };
    }
 }
 

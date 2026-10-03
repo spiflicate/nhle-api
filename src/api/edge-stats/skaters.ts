@@ -9,207 +9,193 @@
 
 import { edgeStatsClient } from '#/client/index.ts';
 import { config } from '#/config/index.ts';
-import {
-   buildCayenneExp,
-   CayenneQueryBuilder,
-} from '#/utils/cayenne-query-builder.ts';
+import { CayenneQueryBuilder } from '#/utils/cayenne-query-builder.ts';
 import { resolvePath } from '#/utils/utils.ts';
 import { dataPaths as p } from './paths.ts';
+import { filterParams, reportParams } from './query.ts';
 import type {
+   APIResultPaginated,
    PaginatedData,
+   PlayerInfo,
    SkaterLeader,
    SkaterMilestone,
+   SkaterReport,
    SkaterStats,
+   StatsFilters,
+   StatsPagination,
    StatsQueryParams,
+   StatsSorting,
 } from './types.ts';
 
 /**
- * Get player information (truncated list)
+ * Look up players (skaters and goalies)
  *
- * @param lang - Language code (default: 'en')
- * @returns Promise resolving to player information
+ * The endpoint returns nothing without a filter, so pass a `cayenneExp`.
+ *
+ * @param params - Query parameters, e.g. `{ cayenneExp: 'id=8478402' }`
+ * @param lang - Language code (default: configured language)
+ * @returns Promise resolving to matching players
  *
  * @example
- * const players = await getPlayerInfo('en');
+ * const players = await stats.skaters.getPlayerInfo({
+ *    cayenneExp: 'lastName="McDavid"',
+ * });
  */
-export async function getPlayerInfo(lang: string = config.language) {
+export async function getPlayerInfo(
+   params: StatsQueryParams = {},
+   lang: string = config.language,
+): Promise<APIResultPaginated<PlayerInfo>> {
    const path = resolvePath(p.skater.players, { lang });
-   return edgeStatsClient.get(path);
+   return edgeStatsClient.get<PaginatedData<PlayerInfo>>(path, params);
 }
 
 /**
- * Get skater leaders for a specific attribute
+ * Get skater leaders for a stat category
  *
- * @param attribute - The attribute to rank by (e.g., 'points', 'goals', 'assists')
- * @param lang - Language code (default: 'en')
+ * Without a filter the leaders are all-time; filter by season with
+ * `{ cayenneExp: 'season=20242025 and gameType=2' }`.
+ *
+ * @param statCategory - 'points', 'goals' or 'assists'
+ * @param params - Query parameters (the endpoint ignores `limit`)
+ * @param lang - Language code (default: configured language)
  * @returns Promise resolving to skater leaders
  *
  * @example
- * const leaders = await getLeaders('points', 'en');
+ * const leaders = await stats.skaters.getLeaders('points', {
+ *    cayenneExp: 'season=20242025 and gameType=2',
+ * });
  */
 export async function getLeaders(
    statCategory: keyof typeof p.skater.leaders,
+   params: StatsQueryParams = {},
    lang: string = config.language,
-) {
+): Promise<APIResultPaginated<SkaterLeader>> {
    const path = resolvePath(p.skater.leaders[statCategory], { lang });
-   return edgeStatsClient.get<PaginatedData<SkaterLeader>>(path);
+   return edgeStatsClient.get<PaginatedData<SkaterLeader>>(path, params);
 }
 
 /**
- * Get skater milestones
+ * Get active skaters approaching a career milestone
  *
- * @param lang - Language code (default: 'en')
+ * @param lang - Language code (default: configured language)
  * @returns Promise resolving to skater milestones
  *
  * @example
- * const milestones = await skaters.getMilestones('en');
+ * const milestones = await stats.skaters.getMilestones();
  */
-export async function getMilestones(lang: string = config.language) {
+export async function getMilestones(
+   lang: string = config.language,
+): Promise<APIResultPaginated<SkaterMilestone>> {
    const path = resolvePath(p.skater.milestones, { lang });
    return edgeStatsClient.get<PaginatedData<SkaterMilestone>>(path);
 }
+
 /**
- * Get skater information (detailed)
+ * Get a skater report
  *
- * @param lang - Language code (default: 'en')
- * @returns Promise resolving to skater information
+ * @param report - The report name (default: 'summary')
+ * @param params - Query parameters including cayenneExp for filtering
+ * @param lang - Language code (default: configured language)
+ * @returns Promise resolving to skater statistics
  *
  * @example
- * const info = await skaters.getInfo('en');
+ * const result = await stats.skaters.getStats('summary', {
+ *    cayenneExp: 'seasonId=20242025 and gameTypeId=2',
+ *    sort: 'points',
+ *    dir: 'desc',
+ *    limit: 10,
+ * });
  */
-export async function getStats(lang: string = config.language) {
-   const path = resolvePath(p.skater.report, { lang });
-   return edgeStatsClient.get<PaginatedData<SkaterStats>>(path);
+export async function getStats(
+   report: SkaterReport = 'summary',
+   params: StatsQueryParams = {},
+   lang: string = config.language,
+): Promise<APIResultPaginated<SkaterStats>> {
+   const path = resolvePath(p.skater.report, { lang, report });
+   return edgeStatsClient.get<PaginatedData<SkaterStats>>(
+      path,
+      reportParams(params),
+   );
 }
 
 /**
  * Get skater stats with low-level query parameters
  * This is the most flexible approach - you build the query parameters yourself
  *
- * @param report - The report type (e.g., 'summary', 'detailed')
+ * @param report - The report name (e.g., 'summary', 'realtime')
  * @param params - Query parameters including cayenneExp for filtering
- * @param lang - Language code (default: 'en')
+ * @param lang - Language code (default: configured language)
  * @returns Promise resolving to skater statistics
  *
  * @example
- * // Option 1: Using low-level params directly
- * const stats = await skaters.getStatsWithParams(
- *   'summary',
- *   {
- *     cayenneExp: 'seasonId=20232024 and gameTypeId=2',
- *     sort: 'points',
- *     limit: 10,
- *     dir: 'desc'
- *   },
- *   'en'
- * );
+ * const result = await stats.skaters.getStatsWithParams('summary', {
+ *    cayenneExp: 'seasonId=20232024 and gameTypeId=2',
+ *    sort: 'points',
+ *    limit: 10,
+ *    dir: 'desc',
+ * });
  */
 export async function getStatsWithParams(
-   report: string,
+   report: SkaterReport,
    params: StatsQueryParams,
    lang: string = config.language,
-) {
-   const path = resolvePath(p.skater.report, { lang, report });
-   return edgeStatsClient.get<PaginatedData<SkaterStats>>(path, params);
+): Promise<APIResultPaginated<SkaterStats>> {
+   return getStats(report, params, lang);
 }
+
 /**
  * Get skater stats using a fluent query builder
- * This approach uses the CayenneQueryBuilder for constructing complex filters
  *
- * @param report - The report type (e.g., 'summary', 'detailed')
+ * @param report - The report name (e.g., 'summary', 'realtime')
  * @param buildQuery - Function that receives a CayenneQueryBuilder and returns params
- * @param lang - Language code (default: 'en')
+ * @param lang - Language code (default: configured language)
  * @returns Promise resolving to skater statistics
  *
  * @example
- * // Option 2: Using the query builder
- * const stats = await skaters.getStatsWithBuilder(
- *   'summary',
- *   (q) => ({
- *     cayenneExp: q
- *       .equals('seasonId', '20232024')
- *       .equals('gameTypeId', 2)
- *       .build(),
- *     sort: 'points',
- *     limit: 10,
- *     dir: 'desc' as const
- *   }),
- *   'en'
- * );
+ * const result = await stats.skaters.getStatsWithBuilder('summary', (q) => ({
+ *    cayenneExp: q.equals('seasonId', 20232024).equals('gameTypeId', 2).build(),
+ *    sort: 'points',
+ *    limit: 10,
+ *    dir: 'desc' as const,
+ * }));
  */
 export async function getStatsWithBuilder(
-   report: string,
+   report: SkaterReport,
    buildQuery: (builder: CayenneQueryBuilder) => StatsQueryParams,
    lang: string = config.language,
-) {
-   const builder = new CayenneQueryBuilder();
-   const params = buildQuery(builder);
-   const path = resolvePath(p.skater.report, { lang, report });
-   return edgeStatsClient.get<PaginatedData<SkaterStats>>(path, params);
+): Promise<APIResultPaginated<SkaterStats>> {
+   return getStats(report, buildQuery(new CayenneQueryBuilder()), lang);
 }
 
 /**
  * Get skater stats with high-level convenience parameters
- * This approach hides the cayenneExp complexity with friendly parameters
+ * Every filter is matched with equality.
  *
- * @param report - The report type (e.g., 'summary', 'detailed')
- * @param filters - High-level filter object
+ * @param report - The report name (e.g., 'summary', 'realtime')
+ * @param filters - Field filters, e.g. `{ seasonId: 20232024, gameTypeId: 2 }`
  * @param sorting - Sorting options
  * @param pagination - Pagination options
- * @param lang - Language code (default: 'en')
+ * @param lang - Language code (default: configured language)
  * @returns Promise resolving to skater statistics
  *
  * @example
- * // Option 3: Using high-level convenience parameters
- * const stats = await skaters.getStatsWithFilters(
- *   'summary',
- *   { seasonId: '20232024', gameTypeId: 2 },
- *   { sortBy: 'points', direction: 'desc' },
- *   { limit: 10, start: 0 },
- *   'en'
+ * const result = await stats.skaters.getStatsWithFilters(
+ *    'summary',
+ *    { seasonId: '20232024', gameTypeId: 2 },
+ *    { sortBy: 'points', direction: 'desc' },
+ *    { limit: 10, start: 0 },
  * );
  */
 export async function getStatsWithFilters(
-   report: string,
-   filters?: {
-      seasonId?: string | number;
-      gameTypeId?: number;
-      playerId?: number;
-      [key: string]: unknown;
-   },
-   sorting?: {
-      sortBy?: string;
-      direction?: 'asc' | 'desc';
-   },
-   pagination?: {
-      limit?: number;
-      start?: number;
-   },
-   lang: string = 'en',
-) {
-   // Build cayenneExp from high-level filters
-   const cayenneFilters: Record<string, string | number> = {};
-   if (filters?.seasonId) cayenneFilters.seasonId = filters.seasonId;
-   if (filters?.gameTypeId) cayenneFilters.gameTypeId = filters.gameTypeId;
-   if (filters?.playerId) cayenneFilters.playerId = filters.playerId;
-
-   const params: Record<string, unknown> = {
-      cayenneExp: Object.keys(cayenneFilters).length
-         ? buildCayenneExp(cayenneFilters)
-         : '',
-   };
-   if (sorting?.sortBy) {
-      params.sort = sorting.sortBy;
-   }
-   if (sorting?.direction) {
-      params.dir = sorting.direction;
-   }
-   if (pagination?.limit) {
-      params.limit = pagination.limit;
-   }
-   if (pagination?.start) {
-      params.start = pagination.start;
-   }
-   const path = resolvePath(p.skater.report, { lang, report });
-   return edgeStatsClient.get<PaginatedData<SkaterStats>>(path, params);
+   report: SkaterReport,
+   filters?: StatsFilters,
+   sorting?: StatsSorting,
+   pagination?: StatsPagination,
+   lang: string = config.language,
+): Promise<APIResultPaginated<SkaterStats>> {
+   return getStats(
+      report,
+      filterParams(filters, sorting, pagination),
+      lang,
+   );
 }

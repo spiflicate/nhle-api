@@ -59,7 +59,7 @@ describe('Goalies Module', () => {
    });
 
    test('getLeaders should fetch goalie leaders with attribute', async () => {
-      const result = await goalies.getLeaders('gaa', 'en');
+      const result = await goalies.getLeaders('gaa', {}, 'en');
       expectSuccess(result);
       expect(mockCalls[0]).toContain('/leaders/goalies/gaa');
    });
@@ -118,7 +118,7 @@ describe('Goalies Module', () => {
    });
 
    test('should support multiple languages', async () => {
-      await goalies.getLeaders('gaa', 'fr');
+      await goalies.getLeaders('gaa', {}, 'fr');
       expect(mockCalls[0]).toContain('/fr/');
    });
 

@@ -9,175 +9,166 @@
 
 import { edgeStatsClient } from '#/client/index.ts';
 import { config } from '#/config/index.ts';
-import {
-   buildCayenneExp,
-   CayenneQueryBuilder,
-} from '#/utils/cayenne-query-builder.ts';
+import { CayenneQueryBuilder } from '#/utils/cayenne-query-builder.ts';
 import { resolvePath } from '#/utils/utils.ts';
 import { dataPaths as p } from './paths.ts';
+import { filterParams, reportParams } from './query.ts';
 import type {
+   APIResultPaginated,
    PaginatedData,
+   StatsFilters,
+   StatsPagination,
    StatsQueryParams,
+   StatsSorting,
    Team,
+   TeamReport,
    TeamStats,
 } from './types.ts';
 
 /**
- * Get list of all teams
+ * Get every team, past and present
  *
- * @param lang - Language code (default: 'en')
- * @returns Promise resolving to team list
+ * @param params - Query parameters, e.g. `{ include: 'logos' }`
+ * @param lang - Language code (default: configured language)
+ * @returns Promise resolving to the team list
  *
  * @example
- * const allTeams = await teams.getAll('en');
+ * const allTeams = await stats.teams.getAll();
  */
-export async function getAll(lang: string = config.language) {
+export async function getAll(
+   params: StatsQueryParams = {},
+   lang: string = config.language,
+): Promise<APIResultPaginated<Team>> {
    const path = resolvePath(p.team.all, { lang });
-   return edgeStatsClient.get(path);
+   return edgeStatsClient.get<PaginatedData<Team>>(path, params);
 }
 
 /**
- * Get information for a specific team by ID
+ * Get a team by ID
+ *
+ * The API answers with a one-row list.
  *
  * @param teamId - The team ID
- * @param lang - Language code (default: 'en')
- * @returns Promise resolving to team information
+ * @param params - Query parameters, e.g. `{ include: 'logos' }`
+ * @param lang - Language code (default: configured language)
+ * @returns Promise resolving to a list holding the team
  *
  * @example
- * const team = await teams.getById(10, 'en');
+ * const result = await stats.teams.getById(10);
+ * if (result.success) console.log(result.data.data[0]?.fullName);
  */
 export async function getById(
    teamId: number,
+   params: StatsQueryParams = {},
    lang: string = config.language,
-) {
+): Promise<APIResultPaginated<Team>> {
    const path = resolvePath(p.team.byId, { lang, teamId });
-   return edgeStatsClient.get<Team>(path);
+   return edgeStatsClient.get<PaginatedData<Team>>(path, params);
+}
+
+/**
+ * Get a team report
+ *
+ * @param report - The report name (default: 'summary')
+ * @param params - Query parameters including cayenneExp for filtering
+ * @param lang - Language code (default: configured language)
+ * @returns Promise resolving to team statistics
+ *
+ * @example
+ * const result = await stats.teams.getStats('summary', {
+ *    cayenneExp: 'seasonId=20242025 and gameTypeId=2',
+ *    sort: 'points',
+ *    dir: 'desc',
+ * });
+ */
+export async function getStats(
+   report: TeamReport = 'summary',
+   params: StatsQueryParams = {},
+   lang: string = config.language,
+): Promise<APIResultPaginated<TeamStats>> {
+   const path = resolvePath(p.team.report, { lang, report });
+   return edgeStatsClient.get<PaginatedData<TeamStats>>(
+      path,
+      reportParams(params),
+   );
 }
 
 /**
  * Get team stats with low-level query parameters
  * This is the most flexible approach - you build the query parameters yourself
  *
- * @param report - The report type (e.g., 'summary', 'detailed')
+ * @param report - The report name (e.g., 'summary', 'powerplay')
  * @param params - Query parameters including cayenneExp for filtering
- * @param lang - Language code (default: 'en')
+ * @param lang - Language code (default: configured language)
  * @returns Promise resolving to team statistics
  *
  * @example
- * // Option 1: Using low-level params directly
- * const stats = await teams.getStatsWithParams(
- *   'summary',
- *   {
- *     cayenneExp: 'seasonId=20232024 and gameTypeId=2',
- *     sort: 'shotsForPerGame',
- *   },
- *   'en'
- * );
+ * const result = await stats.teams.getStatsWithParams('summary', {
+ *    cayenneExp: 'seasonId=20232024 and gameTypeId=2',
+ *    sort: 'shotsForPerGame',
+ * });
  */
 export async function getStatsWithParams(
-   report: string,
+   report: TeamReport,
    params: StatsQueryParams,
    lang: string = config.language,
-) {
-   const path = resolvePath(p.team.report, { lang, report });
-   return edgeStatsClient.get<PaginatedData<TeamStats>>(path, params);
+): Promise<APIResultPaginated<TeamStats>> {
+   return getStats(report, params, lang);
 }
 
 /**
  * Get team stats using a fluent query builder
- * This approach uses the CayenneQueryBuilder for constructing complex filters
  *
- * @param report - The report type (e.g., 'summary', 'detailed')
+ * @param report - The report name (e.g., 'summary', 'powerplay')
  * @param buildQuery - Function that receives a CayenneQueryBuilder and returns params
- * @param lang - Language code (default: 'en')
+ * @param lang - Language code (default: configured language)
  * @returns Promise resolving to team statistics
  *
  * @example
- * // Option 2: Using the query builder
- * const stats = await teams.getStatsWithBuilder(
- *   'summary',
- *   (q) => ({
- *     cayenneExp: q
- *       .equals('seasonId', '20232024')
- *       .equals('gameTypeId', 2)
- *       .build(),
- *     sort: 'shotsForPerGame',
- *     limit: 10,
- *     dir: 'desc' as const
- *   }),
- *   'en'
- * );
+ * const result = await stats.teams.getStatsWithBuilder('summary', (q) => ({
+ *    cayenneExp: q.equals('seasonId', 20232024).equals('gameTypeId', 2).build(),
+ *    sort: 'shotsForPerGame',
+ *    limit: 10,
+ *    dir: 'desc' as const,
+ * }));
  */
 export async function getStatsWithBuilder(
-   report: string,
+   report: TeamReport,
    buildQuery: (builder: CayenneQueryBuilder) => StatsQueryParams,
    lang: string = config.language,
-) {
-   const builder = new CayenneQueryBuilder();
-   const params = buildQuery(builder);
-   const path = resolvePath(p.team.report, { lang, report });
-   return edgeStatsClient.get<PaginatedData<TeamStats>>(path, params);
+): Promise<APIResultPaginated<TeamStats>> {
+   return getStats(report, buildQuery(new CayenneQueryBuilder()), lang);
 }
 
 /**
  * Get team stats with high-level convenience parameters
- * This approach hides the cayenneExp complexity with friendly parameters
+ * Every filter is matched with equality.
  *
- * @param report - The report type (e.g., 'summary', 'detailed')
- * @param filters - High-level filter object
+ * @param report - The report name (e.g., 'summary', 'powerplay')
+ * @param filters - Field filters, e.g. `{ seasonId: 20232024, gameTypeId: 2 }`
  * @param sorting - Sorting options
  * @param pagination - Pagination options
- * @param lang - Language code (default: 'en')
+ * @param lang - Language code (default: configured language)
  * @returns Promise resolving to team statistics
  *
  * @example
- * // Option 3: Using high-level convenience parameters
- * const stats = await teams.getStatsWithFilters(
- *   'summary',
- *   { seasonId: '20232024', gameTypeId: 2 },
- *   { sortBy: 'shotsForPerGame', direction: 'desc' },
- *   { limit: 10, start: 0 },
- *   'en'
+ * const result = await stats.teams.getStatsWithFilters(
+ *    'summary',
+ *    { seasonId: '20232024', gameTypeId: 2 },
+ *    { sortBy: 'shotsForPerGame', direction: 'desc' },
+ *    { limit: 10, start: 0 },
  * );
  */
 export async function getStatsWithFilters(
-   report: string,
-   filters?: {
-      seasonId?: string | number;
-      gameTypeId?: number;
-      [key: string]: unknown;
-   },
-   sorting?: {
-      sortBy?: string;
-      direction?: 'asc' | 'desc';
-   },
-   pagination?: {
-      limit?: number;
-      start?: number;
-   },
+   report: TeamReport,
+   filters?: StatsFilters,
+   sorting?: StatsSorting,
+   pagination?: StatsPagination,
    lang: string = config.language,
-) {
-   // Build cayenneExp from high-level filters
-   const cayenneFilters: Record<string, string | number> = {};
-   if (filters?.seasonId) cayenneFilters.seasonId = filters.seasonId;
-   if (filters?.gameTypeId) cayenneFilters.gameTypeId = filters.gameTypeId;
-
-   const params: Record<string, unknown> = {};
-   if (Object.keys(cayenneFilters).length) {
-      params.cayenneExp = buildCayenneExp(cayenneFilters);
-   }
-   if (sorting?.sortBy) {
-      params.sort = sorting.sortBy;
-   }
-   if (sorting?.direction) {
-      params.dir = sorting.direction;
-   }
-   if (pagination?.limit) {
-      params.limit = pagination.limit;
-   }
-   if (pagination?.start) {
-      params.start = pagination.start;
-   }
-   const path = resolvePath(p.team.report, { lang, report });
-   return edgeStatsClient.get<PaginatedData<TeamStats>>(path, params);
+): Promise<APIResultPaginated<TeamStats>> {
+   return getStats(
+      report,
+      filterParams(filters, sorting, pagination),
+      lang,
+   );
 }

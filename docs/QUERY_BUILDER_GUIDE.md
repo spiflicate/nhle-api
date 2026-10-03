@@ -9,7 +9,7 @@ The `CayenneQueryBuilder` is a fluent TypeScript API for building complex filter
 ### Basic Queries
 
 ```typescript
-import { CayenneQueryBuilder } from "./utils/cayenne-query-builder";
+import { CayenneQueryBuilder } from "nhle-api";
 
 // Simple equality
 const query = new CayenneQueryBuilder()
@@ -25,6 +25,22 @@ const orQuery = new CayenneQueryBuilder()
   .equals("teamId", "BOS")
   .build();
 // Result: "teamId=NYR or teamId=BOS"
+```
+
+### With the `stats` API
+
+Pass the built expression as `cayenneExp`, or let `getStatsWithBuilder`
+create the builder for you:
+
+```typescript
+import { stats } from "nhle-api";
+
+const result = await stats.skaters.getStatsWithBuilder("summary", (q) => ({
+  cayenneExp: q.equals("seasonId", 20242025).equals("gameTypeId", 2).build(),
+  sort: "points",
+  dir: "desc",
+  limit: 10,
+}));
 ```
 
 ## Operators
