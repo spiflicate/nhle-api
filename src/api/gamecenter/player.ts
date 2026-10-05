@@ -7,15 +7,25 @@ import { createNHLClient, nhlClient } from '#/client/index.ts';
 import type { APIResult } from '#/client/types.ts';
 import { ValidationError } from '#/errors/index.ts';
 import type {
+   GoalieLeaderCategory,
    GoalieStatsLeaders,
    PlayerGameLog,
    PlayerLanding,
    PlayerSearchResult,
    PlayerSpotlight,
+   SkaterLeaderCategory,
    SkaterStatsLeaders,
+   StatsLeadersOptions,
 } from '#/types/index.ts';
 import type { GameType, Season } from '#/types/types.ts';
-import { BaseParams, isParseError, PlayerId } from '#/utils/schemas.ts';
+import {
+   BaseParams,
+   GoalieLeaderCategory as GoalieLeaderCategoryAT,
+   isParseError,
+   PlayerId,
+   SkaterLeaderCategory as SkaterLeaderCategoryAT,
+   StatsLeadersLimit,
+} from '#/utils/schemas.ts';
 import { resolvePath } from '#/utils/utils.ts';
 import { playerPaths as p } from './paths.ts';
 
@@ -132,52 +142,81 @@ export const statsLeaders = {
  * Get skater stats leaders
  * @param season - The season identifier (8-digit format: YYYYYYYY). Defaults to current season
  * @param gameType - The game type (2 = regular season, 3 = playoffs). Defaults to regular season
- * @returns Promise resolving to skater statistical leaders
+ * @param options - `categories` to return (defaults to all) and `limit` per category (defaults to 5; -1 returns every player)
+ * @returns Promise resolving to skater statistical leaders, keyed by category
  * @example
  * ```ts
  * statsLeaders.skaters(20232024, 2).then((data) => console.log(data));
+ * statsLeaders.skaters(20232024, 2, { categories: ['points', 'goals'], limit: -1 });
  * ```
  */
-async function statsLeadersSkaters(
+async function statsLeadersSkaters<
+   C extends SkaterLeaderCategory = SkaterLeaderCategory,
+>(
    season?: Season,
    gameType?: GameType,
-): Promise<APIResult<SkaterStatsLeaders>> {
-   const parsed = BaseParams({ season, gameType });
-   if (isParseError(parsed)) {
-      return {
-         success: false,
-         error: new ValidationError(parsed.summary, {
-            endpoint: p.statsLeaders.skaters,
-         }),
-      };
-   }
-   const path = resolvePath(p.statsLeaders.skaters, parsed);
-   return nhlClient.get(path);
+   options?: StatsLeadersOptions<C>,
+): Promise<APIResult<Pick<SkaterStatsLeaders, C>>> {
+   return getStatsLeaders(
+      p.statsLeaders.skaters,
+      SkaterLeaderCategoryAT,
+      season,
+      gameType,
+      options,
+   );
 }
 
 /**
  * Get goalie stats leaders
  * @param season - The season identifier (8-digit format: YYYYYYYY). Defaults to current season
  * @param gameType - The game type (2 = regular season, 3 = playoffs). Defaults to regular season
- * @returns Promise resolving to goalie statistical leaders
+ * @param options - `categories` to return (defaults to all) and `limit` per category (defaults to 5; -1 returns every player)
+ * @returns Promise resolving to goalie statistical leaders, keyed by category
  * @example
  * ```ts
  * statsLeaders.goalies(20232024, 2).then((data) => console.log(data));
+ * statsLeaders.goalies(20232024, 2, { categories: ['savePctg'], limit: 10 });
  * ```
  */
-async function statsLeadersGoalies(
+async function statsLeadersGoalies<
+   C extends GoalieLeaderCategory = GoalieLeaderCategory,
+>(
    season?: Season,
    gameType?: GameType,
-): Promise<APIResult<GoalieStatsLeaders>> {
-   const parsed = BaseParams({ season, gameType });
+   options?: StatsLeadersOptions<C>,
+): Promise<APIResult<Pick<GoalieStatsLeaders, C>>> {
+   return getStatsLeaders(
+      p.statsLeaders.goalies,
+      GoalieLeaderCategoryAT,
+      season,
+      gameType,
+      options,
+   );
+}
+
+async function getStatsLeaders<T>(
+   endpoint: string,
+   Category: typeof SkaterLeaderCategoryAT | typeof GoalieLeaderCategoryAT,
+   season: Season | undefined,
+   gameType: GameType | undefined,
+   options: StatsLeadersOptions<string> = {},
+): Promise<APIResult<T>> {
+   const parsed = BaseParams.merge({
+      categories: Category.array().or('undefined'),
+      limit: StatsLeadersLimit.or('undefined'),
+   })({
+      season,
+      gameType,
+      categories: options.categories,
+      limit: options.limit,
+   });
    if (isParseError(parsed)) {
       return {
          success: false,
-         error: new ValidationError(parsed.summary, {
-            endpoint: p.statsLeaders.goalies,
-         }),
+         error: new ValidationError(parsed.summary, { endpoint }),
       };
    }
-   const path = resolvePath(p.statsLeaders.goalies, parsed);
-   return nhlClient.get(path);
+   const { categories, limit, ...pathParams } = parsed;
+   const path = resolvePath(endpoint, pathParams);
+   return nhlClient.get(path, { categories: categories?.join(','), limit });
 }

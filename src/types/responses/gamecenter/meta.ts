@@ -38,3 +38,33 @@ interface Team {
    teamId: number;
    teamSlug: string;
 }
+
+/** Response from bulk `meta?players=…&teams=…`. Unknown ids are dropped. */
+export interface BulkMeta {
+   players: PlayerMeta[];
+   teams: TeamMeta[];
+   /** Always empty in every response seen so far */
+   seasonStates: SeasonStates[];
+}
+
+export interface PlayerMeta {
+   playerId: number;
+   playerSlug: string;
+   actionShot: string;
+   name: LocalizedText;
+   /** Empty for retired players */
+   currentTeams: PlayerMetaTeam[];
+}
+
+interface PlayerMetaTeam {
+   teamId: number;
+   abbrev: string;
+   force: boolean;
+}
+
+export interface TeamMeta {
+   name: LocalizedText;
+   tricode: string;
+   teamId: number;
+   teamSlug: string;
+}

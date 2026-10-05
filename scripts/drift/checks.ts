@@ -132,6 +132,22 @@ const gamecenter: DriftCheck[] = [
       name: 'gc.player.statsLeaders.goalies',
       run: () => gc.player.statsLeaders.goalies(SEASON, REG),
    },
+   {
+      name: 'gc.player.statsLeaders.skaters (categories, all players)',
+      run: () =>
+         gc.player.statsLeaders.skaters(SEASON, REG, {
+            categories: ['points', 'goals'],
+            limit: -1,
+         }),
+   },
+   {
+      name: 'gc.player.statsLeaders.goalies (categories, limit)',
+      run: () =>
+         gc.player.statsLeaders.goalies(SEASON, REG, {
+            categories: ['goalsAgainstAverage', 'savePctg'],
+            limit: 10,
+         }),
+   },
 
    // gc.team
    {
@@ -182,6 +198,15 @@ const gamecenter: DriftCheck[] = [
 
    // gc.misc
    { name: 'gc.misc.seasons', run: () => gc.misc.seasons() },
+   {
+      name: 'gc.misc.meta.lookup',
+      // Gretzky has no current team, so currentTeams[] is empty for him
+      run: () =>
+         gc.misc.meta.lookup({
+            players: [SKATER, GOALIE, 8447400],
+            teams: [TEAM, 'EDM'],
+         }),
+   },
    { name: 'gc.misc.meta.game', run: () => gc.misc.meta.game(GAME) },
    {
       name: 'gc.misc.meta.playoffSeries',

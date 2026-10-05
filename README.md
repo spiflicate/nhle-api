@@ -161,8 +161,8 @@ official logo URL helpers.
 - `gameLog(playerId, season?, gameType?)` – Game log for a player
 - `spotlight()` – Featured players (spotlight carousel)
 - `search(query)` – Player search
-- `statsLeaders.season(season?, gameType?, category?, limit?)` – Season stat leaders
-- `statsLeaders.current(gameType?, category?, limit?)` – Current stat leaders
+- `statsLeaders.skaters(season?, gameType?, { categories?, limit? }?)` – Skater stat leaders (`limit: -1` returns every player)
+- `statsLeaders.goalies(season?, gameType?, { categories?, limit? }?)` – Goalie stat leaders
 
 ### `gc.draft` – Draft Data
 
@@ -173,6 +173,7 @@ official logo URL helpers.
 ### `gc.misc` – Miscellaneous
 
 - `seasons()` – All NHL seasons
+- `meta.lookup({ players?, teams? })` – Player and team metadata for several ids in one call
 - `meta.game(gameId)` – Game metadata
 - `meta.gameVideo(gameId)` – Game video metadata
 - `postalLookup(postalCode)` – Postal/ZIP lookup (location info)
