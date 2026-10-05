@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `nhle-api/toolkit` entry point with constants, date helpers, `resolvePath`, `normalizeAbbrev`, the Cayenne query builder, and team branding (colors and logo URLs)
 - `NHLClient` accepts an options object (`baseUrl`, `timeout`, `language`, `headers`, `errorConfig`)
 - Level-aware `logger` and `writeLog`
+- `gc.player.v2` for the v2 player API that nhl.com player pages use: `header`, `home`, `bio`, `stats` and `gameLog`, with response types (`PlayerHeader`, `PlayerHome`, `PlayerBio`, `PlayerStats`, `PlayerGameLogV2`)
 - Daily API drift check (`bun run drift`, GitHub workflow "API drift") covering every public function
 - CI on pull requests (lint, typecheck, tests, build, publint and are-the-types-wrong) and a tag-triggered release workflow that publishes with npm trusted publishing
 

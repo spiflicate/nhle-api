@@ -164,6 +164,14 @@ official logo URL helpers.
 - `statsLeaders.season(season?, gameType?, category?, limit?)` – Season stat leaders
 - `statsLeaders.current(gameType?, category?, limit?)` – Current stat leaders
 
+`gc.player.v2` is the newer API that nhl.com player pages use:
+
+- `v2.header(playerId)` – Name, number, position, badges and current team
+- `v2.home(playerId)` – Last game, next game (with broadcasts and matchup stats) and current roster
+- `v2.bio(playerId)` – Vitals, draft, awards, biography and transactions
+- `v2.stats(playerId)` – Statline with league ranks, last 5 games, career and season totals in every league
+- `v2.gameLog(playerId, season?, gameType?)` – Game log with home/away teams, scores and results
+
 ### `gc.draft` – Draft Data
 
 - `picks(year?)` – Draft picks for a given year

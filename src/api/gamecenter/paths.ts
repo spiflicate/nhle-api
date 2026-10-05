@@ -70,6 +70,23 @@ export const playerPaths = {
    playerSearch: 'https://search.d3.nhle.com/api/v1/search/player',
 };
 
+/**
+ * API endpoint paths for the v2 player API, which nhl.com player pages use.
+ * Base URL: https://api-web.nhle.com/v2
+ */
+export const playerV2Paths = {
+   /** Name, number, position, size and current team. */
+   header: 'player/{playerId}/header',
+   /** Last game, next game and current team roster. */
+   home: 'player/{playerId}/home',
+   /** Vitals, draft, awards, biography and current team roster. */
+   bio: 'player/{playerId}/bio',
+   /** Statline with ranks, last 5 games, career and season totals. */
+   playerStats: 'player/{playerId}/player-stats',
+   /** Player game log for a season and game type. */
+   gameLog: 'player/{playerId}/game-log/{season}/{gameType}',
+};
+
 /** API endpoint paths for miscellaneous data. */
 export const miscPaths = {
    /** Current season information. */
