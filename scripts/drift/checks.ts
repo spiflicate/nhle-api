@@ -72,6 +72,10 @@ const gamecenter: DriftCheck[] = [
       name: 'gc.game.pptReplay.event',
       run: async () => gc.game.pptReplay.event(GAME, await goalEventId()),
    },
+   {
+      name: 'gc.game.pptReplay.frames',
+      run: async () => gc.game.pptReplay.frames(GAME, await goalEventId()),
+   },
    { name: 'gc.game.schedule', run: () => gc.game.schedule(DATE) },
    {
       name: 'gc.game.scheduleCalendar',
@@ -212,6 +216,12 @@ const gamecenter: DriftCheck[] = [
       // A valid id past the last game of 2015-16 (1,230 games)
       run: () => gc.game.landing(2015021312),
       expectError: 'NotFoundError',
+   },
+   {
+      name: 'gc.game.pptReplay.frames (no replay)',
+      // Event 52 is GAME's first period-start; only goals have a file
+      run: () => gc.game.pptReplay.frames(GAME, 52),
+      expectError: 'ClientError',
    },
 ];
 

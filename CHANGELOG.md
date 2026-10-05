@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `getStats(report, params)` for skaters, goalies and teams, with `SkaterReport`, `GoalieReport` and `TeamReport` unions of the report names
 - Response types for every `adv` function (`EdgeSkaterDetail`, `EdgeTeamZoneTime`, ...) and `LocalizedText`
 - `video.metadata(videoId)` for Brightcove video titles, descriptions and sources
+- `gc.game.pptReplay.frames(gameId, eventId)` for the tracked puck and player positions around a goal (wsr.nhle.com), typed as `PPTReplayFrames`
 - Root exports: `APIResult`, `NHLClient`, `createNHLClient`, `BASE_URLS`, the error classes (`NHLError`, `NotFoundError`, `ValidationError`...), `ErrorCategory`, `ErrorLogLevel`, and the Cayenne query builder
 - `nhle-api/toolkit` entry point with constants, date helpers, `resolvePath`, `normalizeAbbrev`, the Cayenne query builder, and team branding (colors and logo URLs)
 - `NHLClient` accepts an options object (`baseUrl`, `timeout`, `language`, `headers`, `errorConfig`)

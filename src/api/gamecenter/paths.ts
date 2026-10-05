@@ -122,6 +122,8 @@ export const gamePaths = {
       goal: 'ppt-replay/goal/{gameId}/{eventId}',
       /** Event replay. */
       event: 'ppt-replay/{gameId}/{eventId}',
+      /** Tracking frames for a goal, on wsr.nhle.com. */
+      frames: 'sprites/{season}/{gameId}/ev{eventId}.json',
    },
    /** Where to watch information. */
    whereToWatch: 'where-to-watch',
