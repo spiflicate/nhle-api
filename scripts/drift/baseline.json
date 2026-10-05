@@ -3070,6 +3070,7 @@
       "$.maxSkatingSpeedSkater.overlay.gameDate": "string",
       "$.maxSkatingSpeedSkater.overlay.gameOutcome": "object",
       "$.maxSkatingSpeedSkater.overlay.gameOutcome.lastPeriodType": "string",
+      "$.maxSkatingSpeedSkater.overlay.gameOutcome.otPeriods": "number",
       "$.maxSkatingSpeedSkater.overlay.gameType": "number",
       "$.maxSkatingSpeedSkater.overlay.homeTeam": "object",
       "$.maxSkatingSpeedSkater.overlay.homeTeam.abbrev": "string",
@@ -3171,6 +3172,7 @@
       "$.totalDistanceSkatedLeague.topFiveSkaters[].player": "object",
       "$.totalDistanceSkatedLeague.topFiveSkaters[].player.name": "object",
       "$.totalDistanceSkatedLeague.topFiveSkaters[].player.name.default": "string",
+      "$.totalDistanceSkatedLeague.topFiveSkaters[].player.name.{lang}": "string",
       "$.totalDistanceSkatedLeague.topFiveSkaters[].playerOnHomeTeam": "boolean",
       "$.totalDistanceSkatedLeague.topFiveSkaters[].toi": "number",
       "$.totalDistanceSkatedSkater": "object",
@@ -3308,6 +3310,7 @@
       "$.totalDistanceSkatedTeam.topFiveSkaters[].player": "object",
       "$.totalDistanceSkatedTeam.topFiveSkaters[].player.name": "object",
       "$.totalDistanceSkatedTeam.topFiveSkaters[].player.name.default": "string",
+      "$.totalDistanceSkatedTeam.topFiveSkaters[].player.name.{lang}": "string",
       "$.totalDistanceSkatedTeam.topFiveSkaters[].playerOnHomeTeam": "boolean",
       "$.totalDistanceSkatedTeam.topFiveSkaters[].toi": "number"
    },
