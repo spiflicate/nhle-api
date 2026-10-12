@@ -206,6 +206,15 @@ export interface EdgeByTheNumbers {
          shots: number;
       }[];
    };
+   /** Goalie with the most high-danger saves; added to the API in October 2026. */
+   highDangerSavesGoalie?: {
+      player: EdgePlayer;
+      saves: number;
+      shotLocationDetails: {
+         area: string;
+         saves: number;
+      }[];
+   };
 }
 
 /** Response of `adv.skaters.detail` */
