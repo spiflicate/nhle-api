@@ -26,6 +26,7 @@ export interface NHLClientWithErrorConfig extends NHLClientConfig {
 export const BASE_URLS = {
    gamecenter: 'https://api-web.nhle.com/v1',
    edgeStats: 'https://api.nhle.com/stats/rest',
+   wsr: 'https://wsr.nhle.com',
 } as const;
 
 const DEFAULT_HEADERS: Record<string, string> = {
@@ -208,4 +209,18 @@ const nhlClient = createNHLClient(BASE_URLS.gamecenter);
  */
 const edgeStatsClient = createNHLClient(BASE_URLS.edgeStats);
 
-export { edgeStatsClient, nhlClient };
+/**
+ * Client instance for the wsr.nhle.com tracking replay files. The host
+ * answers 403 unless the request looks like it came from nhl.com: a
+ * Referer on www.nhl.com and a browser-style User-Agent (runtime
+ * defaults such as `node` or `Bun/1.x` are refused).
+ */
+const wsrClient = createNHLClient({
+   baseUrl: BASE_URLS.wsr,
+   headers: {
+      Referer: 'https://www.nhl.com/',
+      'User-Agent': 'Mozilla/5.0 (compatible; nhle-api)',
+   },
+});
+
+export { edgeStatsClient, nhlClient, wsrClient };

@@ -2,7 +2,7 @@
  * @module api/gamecenter/game
  * @description Game-related API endpoints for schedules, play-by-play, boxscores, playoffs, and game information
  */
-import { nhlClient } from '#/client/index.ts';
+import { nhlClient, wsrClient } from '#/client/index.ts';
 import type { APIResult } from '#/client/types.ts';
 import { ValidationError } from '#/errors/index.ts';
 import type {
@@ -17,6 +17,7 @@ import type {
    PlayoffSeries,
    PlayoffSeriesSchedule,
    PPTReplayEvent,
+   PPTReplayFrames,
    PPTReplayGoal,
    ScheduleCalendar,
    Season,
@@ -232,6 +233,7 @@ async function wscPlayByPlay(
 export const pptReplay = {
    goal: pptReplayGoal,
    event: pptReplayEvent,
+   frames: pptReplayFrames,
 };
 
 /**
@@ -286,6 +288,44 @@ async function pptReplayEvent(
    }
    const path = resolvePath(p.pptReplay.event, { gameId, eventId });
    return nhlClient.get(path);
+}
+
+/**
+ * Get the tracked puck and player positions around a goal, the data the
+ * nhl.com goal visualizer animates. This is the file each goal's
+ * `pptReplayUrl` (in `landing`, `playByPlay` and `pptReplay.goal`)
+ * points at, fetched from wsr.nhle.com with the headers it requires.
+ * @param gameId - The unique identifier for the game (10-digit format)
+ * @param eventId - The goal's event ID (`eventId` in play-by-play or landing)
+ * @returns Promise resolving to about 120-140 frames, one per tenth of a
+ * second. Events without a replay (not a goal, or not tracked) fail with
+ * a ClientError (HTTP 403).
+ * @example
+ * ```ts
+ * pptReplay.frames(2024020500, 152).then((data) => console.log(data));
+ * ```
+ */
+async function pptReplayFrames(
+   gameId: GameId,
+   eventId: number | string,
+): Promise<APIResult<PPTReplayFrames>> {
+   const parsed = GameIdAndEventId({ gameId, eventId });
+   if (isParseError(parsed)) {
+      return {
+         success: false,
+         error: new ValidationError(parsed.summary, {
+            endpoint: p.pptReplay.frames,
+         }),
+      };
+   }
+   // Files are stored by season, which the game ID starts with
+   const year = Math.trunc(parsed.gameId / 1e6);
+   const path = resolvePath(p.pptReplay.frames, {
+      season: `${year}${year + 1}`,
+      gameId: parsed.gameId,
+      eventId: parsed.eventId,
+   });
+   return wsrClient.get(path);
 }
 
 /**
