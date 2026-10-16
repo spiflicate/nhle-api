@@ -105,6 +105,15 @@ describe('diffShapes', () => {
       ]);
    });
 
+   test('translations of a known localized string are not drift', () => {
+      const plain = shapeOf({ name: { default: 'Montreal' } });
+      const translated = shapeOf({
+         name: { default: 'Montreal', fr: 'Montréal' },
+      });
+      expect(diffShapes(plain, translated)).toEqual([]);
+      expect(diffShapes(translated, plain)).toEqual([]);
+   });
+
    test('children of a retyped field are part of that change', () => {
       const live = shapeOf({ list: [{ a: '1', b: '2' }], meta: [1] });
       expect(diffShapes(base, live).map((c) => c.path)).toEqual(['$.meta']);

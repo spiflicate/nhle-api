@@ -101,6 +101,10 @@ function parentOf(path: string): string | undefined {
  * - changed: a path with a kind the baseline never saw there. A `null`
  *   where the baseline only had other kinds is not counted, since the
  *   API blanks fields with null freely.
+ *
+ * Translations (`{lang}`) of a localized string the baseline knows are
+ * neither added nor removed: which players or teams have a French or
+ * Czech spelling is data, not structure.
  */
 export function diffShapes(baseline: Shape, live: Shape): Change[] {
    const changes: Change[] = [];
@@ -108,6 +112,7 @@ export function diffShapes(baseline: Shape, live: Shape): Change[] {
       const before = baseline[path];
       if (before === undefined) {
          if (!isUnder(path, baseline)) continue;
+         if (isTranslation(path, baseline)) continue;
          changes.push({ kind: 'added', path, live: kinds });
          continue;
       }
@@ -127,9 +132,16 @@ export function diffShapes(baseline: Shape, live: Shape): Change[] {
    for (const [path, kinds] of Object.entries(baseline)) {
       if (path in live) continue;
       if (!couldHold(path, live)) continue;
+      if (isTranslation(path, live)) continue;
       changes.push({ kind: 'removed', path, baseline: kinds });
    }
    return changes.sort((a, b) => a.path.localeCompare(b.path));
+}
+
+/** Whether `path` is a `{lang}` translation of a string `shape` knows */
+function isTranslation(path: string, shape: Shape): boolean {
+   if (!path.endsWith('.{lang}')) return false;
+   return `${path.slice(0, -'{lang}'.length)}default` in shape;
 }
 
 /**
