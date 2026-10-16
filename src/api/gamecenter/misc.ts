@@ -9,11 +9,14 @@ import { ValidationError } from '#/errors/index.ts';
 import type {
    CountryCode,
    GameId,
+   PlayerId,
    PostalCode,
    SeriesLetter,
+   TeamAbbrev,
    Year,
 } from '#/types/index.ts';
 import type {
+   BulkMeta,
    GameMeta,
    LocationInfo,
    NHLSeasons,
@@ -22,6 +25,7 @@ import type {
    PostalCodeInfo,
 } from '#/types/responses/gamecenter/index.ts';
 import {
+   BulkMetaParams,
    CountryCode as CountryCodeAT,
    GameId as GameIdAT,
    isParseError,
@@ -48,9 +52,43 @@ export async function seasons(): Promise<APIResult<NHLSeasons>> {
  * @description Get metadata about playoff series and games
  */
 export const meta = {
+   lookup: metaLookup,
    game: metaGame,
    playoffSeries: metaPlayoffSeries,
 };
+
+/**
+ * Look up metadata for several players and teams in one request
+ *
+ * @param ids - Player ids and/or team abbreviations; at least one is required.
+ *    Unknown ids are left out of the response rather than failing it.
+ * @returns Promise resolving to player metadata (slug, action shot, current
+ *    teams) and team metadata (name, id, slug)
+ * @example
+ * ```ts
+ * meta.lookup({ players: [8478402, 8471675], teams: ['TOR', 'EDM'] })
+ *    .then((data) => console.log(data));
+ * ```
+ */
+async function metaLookup(ids: {
+   players?: PlayerId[];
+   teams?: TeamAbbrev[];
+}): Promise<APIResult<BulkMeta>> {
+   const parsed = BulkMetaParams({
+      players: ids.players,
+      teams: ids.teams,
+   });
+   if (isParseError(parsed)) {
+      return {
+         success: false,
+         error: new ValidationError(parsed.summary, { endpoint: p.meta }),
+      };
+   }
+   return nhlClient.get(p.meta, {
+      players: parsed.players.join(',') || undefined,
+      teams: parsed.teams.join(',') || undefined,
+   });
+}
 
 /**
  * Get meta information for a specific game

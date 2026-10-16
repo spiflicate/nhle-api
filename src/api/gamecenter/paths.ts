@@ -74,6 +74,8 @@ export const playerPaths = {
 export const miscPaths = {
    /** Current season information. */
    season: 'season',
+   /** Bulk player and team metadata (`?players=…&teams=…`). */
+   meta: 'meta',
    /** Playoff series metadata for a specific year and series. */
    metaPlayoffSeries: 'meta/playoff-series/{year}/{seriesLetter}',
    /** Game metadata. */

@@ -3,6 +3,7 @@
  *
  * Tests miscellaneous endpoints:
  * - seasons() - Get all valid NHL seasons
+ * - meta.lookup() - Get meta info for several players and teams
  * - meta.playoffSeries() - Get meta info for playoff series
  * - meta.game() - Get meta info for a specific game
  * - postalLookup() - Lookup info based on postal code
@@ -116,6 +117,34 @@ describe('Misc Module', () => {
    });
 
    describe('meta', () => {
+      test('meta.lookup should send players and teams as lists', async () => {
+         await misc.meta.lookup({
+            players: [8478402, '8471675'],
+            teams: ['TOR', 'EDM'],
+         });
+         const url = new URL(mockCalls[0] ?? '');
+         expect(url.pathname).toEndWith('/meta');
+         expect(url.searchParams.get('players')).toBe('8478402,8471675');
+         expect(url.searchParams.get('teams')).toBe('TOR,EDM');
+      });
+
+      test('meta.lookup should leave out an empty list', async () => {
+         await misc.meta.lookup({ teams: ['TOR'] });
+         const url = new URL(mockCalls[0] ?? '');
+         expect(url.searchParams.has('players')).toBeFalse();
+         expect(url.searchParams.get('teams')).toBe('TOR');
+      });
+
+      test('meta.lookup should require at least one id', async () => {
+         expectValidationError(await misc.meta.lookup({}));
+         expectValidationError(await misc.meta.lookup({ players: [] }));
+         expect(mockCalls.length).toBe(0);
+      });
+
+      test('meta.lookup should reject an invalid player id', async () => {
+         expectValidationError(await misc.meta.lookup({ players: [12] }));
+      });
+
       test('meta.playoffSeries should fetch playoff series meta with year and series letter', async () => {
          const result = await misc.meta.playoffSeries('A', 2024);
          expect(result).toBeDefined();
