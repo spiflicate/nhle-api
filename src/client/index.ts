@@ -25,6 +25,7 @@ export interface NHLClientWithErrorConfig extends NHLClientConfig {
 /** Base URLs of the NHL APIs the library calls. */
 export const BASE_URLS = {
    gamecenter: 'https://api-web.nhle.com/v1',
+   gamecenterV2: 'https://api-web.nhle.com/v2',
    edgeStats: 'https://api.nhle.com/stats/rest',
 } as const;
 
