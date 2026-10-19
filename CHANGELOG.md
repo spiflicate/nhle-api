@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- `savePctgLast10` and `savePctg5v5Last10` on `adv.goalies.compare` and `adv.goalies.savePercentage5v5` are typed as `EdgeGoalieGame[]` and `EdgeGoalieGameDecision[]` instead of `unknown[]`, now that the API fills them
 - **Breaking:** `PositionCode` is now `'C' | 'L' | 'R' | 'D' | 'G'`. Outside the draft endpoints the API sends `L`/`R` for wingers, never `LW`/`RW`
 
 ## [0.6.0] - 2026-10-03

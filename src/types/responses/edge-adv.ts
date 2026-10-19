@@ -742,14 +742,14 @@ export interface EdgeGoalieComparison {
       saves: number;
       savePctg: number;
    }[];
-   savePctg5v5Last10: unknown[]; // empty in every sample seen
+   savePctg5v5Last10: EdgeGoalieGame[];
    savePctg5v5Details: {
       savePctg: number;
       savePctgClose: number;
       shots: number;
       shotsPer60: number;
    };
-   savePctgLast10: unknown[]; // empty in every sample seen
+   savePctgLast10: EdgeGoalieGame[];
    savePctgDetails: {
       gamesAbove900: number;
       pctgGamesAbove900: number;
@@ -798,17 +798,24 @@ export interface EdgeGoalieLanding {
    minimumMinutesPlayed?: number;
 }
 
+/** A goalie's save percentage in one of their last 10 games */
+export interface EdgeGoalieGame {
+   gameCenterLink: string;
+   savePctg: number;
+   gameDate: string;
+   playerOnHomeTeam: boolean;
+   homeTeam: EdgeTeam;
+   awayTeam: EdgeTeam;
+}
+
+/** `EdgeGoalieGame` with the goalie's decision (`W`, `L` or `O`) */
+export interface EdgeGoalieGameDecision extends EdgeGoalieGame {
+   decision: string;
+}
+
 /** Response of `adv.goalies.savePercentage` */
 export interface EdgeGoalieSavePercentage {
-   savePctgLast10: {
-      gameCenterLink: string;
-      savePctg: number;
-      gameDate: string;
-      decision: string;
-      playerOnHomeTeam: boolean;
-      homeTeam: EdgeTeam;
-      awayTeam: EdgeTeam;
-   }[];
+   savePctgLast10: EdgeGoalieGameDecision[];
    savePctgDetails: {
       gamesAbove900: {
          value: number;
@@ -825,7 +832,7 @@ export interface EdgeGoalieSavePercentage {
 
 /** Response of `adv.goalies.savePercentage5v5` */
 export interface EdgeGoalieSavePercentage5v5 {
-   savePctg5v5Last10: unknown[]; // empty in every sample seen
+   savePctg5v5Last10: EdgeGoalieGameDecision[];
    savePctg5v5Details: {
       savePctg: {
          value: number;
