@@ -11,6 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `EdgeByTheNumbers.highDangerSavesGoalie`, the goalie with the most high-danger saves, newly returned by `adv.byTheNumbers`
 - Live-game fields on `Scoreboard` games: `clock`, `situation` and each team's `sog`
+- `DraftPositionCode` (`C`, `LW`, `RW`, `D`, `G`, `F`, `C/LW`, `C/RW`, `LW/RW`), used by the `draft.picks`, `draft.rankings` and `draft.tracker` response types
+- The drift check flags position codes a response's types don't declare, and `--update` won't accept them
+
+### Changed
+
+- **Breaking:** `PositionCode` is now `'C' | 'L' | 'R' | 'D' | 'G'`. Outside the draft endpoints the API sends `L`/`R` for wingers, never `LW`/`RW`
 
 ## [0.6.0] - 2026-10-03
 

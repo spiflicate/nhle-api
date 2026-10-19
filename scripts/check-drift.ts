@@ -8,7 +8,8 @@
  *
  * Fails when an endpoint is unreachable, an error response stops looking
  * the way the client expects, or a response gains, loses or retypes a
- * field, or sends a position code its types don't declare. Runs on a schedule in .github/workflows/drift.yml.
+ * field, or sends a position code its types don't declare. Runs on a
+ * schedule in .github/workflows/drift.yml.
  */
 import { appendFileSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
