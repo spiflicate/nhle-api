@@ -13,6 +13,12 @@ import {
    mergeShapes,
    shapeOf,
 } from '../../scripts/drift/shape.ts';
+import {
+   DRAFT_POSITION_CODES,
+   POSITION_CODES,
+   positionsFor,
+   unknownPositions,
+} from '../../scripts/drift/values.ts';
 
 describe('shapeOf', () => {
    test('merges array items and id-keyed entries', () => {
@@ -135,6 +141,51 @@ describe('mergeShapes', () => {
       expect(diffShapes(merged, shapeOf({ a: 2 }))).toEqual([
          { kind: 'removed', path: '$.clock', baseline: 'object' },
       ]);
+   });
+});
+
+describe('unknownPositions', () => {
+   test('reports each undeclared code once per path', () => {
+      expect(
+         unknownPositions(
+            {
+               homeTeam: {
+                  forwards: [
+                     { position: 'C' },
+                     { position: 'LW' },
+                     { position: 'LW' },
+                  ],
+               },
+               players: { 8478402: { positionCode: 'W' } },
+            },
+            POSITION_CODES,
+         ),
+      ).toEqual([
+         { path: '$.homeTeam.forwards[].position', value: 'LW' },
+         { path: '$.players.{id}.positionCode', value: 'W' },
+      ]);
+   });
+
+   test('accepts declared codes and ignores non-string positions', () => {
+      expect(
+         unknownPositions(
+            {
+               picks: [{ position: 'C/LW' }, { position: 'RW' }],
+               position: { x: 1 },
+            },
+            DRAFT_POSITION_CODES,
+         ),
+      ).toEqual([]);
+   });
+});
+
+describe('positionsFor', () => {
+   test('picks the draft codes for draft checks', () => {
+      expect(positionsFor('gc.draft.picks 2024 1')).toBe(
+         DRAFT_POSITION_CODES,
+      );
+      expect(positionsFor('gc.game.boxscore')).toBe(POSITION_CODES);
+      expect(positionsFor('stats.skater')).toBeUndefined();
    });
 });
 

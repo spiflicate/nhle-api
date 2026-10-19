@@ -30,8 +30,24 @@ export type Market = 'H' | 'A' | 'N' | 'S';
 /** The country code for this broadcast. (CA = Canada, US = United States) */
 export type CountryCode = 'CA' | 'US';
 
-/** The position code for a player. (C = Center, L[W] = Left Wing, R[W] = Right Wing, D = Defenseman, G = Goalie) */
-export type PositionCode = 'C' | 'LW' | 'L' | 'RW' | 'R' | 'D' | 'G';
+/** The position code for a player. (C = Center, L = Left Wing, R = Right Wing, D = Defenseman, G = Goalie) */
+export type PositionCode = 'C' | 'L' | 'R' | 'D' | 'G';
+
+/**
+ * The position code for a draft prospect. The draft endpoints spell
+ * wingers `LW`/`RW` and may list a generic forward (`F`) or two
+ * positions (`C/LW`).
+ */
+export type DraftPositionCode =
+   | 'C'
+   | 'LW'
+   | 'RW'
+   | 'D'
+   | 'G'
+   | 'F'
+   | 'C/LW'
+   | 'C/RW'
+   | 'LW/RW';
 
 /** Player's shooting/catching handedness. (L = Left, R = Right) */
 export type ShootsCatches = 'L' | 'R';

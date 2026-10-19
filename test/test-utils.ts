@@ -273,7 +273,7 @@ export const testData = {
    // Sample players for testing
    players: [
       { playerId: 8476791, name: 'Connor McDavid', position: 'C' },
-      { playerId: 8480793, name: 'Leon Draisaitl', position: 'LW' },
+      { playerId: 8480793, name: 'Leon Draisaitl', position: 'L' },
       { playerId: 8471214, name: 'Sidney Crosby', position: 'C' },
    ],
 

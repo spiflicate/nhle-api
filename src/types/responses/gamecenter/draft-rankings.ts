@@ -1,4 +1,4 @@
-import type { PositionCode, ShootsCatches } from './common.ts';
+import type { DraftPositionCode, ShootsCatches } from './common.ts';
 
 export interface DraftRankings {
    draftYear: number;
@@ -30,7 +30,7 @@ type Name =
 interface Ranking {
    lastName: string;
    firstName: string;
-   positionCode: PositionCode;
+   positionCode: DraftPositionCode;
    shootsCatches: ShootsCatches;
    heightInInches: number;
    weightInPounds: number;
