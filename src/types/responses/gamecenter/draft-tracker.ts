@@ -1,8 +1,8 @@
 import type { TeamAbbrev } from '../../types.ts';
 import type {
+   DraftPositionCode,
    HexColorCode,
    LocalizedText,
-   PositionCode,
    TvBroadcast,
 } from './common.ts';
 
@@ -31,5 +31,5 @@ interface Pick {
    state: string;
    lastName: LocalizedText;
    firstName: LocalizedText;
-   positionCode: PositionCode;
+   positionCode: DraftPositionCode;
 }

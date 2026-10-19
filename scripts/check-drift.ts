@@ -8,7 +8,7 @@
  *
  * Fails when an endpoint is unreachable, an error response stops looking
  * the way the client expects, or a response gains, loses or retypes a
- * field. Runs on a schedule in .github/workflows/drift.yml.
+ * field, or sends a position code its types don't declare. Runs on a schedule in .github/workflows/drift.yml.
  */
 import { appendFileSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
@@ -23,6 +23,11 @@ import {
    type Shape,
    shapeOf,
 } from './drift/shape.ts';
+import {
+   positionsFor,
+   type UnknownValue,
+   unknownPositions,
+} from './drift/values.ts';
 
 export const BASELINE_PATH = join(import.meta.dir, 'drift/baseline.json');
 
@@ -39,6 +44,8 @@ interface Outcome {
    status: Status;
    detail: string;
    changes: Change[];
+   /** Position codes outside the declared union */
+   values: UnknownValue[];
    /** Removed fields on volatile checks: reported, not failed */
    notes: Change[];
    shape?: Shape;
@@ -93,7 +100,7 @@ async function evaluate(
    check: DriftCheck,
    baseline: Record<string, Shape>,
 ): Promise<Outcome> {
-   const base = { check, changes: [], notes: [] };
+   const base = { check, changes: [], values: [], notes: [] };
    const result = await call(check);
 
    if (check.expectError) {
@@ -135,9 +142,11 @@ async function evaluate(
    }
 
    const shape = shapeOf(result.data);
+   const allowed = positionsFor(check.name);
+   const values = allowed ? unknownPositions(result.data, allowed) : [];
    const expected = baseline[check.name];
    if (!expected) {
-      return { ...base, shape, status: 'no baseline', detail: '' };
+      return { ...base, shape, values, status: 'no baseline', detail: '' };
    }
 
    const all = diffShapes(expected, shape);
@@ -145,16 +154,22 @@ async function evaluate(
    const isNote = (c: Change) => check.volatile && c.kind === 'removed';
    const notes = all.filter(isNote);
    const changes = all.filter((c) => !isNote(c));
+   const detail = [
+      changes.length > 0 &&
+         `${changes.length} field change${changes.length === 1 ? '' : 's'}`,
+      values.length > 0 &&
+         `${values.length} unknown position code${values.length === 1 ? '' : 's'}`,
+   ]
+      .filter(Boolean)
+      .join(', ');
    return {
       ...base,
       shape,
       changes,
+      values,
       notes,
-      status: changes.length > 0 ? 'drift' : 'ok',
-      detail:
-         changes.length > 0
-            ? `${changes.length} field change${changes.length === 1 ? '' : 's'}`
-            : '',
+      status: changes.length > 0 || values.length > 0 ? 'drift' : 'ok',
+      detail,
    };
 }
 
@@ -197,9 +212,20 @@ function report(outcomes: Outcome[], updated: boolean): string {
       ),
    ];
    for (const o of outcomes) {
-      if (o.changes.length === 0 && o.notes.length === 0) continue;
+      if (
+         o.changes.length === 0 &&
+         o.values.length === 0 &&
+         o.notes.length === 0
+      )
+         continue;
       lines.push('', `## \`${o.check.name}\``, '');
       lines.push(...o.changes.map((c) => `- ${describe(c)}`));
+      lines.push(
+         ...o.values.map(
+            (v) =>
+               `- unknown position code \`${v.value}\` at \`${v.path}\``,
+         ),
+      );
       if (o.notes.length > 0) {
          lines.push(
             '',
@@ -216,7 +242,7 @@ function report(outcomes: Outcome[], updated: boolean): string {
          '',
          '- **unavailable**: the API did not answer. Re-run the workflow; if it persists, the endpoint may have moved.',
          '- **unexpected**: the call failed or returned nothing where data or a specific error was expected.',
-         '- **drift**: update the response types in `src/types/responses/`, then accept the new shapes with `bun run drift --update`.',
+         '- **drift**: update the response types in `src/types/responses/`, then accept the new shapes with `bun run drift --update`. An unknown position code needs `PositionCode` or `DraftPositionCode` (and the lists in `scripts/drift/values.ts`) widened instead.',
       );
    }
    return `${lines.join('\n')}\n`;
@@ -266,15 +292,21 @@ async function main() {
    }
 
    const failed = outcomes.filter((o) => FAILING.includes(o.status));
+   // --update accepts shapes, but an unknown position code needs a type change
    const blocking = update
       ? failed.filter(
-           (o) => o.status !== 'drift' && o.status !== 'no baseline',
+           (o) =>
+              o.values.length > 0 ||
+              (o.status !== 'drift' && o.status !== 'no baseline'),
         )
       : failed;
    if (blocking.length > 0) {
       for (const o of blocking) {
          console.log(`\n${o.check.name}: ${o.status} ${o.detail}`);
          for (const c of o.changes) console.log(`  ${describe(c)}`);
+         for (const v of o.values) {
+            console.log(`  unknown position code ${v.value} at ${v.path}`);
+         }
       }
       process.exit(1);
    }
