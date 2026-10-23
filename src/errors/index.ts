@@ -164,7 +164,7 @@ export class ServerError extends NHLError {
  * HTTP 429 rate limit errors
  */
 export class RateLimitError extends NHLError {
-   public readonly retryAfter?: number;
+   public readonly retryAfter: number | undefined;
 
    constructor(
       message: string = 'Rate limit exceeded',
@@ -175,8 +175,31 @@ export class RateLimitError extends NHLError {
          ...context,
          statusCode: context.statusCode || 429,
       });
-      this.retryAfter = retryAfter || 0;
+      this.retryAfter = retryAfter;
    }
+}
+
+/**
+ * Parse a Retry-After header into seconds. Accepts delay-seconds or an
+ * HTTP date (RFC 9110); returns undefined when missing or unparseable.
+ */
+export function parseRetryAfter(
+   value: string | null | undefined,
+   now: number = Date.now(),
+): number | undefined {
+   const trimmed = value?.trim();
+   if (!trimmed) return undefined;
+
+   if (/^\d+$/.test(trimmed)) {
+      return Number.parseInt(trimmed, 10);
+   }
+
+   // HTTP dates always name the month; this keeps Date.parse from
+   // reading values like "-5" as a year
+   if (!/[a-z]/i.test(trimmed)) return undefined;
+   const date = Date.parse(trimmed);
+   if (Number.isNaN(date)) return undefined;
+   return Math.max(0, Math.ceil((date - now) / 1000));
 }
 
 /**
@@ -319,7 +342,7 @@ export class ErrorHandler {
          return new RateLimitError(
             errorMessage,
             baseContext,
-            retryAfter ? parseInt(retryAfter, 10) : undefined,
+            parseRetryAfter(retryAfter),
          );
       }
 
