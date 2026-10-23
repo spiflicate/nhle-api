@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Breaking:** `RateLimitError.retryAfter` is `undefined` when the 429 response has no usable `Retry-After` header, instead of `0`. Code that checks `retryAfter === 0` or `retryAfter > 0` should check for `undefined` instead; `retryAfter ?? fallback` now works as expected
+- A `Retry-After` header sent as an HTTP date is converted to seconds from now (never below 0) instead of being discarded
+
 ## [0.7.0] - 2026-10-19
 
 ### Added
