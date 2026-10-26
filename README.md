@@ -240,7 +240,7 @@ const result = await reports.gameTimes(2026020180);
 ```
 
 - The report prints 12-hour local times without am/pm. A start at 10:xx or 11:xx is read as morning, 12:xx as noon and 1:xx–9:xx as afternoon or evening; the end is the first matching time after the start, so an end past midnight falls on the next day.
-- `utc` is filled for EST/EDT, CST/CDT, MST/MDT, PST/PDT, CET/CEST and EET/EEST. Any other zone abbreviation keeps `local` and `zone` and gives `utc: null`.
+- Times convert to UTC for EST/EDT, CST/CDT, MST/MDT, PST/PDT, CET/CEST and EET/EEST. Any other zone abbreviation, or a time without one, gives a `ParseError` rather than a UTC time that could be wrong.
 - `start` is null before the game has started and `end` is null while it is in progress. The report doesn't exist before the game, so the call gives a `NotFoundError` then.
 
 ## Video (`video`)

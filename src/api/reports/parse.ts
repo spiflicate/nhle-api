@@ -4,17 +4,17 @@
  * tests.
  */
 
+import type { APIResult } from '#/client/types.ts';
+import { ParseError } from '#/errors/index.ts';
+
 /** A recorded start or end time from the Game Summary header */
 export interface ReportTime {
    /** Local time as printed, 12-hour without am/pm, e.g. '2:16' */
    local: string;
    /** Zone abbreviation as printed, e.g. 'CDT' */
    zone: string;
-   /**
-    * The time in UTC, e.g. '2026-10-25T19:16:00Z', or null when the zone
-    * abbreviation isn't one of {@link ZONE_OFFSETS}
-    */
-   utc: string | null;
+   /** The time in UTC, e.g. '2026-10-25T19:16:00Z' */
+   utc: string;
 }
 
 /** When a game actually started and ended, from its Game Summary report */
@@ -30,7 +30,8 @@ export interface GameTimes {
 /**
  * UTC offsets in hours of the zone abbreviations the reports print:
  * North American venues, plus Global Series games in Europe, which print
- * local time too. Other abbreviations give a null `utc`.
+ * local time too. Any other abbreviation fails the parse rather than
+ * risk a wrong UTC time.
  */
 export const ZONE_OFFSETS: Readonly<Record<string, number>> = {
    EST: -5,
@@ -65,8 +66,10 @@ const MONTHS = [
 const DATE_RE = new RegExp(
    `(?:Mon|Tues|Wednes|Thurs|Fri|Satur|Sun)day,\\s+(${MONTHS.join('|')})\\s+(\\d{1,2}),\\s+(\\d{4})`,
 );
+// The zone is optional here so that a missing one fails the parse
+// instead of reading as "not started"
 const TIME_RE = (label: string) =>
-   new RegExp(`\\b${label}\\s+(\\d{1,2}):(\\d{2})\\s+([A-Z]{2,5})\\b`);
+   new RegExp(`\\b${label}\\s+(\\d{1,2}):(\\d{2})(?:\\s+([A-Za-z]+))?`);
 
 const DAY = 24 * 60;
 
@@ -81,18 +84,29 @@ const DAY = 24 * 60;
  * - the end is the first time after the start that matches the printed
  *   value, so an end before the start falls on the next day.
  *
+ * Zone abbreviations not in {@link ZONE_OFFSETS} fail the parse.
+ *
  * @param html - The report page
- * @returns The times, or null when the page has no game date
+ * @returns The times, or a ParseError when the page has no game date or
+ * a time can't be read or converted to UTC
  */
-export function parseGameTimes(html: string): GameTimes | null {
-   const text = html.replace(/&nbsp;| /g, ' ');
+export function parseGameTimes(html: string): APIResult<GameTimes> {
+   const text = html.replace(/&nbsp;|\u00a0/g, ' ');
    const dateMatch = DATE_RE.exec(text);
-   if (!dateMatch) return null;
+   if (!dateMatch) return failure('No game date found in the Game Summary');
    const [, monthName = '', day = '', year = ''] = dateMatch;
    const date = `${year}-${pad(MONTHS.indexOf(monthName) + 1)}-${pad(Number(day))}`;
 
    const start = TIME_RE('Start').exec(text);
    const end = TIME_RE('End').exec(text);
+   for (const match of [start, end]) {
+      const zone = match?.[3];
+      if (match && (zone === undefined || !(zone in ZONE_OFFSETS))) {
+         return failure(
+            `Unknown time zone ${zone === undefined ? '(none)' : `'${zone}'`} in '${match[0].trim()}'`,
+         );
+      }
+   }
 
    // Minutes after local midnight of the game date
    const startMinutes = start ? startToMinutes(start) : null;
@@ -103,10 +117,17 @@ export function parseGameTimes(html: string): GameTimes | null {
       : null;
 
    return {
-      date,
-      start: start ? toReportTime(start, date, startMinutes ?? 0) : null,
-      end: end ? toReportTime(end, date, endMinutes ?? 0) : null,
+      success: true,
+      data: {
+         date,
+         start: start ? toReportTime(start, date, startMinutes ?? 0) : null,
+         end: end ? toReportTime(end, date, endMinutes ?? 0) : null,
+      },
    };
+}
+
+function failure(message: string): APIResult<never> {
+   return { success: false, error: new ParseError(message) };
 }
 
 function startToMinutes(match: RegExpExecArray): number {
@@ -130,19 +151,10 @@ function toReportTime(
    minutes: number,
 ): ReportTime {
    const [, hour = '', minute = '', zone = ''] = match;
-   const offset = ZONE_OFFSETS[zone];
-   let utc: string | null = null;
-   if (offset !== undefined) {
-      const [y, m, d] = date.split('-').map(Number);
-      const ms = Date.UTC(
-         y ?? 0,
-         (m ?? 1) - 1,
-         d,
-         0,
-         minutes - offset * 60,
-      );
-      utc = new Date(ms).toISOString().replace('.000Z', 'Z');
-   }
+   const offset = ZONE_OFFSETS[zone] ?? 0;
+   const [y = 0, m = 1, d = 1] = date.split('-').map(Number);
+   const ms = Date.UTC(y, m - 1, d, 0, minutes - offset * 60);
+   const utc = new Date(ms).toISOString().replace('.000Z', 'Z');
    return { local: `${Number(hour)}:${minute}`, zone, utc };
 }
 

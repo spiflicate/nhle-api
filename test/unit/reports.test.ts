@@ -1,15 +1,26 @@
 import { afterEach, describe, expect, it } from 'bun:test';
 import { readFileSync } from 'node:fs';
 import { gameTimes, REPORT_CODES, url } from '#/api/reports/index.ts';
-import { parseGameTimes } from '#/api/reports/parse.ts';
+import { type GameTimes, parseGameTimes } from '#/api/reports/parse.ts';
 import { config } from '#/config/index.ts';
-import { NotFoundError, ValidationError } from '#/errors/index.ts';
+import {
+   NotFoundError,
+   ParseError,
+   ValidationError,
+} from '#/errors/index.ts';
 
 /** Game Summary of 2026020180, FLA @ CHI, saved 2026-10-26 */
 const FIXTURE = readFileSync(
    new URL('../fixtures/reports/GS020180.HTM', import.meta.url),
    'utf8',
 );
+
+/** Parse a report expected to succeed */
+function parsed(html: string): GameTimes {
+   const result = parseGameTimes(html);
+   if (!result.success) throw result.error;
+   return result.data;
+}
 
 /** The fixture with its date and start/end line replaced */
 function summary(date: string, times: string): string {
@@ -37,7 +48,7 @@ describe('reports.url', () => {
 
 describe('parseGameTimes', () => {
    it('reads a finished game', () => {
-      expect(parseGameTimes(FIXTURE)).toEqual({
+      expect(parsed(FIXTURE)).toEqual({
          date: '2026-10-25',
          start: { local: '2:16', zone: 'CDT', utc: '2026-10-25T19:16:00Z' },
          end: { local: '4:48', zone: 'CDT', utc: '2026-10-25T21:48:00Z' },
@@ -45,7 +56,7 @@ describe('parseGameTimes', () => {
    });
 
    it('puts an end before the start on the next day', () => {
-      const times = parseGameTimes(
+      const times = parsed(
          summary(
             'Saturday, January 10, 2026',
             'Start 9:52 PST; End 12:41 PST',
@@ -58,7 +69,7 @@ describe('parseGameTimes', () => {
          utc: '2026-01-11T08:41:00Z',
       });
 
-      const late = parseGameTimes(
+      const late = parsed(
          summary(
             'Saturday, January 10, 2026',
             'Start 9:40 EST; End 1:05 EST',
@@ -69,7 +80,7 @@ describe('parseGameTimes', () => {
    });
 
    it('reads 10:xx and 11:xx starts as morning and 12:xx as noon', () => {
-      const morning = parseGameTimes(
+      const morning = parsed(
          summary(
             'Monday, February 16, 2026',
             'Start 11:38 EST; End 2:09 EST',
@@ -78,7 +89,7 @@ describe('parseGameTimes', () => {
       expect(morning?.start?.utc).toBe('2026-02-16T16:38:00Z');
       expect(morning?.end?.utc).toBe('2026-02-16T19:09:00Z');
 
-      const noon = parseGameTimes(
+      const noon = parsed(
          summary(
             'Monday, February 16, 2026',
             'Start 12:30 EST; End 3:01 EST',
@@ -100,29 +111,28 @@ describe('parseGameTimes', () => {
          '2026-09-29T21:20:00Z',
       ],
    ])('converts a %s start in %s', (date, zone, start, utc) => {
-      const times = parseGameTimes(
+      const times = parsed(
          summary(date, `Start ${start} ${zone}; End 11:59 ${zone}`),
       );
       expect(times?.start).toEqual({ local: start, zone, utc });
    });
 
-   it('keeps local values and a null UTC for an unknown zone', () => {
-      expect(
-         parseGameTimes(
-            summary(
-               'Saturday, March 6, 2027',
-               'Start 7:15 JST; End 9:50 JST',
-            ),
-         ),
-      ).toEqual({
-         date: '2027-03-06',
-         start: { local: '7:15', zone: 'JST', utc: null },
-         end: { local: '9:50', zone: 'JST', utc: null },
-      });
+   it.each([
+      ['an unknown zone', 'Start 7:15 JST; End 9:50 JST', "'JST'"],
+      ['an unknown end zone', 'Start 7:15 EDT; End 9:50 ET', "'ET'"],
+      ['no zone', 'Start 7:15; End', '(none)'],
+   ])('fails on %s', (_, line, zone) => {
+      const result = parseGameTimes(
+         summary('Saturday, March 6, 2027', line),
+      );
+      expect(result.success).toBeFalse();
+      if (result.success) return;
+      expect(result.error).toBeInstanceOf(ParseError);
+      expect(result.error.message).toContain(`Unknown time zone ${zone}`);
    });
 
    it('gives a null end while the game is in progress', () => {
-      const times = parseGameTimes(
+      const times = parsed(
          summary('Sunday, October 25, 2026', 'Start 2:16 CDT; End'),
       );
       expect(times?.start?.local).toBe('2:16');
@@ -130,16 +140,16 @@ describe('parseGameTimes', () => {
    });
 
    it('gives a null start before the game has started', () => {
-      const times = parseGameTimes(
+      const times = parsed(
          summary('Sunday, October 25, 2026', 'Start ; End'),
       );
       expect(times).toEqual({ date: '2026-10-25', start: null, end: null });
    });
 
-   it('returns null for a page without a game date', () => {
-      expect(
-         parseGameTimes('<html><body>Not found</body></html>'),
-      ).toBeNull();
+   it('fails on a page without a game date', () => {
+      const result = parseGameTimes('<html><body>Not found</body></html>');
+      expect(result.success).toBeFalse();
+      if (!result.success) expect(result.error).toBeInstanceOf(ParseError);
    });
 });
 

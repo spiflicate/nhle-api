@@ -77,14 +77,14 @@ export function url(gameId: GameId, code: ReportCode): string {
  * Get when a game actually started and ended, from its Game Summary
  * report. The JSON APIs only have the scheduled start time.
  *
- * Times are printed in the venue's local zone and converted to UTC when
- * the zone abbreviation is known (North American zones, CET/CEST and
- * EET/EEST); otherwise `utc` is null.
+ * Times are printed in the venue's local zone and converted to UTC. A
+ * zone abbreviation other than the North American zones, CET/CEST and
+ * EET/EEST gives a ParseError rather than a guessed UTC time.
  *
  * @param gameId - 10-digit game id
  * @returns Promise resolving to the local date and the start and end
  * times; a game whose report doesn't exist yet gives a NotFoundError
- * result
+ * result, and a header that can't be read or converted a ParseError
  *
  * @example
  * const result = await reports.gameTimes(2026020180);
@@ -106,13 +106,13 @@ export async function gameTimes(
    if (!result.success) return result;
 
    const times = parseGameTimes(result.data);
-   if (!times) {
+   if (!times.success) {
       return {
          success: false,
-         error: new ParseError('No game date found in the Game Summary', {
+         error: new ParseError(times.error.message, {
             endpoint: `${BASE_URL}/${path}`,
          }),
       };
    }
-   return { success: true, data: times };
+   return times;
 }
