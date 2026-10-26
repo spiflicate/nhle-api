@@ -146,6 +146,50 @@ describe('parseGameTimes', () => {
       expect(times).toEqual({ date: '2026-10-25', start: null, end: null });
    });
 
+   it('picks am or pm from the scheduled start', () => {
+      const html = summary(
+         'Saturday, January 10, 2026',
+         'Start 10:07 PST; End 12:41 PST',
+      );
+      const evening = parseGameTimes(
+         html,
+         new Date('2026-01-11T06:00:00Z'),
+      );
+      expect(evening.success && evening.data.start?.utc).toBe(
+         '2026-01-11T06:07:00Z',
+      );
+      expect(evening.success && evening.data.end?.utc).toBe(
+         '2026-01-11T08:41:00Z',
+      );
+
+      const morning = parseGameTimes(
+         html,
+         new Date('2026-01-10T18:00:00Z'),
+      );
+      expect(morning.success && morning.data.start?.utc).toBe(
+         '2026-01-10T18:07:00Z',
+      );
+   });
+
+   it('fails when neither reading is near the scheduled start', () => {
+      const result = parseGameTimes(
+         FIXTURE,
+         new Date('2026-10-25T12:00:00Z'),
+      );
+      expect(result.success).toBeFalse();
+      if (!result.success)
+         expect(result.error.message).toContain(
+            'scheduled start 2026-10-25T12:00:00Z',
+         );
+   });
+
+   it('fails on an end without a start', () => {
+      const result = parseGameTimes(
+         summary('Sunday, October 25, 2026', 'Start ; End 4:48 CDT'),
+      );
+      expect(result.success).toBeFalse();
+   });
+
    it('fails on a page without a game date', () => {
       const result = parseGameTimes('<html><body>Not found</body></html>');
       expect(result.success).toBeFalse();
@@ -155,27 +199,38 @@ describe('parseGameTimes', () => {
 
 describe('reports.gameTimes', () => {
    const originalFetch = globalThis.fetch;
+   const REPORT = 'https://www.nhl.com/scores/htmlreports/';
+   const BOXSCORE = { startTimeUTC: '2026-10-25T19:00:00Z' };
 
    afterEach(() => {
       globalThis.fetch = originalFetch;
       config.logLevel = 'warn';
    });
 
-   function respond(body: string, status = 200) {
+   /** Answer report URLs with `report` and api-web URLs with `api` */
+   function respond(
+      report: { body: string; status?: number },
+      api: { body: unknown; status?: number } = { body: BOXSCORE },
+   ) {
       const calls: string[] = [];
       globalThis.fetch = (async (url: string) => {
          calls.push(url);
-         return new Response(body, { status });
+         return url.startsWith(REPORT)
+            ? new Response(report.body, { status: report.status ?? 200 })
+            : new Response(JSON.stringify(api.body), {
+                 status: api.status ?? 200,
+              });
       }) as unknown as typeof fetch;
       return calls;
    }
 
-   it('fetches and parses the Game Summary', async () => {
-      const calls = respond(FIXTURE);
+   it('reads the start near the scheduled time from the boxscore', async () => {
+      const calls = respond({ body: FIXTURE });
 
       const result = await gameTimes(2026020180);
 
-      expect(calls).toEqual([
+      expect(calls.sort()).toEqual([
+         'https://api-web.nhle.com/v1/gamecenter/2026020180/boxscore',
          'https://www.nhl.com/scores/htmlreports/20262027/GS020180.HTM',
       ]);
       expect(result.success).toBeTrue();
@@ -184,9 +239,63 @@ describe('reports.gameTimes', () => {
       expect(result.data.end?.utc).toBe('2026-10-25T21:48:00Z');
    });
 
+   it('uses scheduledStart instead of the boxscore', async () => {
+      const calls = respond({
+         body: summary(
+            'Monday, February 16, 2026',
+            'Start 10:12 EST; End 12:40 EST',
+         ),
+      });
+
+      const result = await gameTimes(2025020900, {
+         scheduledStart: new Date('2026-02-17T03:00:00Z'),
+      });
+
+      expect(calls).toEqual([
+         'https://www.nhl.com/scores/htmlreports/20252026/GS020900.HTM',
+      ]);
+      expect(result.success).toBeTrue();
+      if (!result.success) return;
+      // 10:12 pm, which the fixed rule would read as morning
+      expect(result.data.start?.utc).toBe('2026-02-17T03:12:00Z');
+      expect(result.data.end?.utc).toBe('2026-02-17T05:40:00Z');
+   });
+
+   it('fails when the start is far from the scheduled time', async () => {
+      respond({ body: FIXTURE });
+
+      const result = await gameTimes(2026020180, {
+         scheduledStart: '2026-10-25T13:00:00Z',
+      });
+
+      expect(result.success).toBeFalse();
+      if (result.success) return;
+      expect(result.error).toBeInstanceOf(ParseError);
+      expect(result.error.message).toContain('neither am nor pm');
+      expect(result.error.context.endpoint).toBe(
+         'https://www.nhl.com/scores/htmlreports/20262027/GS020180.HTM',
+      );
+   });
+
+   it('returns a ValidationError for an invalid scheduledStart', async () => {
+      const calls = respond({ body: FIXTURE });
+
+      const result = await gameTimes(2026020180, {
+         scheduledStart: 'soon',
+      });
+
+      expect(calls).toEqual([]);
+      expect(result.success).toBeFalse();
+      if (!result.success)
+         expect(result.error).toBeInstanceOf(ValidationError);
+   });
+
    it('returns a NotFoundError for a game without a report', async () => {
       config.logLevel = 'silent';
-      respond('<html><title>404 Not Found</title></html>', 404);
+      respond({
+         body: '<html><title>404 Not Found</title></html>',
+         status: 404,
+      });
 
       const result = await gameTimes(2026020185);
 
@@ -195,8 +304,19 @@ describe('reports.gameTimes', () => {
          expect(result.error).toBeInstanceOf(NotFoundError);
    });
 
+   it('returns the boxscore error when the schedule lookup fails', async () => {
+      config.logLevel = 'silent';
+      respond({ body: FIXTURE }, { body: {}, status: 404 });
+
+      const result = await gameTimes(2026020180);
+
+      expect(result.success).toBeFalse();
+      if (!result.success)
+         expect(result.error).toBeInstanceOf(NotFoundError);
+   });
+
    it('returns a ValidationError for an invalid game id', async () => {
-      const calls = respond(FIXTURE);
+      const calls = respond({ body: FIXTURE });
 
       const result = await gameTimes(123);
 

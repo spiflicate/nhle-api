@@ -13,9 +13,20 @@ import type { APIResult } from '#/client/types.ts';
 import { ParseError, ValidationError } from '#/errors/index.ts';
 import type { GameId } from '#/types/index.ts';
 import { GameId as GameIdAT, isParseError } from '#/utils/schemas.ts';
+import { boxscore } from '../gamecenter/game.ts';
 import { type GameTimes, parseGameTimes } from './parse.ts';
 
 export type { GameTimes, ReportTime } from './parse.ts';
+
+/** Options for {@link gameTimes} */
+export interface GameTimesOptions {
+   /**
+    * The scheduled start in UTC, e.g. the game's `startTimeUTC` from a
+    * schedule you already have. Saves the boxscore request `gameTimes`
+    * makes to look it up.
+    */
+   scheduledStart?: string | Date;
+}
 
 const BASE_URL = 'https://www.nhl.com/scores/htmlreports';
 
@@ -81,7 +92,14 @@ export function url(gameId: GameId, code: ReportCode): string {
  * zone abbreviation other than the North American zones, CET/CEST and
  * EET/EEST gives a ParseError rather than a guessed UTC time.
  *
+ * The report prints times without am/pm, so the start is read as the am
+ * or pm time that falls between 1 hour before and 6 hours after the
+ * scheduled start; when neither does, the result is a ParseError. The
+ * scheduled start comes from `options.scheduledStart`, or else from the
+ * game's boxscore (one more request).
+ *
  * @param gameId - 10-digit game id
+ * @param options - Optional scheduled start
  * @returns Promise resolving to the local date and the start and end
  * times; a game whose report doesn't exist yet gives a NotFoundError
  * result, and a header that can't be read or converted a ParseError
@@ -90,9 +108,13 @@ export function url(gameId: GameId, code: ReportCode): string {
  * const result = await reports.gameTimes(2026020180);
  * if (result.success) console.log(result.data.start?.utc);
  * // '2026-10-25T19:16:00Z'
+ *
+ * // With the scheduled start from a schedule you already fetched
+ * await reports.gameTimes(game.id, { scheduledStart: game.startTimeUTC });
  */
 export async function gameTimes(
    gameId: GameId,
+   options: GameTimesOptions = {},
 ): Promise<APIResult<GameTimes>> {
    const parsed = GameIdAT(gameId);
    if (isParseError(parsed)) {
@@ -101,11 +123,35 @@ export async function gameTimes(
          error: new ValidationError(parsed.summary),
       };
    }
-   const path = reportPath(parsed, 'GS');
-   const result = await reportsClient.getText(path);
-   if (!result.success) return result;
 
-   const times = parseGameTimes(result.data);
+   let scheduledStart = options.scheduledStart;
+   if (
+      scheduledStart !== undefined &&
+      Number.isNaN(new Date(scheduledStart).getTime())
+   ) {
+      return {
+         success: false,
+         error: new ValidationError(
+            `scheduledStart must be a valid date (was ${String(scheduledStart)})`,
+         ),
+      };
+   }
+
+   const path = reportPath(parsed, 'GS');
+   const [result, game] = await Promise.all([
+      reportsClient.getText(path),
+      scheduledStart === undefined ? boxscore(parsed) : undefined,
+   ]);
+   if (!result.success) return result;
+   if (game) {
+      if (!game.success) return game;
+      scheduledStart = game.data.startTimeUTC;
+   }
+
+   const times = parseGameTimes(
+      result.data,
+      new Date(scheduledStart ?? NaN),
+   );
    if (!times.success) {
       return {
          success: false,

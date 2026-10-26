@@ -11,7 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `reports` namespace for the official HTML game reports on www.nhl.com
 - `reports.url(gameId, code)` builds a report URL for the nine report codes (`GS`, `ES`, `PL`, `FS`, `FC`, `RO`, `SS`, `TV`, `TH`), listed in `reports.REPORT_CODES`
-- `reports.gameTimes(gameId)` returns when a game actually started and ended, read from the Game Summary report, in local time and UTC. The JSON APIs only carry the scheduled start time. A zone abbreviation it doesn't know gives a `ParseError`
+- `reports.gameTimes(gameId)` returns when a game actually started and ended, read from the Game Summary report, in local time and UTC. The JSON APIs only carry the scheduled start time. A zone abbreviation it doesn't know gives a `ParseError`. The am/pm the report leaves out is decided by the scheduled start, looked up from the boxscore or passed as `scheduledStart`
 - `NHLClient.getText(endpoint, params)` for responses that aren't JSON
 
 ## [0.7.1] - 2026-10-23

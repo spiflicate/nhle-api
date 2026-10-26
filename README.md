@@ -228,7 +228,7 @@ See [docs/QUERY_BUILDER_GUIDE.md](docs/QUERY_BUILDER_GUIDE.md) for the builder.
 The official HTML game sheets on www.nhl.com (`https://www.nhl.com/scores/htmlreports/{season}/{code}{gameNumber}.HTM`). They carry data the JSON APIs don't.
 
 - `reports.url(gameId, code)`: URL of a report. Codes (`reports.REPORT_CODES`): `GS` Game Summary, `ES` Event Summary, `PL` Play-by-Play, `FS` Faceoff Summary, `FC` Faceoff Comparison, `RO` Playing Roster, `SS` Shot Summary, `TV`/`TH` Time on Ice (away/home)
-- `reports.gameTimes(gameId)`: when the game actually started and ended, from the Game Summary. The JSON APIs only carry the scheduled `startTimeUTC`, and the puck usually drops 10–20 minutes later
+- `reports.gameTimes(gameId, { scheduledStart? })`: when the game actually started and ended, from the Game Summary. The JSON APIs only carry the scheduled `startTimeUTC`, and the puck usually drops 10–20 minutes later
 
 ```ts
 const result = await reports.gameTimes(2026020180);
@@ -239,7 +239,12 @@ const result = await reports.gameTimes(2026020180);
 // }
 ```
 
-- The report prints 12-hour local times without am/pm. A start at 10:xx or 11:xx is read as morning, 12:xx as noon and 1:xx–9:xx as afternoon or evening; the end is the first matching time after the start, so an end past midnight falls on the next day.
+- The report prints 12-hour local times without am/pm. The start is the am or pm reading that falls between 1 hour before and 6 hours after the scheduled start, and a `ParseError` when neither does. The end is the first matching time after the start, so an end past midnight falls on the next day.
+- The scheduled start comes from the game's boxscore, fetched alongside the report. Pass `scheduledStart` (e.g. `startTimeUTC` from a schedule you already have) to skip that request:
+
+```ts
+await reports.gameTimes(game.id, { scheduledStart: game.startTimeUTC });
+```
 - Times convert to UTC for EST/EDT, CST/CDT, MST/MDT, PST/PDT, CET/CEST and EET/EEST. Any other zone abbreviation, or a time without one, gives a `ParseError` rather than a UTC time that could be wrong.
 - `start` is null before the game has started and `end` is null while it is in progress. The report doesn't exist before the game, so the call gives a `NotFoundError` then.
 

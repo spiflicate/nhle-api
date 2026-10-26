@@ -73,24 +73,35 @@ const TIME_RE = (label: string) =>
 
 const DAY = 24 * 60;
 
+/** How far the actual start may be from the scheduled one, in minutes */
+export const START_WINDOW = { before: 60, after: 6 * 60 } as const;
+
 /**
  * Read the local date and the start and end times from a Game Summary
  * (`GS`) report.
  *
- * The report prints 12-hour times without am/pm. The rule used:
- * - a start at 10:xx or 11:xx is morning, 12:xx is noon and 1:xx to
- *   9:xx is afternoon or evening, since NHL games start between late
- *   morning and night local time;
+ * The report prints 12-hour times without am/pm:
+ * - with `scheduledStart`, the start is whichever reading falls between
+ *   {@link START_WINDOW} `before` minutes before and `after` minutes
+ *   after it; when neither does, the parse fails;
+ * - without it, a start at 10:xx or 11:xx is morning, 12:xx is noon and
+ *   1:xx to 9:xx is afternoon or evening, since NHL games start between
+ *   late morning and night local time;
  * - the end is the first time after the start that matches the printed
  *   value, so an end before the start falls on the next day.
  *
  * Zone abbreviations not in {@link ZONE_OFFSETS} fail the parse.
  *
  * @param html - The report page
+ * @param scheduledStart - The scheduled start in UTC, e.g. a game's
+ * `startTimeUTC`, used to tell morning from evening
  * @returns The times, or a ParseError when the page has no game date or
  * a time can't be read or converted to UTC
  */
-export function parseGameTimes(html: string): APIResult<GameTimes> {
+export function parseGameTimes(
+   html: string,
+   scheduledStart?: Date,
+): APIResult<GameTimes> {
    const text = html.replace(/&nbsp;|\u00a0/g, ' ');
    const dateMatch = DATE_RE.exec(text);
    if (!dateMatch) return failure('No game date found in the Game Summary');
@@ -107,21 +118,37 @@ export function parseGameTimes(html: string): APIResult<GameTimes> {
          );
       }
    }
+   if (end && !start) return failure(`'${end[0].trim()}' without a start`);
 
    // Minutes after local midnight of the game date
-   const startMinutes = start ? startToMinutes(start) : null;
-   const endMinutes = end
-      ? startMinutes === null
-         ? startToMinutes(end)
-         : endToMinutes(end, startMinutes)
-      : null;
+   let startMinutes: number | null = null;
+   if (start) {
+      if (scheduledStart) {
+         startMinutes = scheduledToMinutes(start, date, scheduledStart);
+         if (startMinutes === null) {
+            return failure(
+               `'${start[0].trim()}' is neither am nor pm within ${START_WINDOW.before} minutes before to ${START_WINDOW.after} minutes after the scheduled start ${isoMinutes(scheduledStart.getTime())}`,
+            );
+         }
+      } else {
+         startMinutes = startToMinutes(start);
+      }
+   }
+   const endMinutes =
+      end && startMinutes !== null ? endToMinutes(end, startMinutes) : null;
 
    return {
       success: true,
       data: {
          date,
-         start: start ? toReportTime(start, date, startMinutes ?? 0) : null,
-         end: end ? toReportTime(end, date, endMinutes ?? 0) : null,
+         start:
+            start && startMinutes !== null
+               ? toReportTime(start, date, startMinutes)
+               : null,
+         end:
+            end && endMinutes !== null
+               ? toReportTime(end, date, endMinutes)
+               : null,
       },
    };
 }
@@ -135,6 +162,22 @@ function startToMinutes(match: RegExpExecArray): number {
    const minute = Number(match[2]);
    const hour24 = hour >= 10 ? hour : hour + 12;
    return hour24 * 60 + minute;
+}
+
+/** The am or pm reading of `match` that is near `scheduled`, if any */
+function scheduledToMinutes(
+   match: RegExpExecArray,
+   date: string,
+   scheduled: Date,
+): number | null {
+   const base = (Number(match[1]) % 12) * 60 + Number(match[2]);
+   const from = scheduled.getTime() - START_WINDOW.before * 60_000;
+   const to = scheduled.getTime() + START_WINDOW.after * 60_000;
+   for (const candidate of [base, base + DAY / 2]) {
+      const ms = utcMs(date, candidate, match[3] ?? '');
+      if (ms >= from && ms <= to) return candidate;
+   }
+   return null;
 }
 
 function endToMinutes(match: RegExpExecArray, after: number): number {
@@ -151,11 +194,23 @@ function toReportTime(
    minutes: number,
 ): ReportTime {
    const [, hour = '', minute = '', zone = ''] = match;
+   return {
+      local: `${Number(hour)}:${minute}`,
+      zone,
+      utc: isoMinutes(utcMs(date, minutes, zone)),
+   };
+}
+
+/** Epoch ms of `minutes` after local midnight of `date` in `zone` */
+function utcMs(date: string, minutes: number, zone: string): number {
    const offset = ZONE_OFFSETS[zone] ?? 0;
    const [y = 0, m = 1, d = 1] = date.split('-').map(Number);
-   const ms = Date.UTC(y, m - 1, d, 0, minutes - offset * 60);
-   const utc = new Date(ms).toISOString().replace('.000Z', 'Z');
-   return { local: `${Number(hour)}:${minute}`, zone, utc };
+   return Date.UTC(y, m - 1, d, 0, minutes - offset * 60);
+}
+
+/** '2026-10-25T19:16:00Z' */
+function isoMinutes(ms: number): string {
+   return new Date(ms).toISOString().replace(/:\d{2}\.\d{3}Z$/, ':00Z');
 }
 
 function pad(n: number): string {
