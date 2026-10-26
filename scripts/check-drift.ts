@@ -5,18 +5,38 @@
  *    bun scripts/check-drift.ts                  # check, exit 1 on drift
  *    bun scripts/check-drift.ts --update         # accept live shapes
  *    bun scripts/check-drift.ts --report out.md  # also write a report
+ *    bun scripts/check-drift.ts --report out.md --previous issue.md --new new.md
+ *
+ * With --previous (the drift issue's body, which may be missing), the
+ * findings that report tracked are merged with this run's, so a finding
+ * stays in the report and fails the check until it is resolved, even on
+ * days its data doesn't show it. --new writes the findings that are new
+ * or reopened since then, if there are any.
  *
  * Fails when an endpoint is unreachable, an error response stops looking
  * the way the client expects, or a response gains, loses or retypes a
  * field, or sends a position code its types don't declare. Runs on a
  * schedule in .github/workflows/drift.yml.
  */
-import { appendFileSync, readFileSync, writeFileSync } from 'node:fs';
+import {
+   appendFileSync,
+   existsSync,
+   readFileSync,
+   writeFileSync,
+} from 'node:fs';
 import { join } from 'node:path';
 import type { APIResult } from '#/client/types.ts';
 import { config } from '#/config/index.ts';
 import { ErrorCategory, NHLError } from '#/errors/index.ts';
 import type { DriftCheck } from './drift/checks.ts';
+import {
+   type Finding,
+   listFindings,
+   mergeFindings,
+   type RunFinding,
+   readState,
+   writeState,
+} from './drift/findings.ts';
 import {
    type Change,
    diffShapes,
@@ -194,16 +214,64 @@ const ICON: Record<Status, string> = {
    'no baseline': '❌',
 };
 
-function report(outcomes: Outcome[], updated: boolean): string {
+/** This run's failures, as findings to track across runs */
+function findingsOf(o: Outcome): RunFinding[] {
+   const check = o.check.name;
+   if (o.status !== 'drift') {
+      if (!FAILING.includes(o.status)) return [];
+      const text = o.detail ? `${o.status}: ${o.detail}` : o.status;
+      return [{ check, kind: o.status as RunFinding['kind'], text }];
+   }
+   return [
+      ...o.changes.map(
+         (c): RunFinding => ({
+            check,
+            kind: c.kind,
+            path: c.path,
+            ...(c.kind === 'removed' ? {} : { kinds: c.live }),
+            text: describe(c),
+         }),
+      ),
+      ...o.values.map(
+         (v): RunFinding => ({
+            check,
+            kind: 'position',
+            path: v.path,
+            value: v.value,
+            text: `unknown position code \`${v.value}\` at \`${v.path}\``,
+         }),
+      ),
+   ];
+}
+
+interface Tracked {
+   findings: Finding[];
+   today: string;
+}
+
+function report(
+   outcomes: Outcome[],
+   updated: boolean,
+   tracked?: Tracked,
+): string {
    const failed = outcomes.filter((o) => FAILING.includes(o.status));
+   const open = tracked?.findings.filter((f) => !f.resolved) ?? [];
+   const closed = tracked?.findings.filter((f) => f.resolved) ?? [];
+   const summary = updated
+      ? 'Baseline updated from the live APIs.'
+      : failed.length === 0
+        ? `All ${outcomes.length} checks match the baseline.`
+        : `${failed.length} of ${outcomes.length} checks failed.`;
+   const carried = open.filter((f) => f.lastSeen !== tracked?.today);
    const lines = [
       '# NHL API drift check',
       '',
-      updated
-         ? 'Baseline updated from the live APIs.'
-         : failed.length === 0
-           ? `All ${outcomes.length} checks match the baseline.`
-           : `${failed.length} of ${outcomes.length} checks failed.`,
+      tracked && !updated
+         ? `${summary} ${open.length} open finding${open.length === 1 ? '' : 's'}` +
+           (carried.length > 0
+              ? `, ${carried.length} of them not seen in this run.`
+              : '.')
+         : summary,
       '',
       '| Check | Status | Detail |',
       '| --- | --- | --- |',
@@ -212,6 +280,23 @@ function report(outcomes: Outcome[], updated: boolean): string {
             `| \`${o.check.name}\` | ${ICON[o.status]} ${o.status} | ${o.detail.replaceAll('|', '\\|')} |`,
       ),
    ];
+   if (tracked && open.length > 0) {
+      lines.push(
+         '',
+         '## Open findings',
+         '',
+         'Everything this issue has reported that is not resolved yet, including findings a later run did not see.',
+         ...listFindings(open, tracked.today),
+      );
+   }
+   if (tracked && closed.length > 0) {
+      lines.push(
+         '',
+         '## Resolved findings',
+         ...listFindings(closed, tracked.today),
+      );
+   }
+   if (tracked) lines.push('', '## This run');
    for (const o of outcomes) {
       if (
          o.changes.length === 0 &&
@@ -219,7 +304,7 @@ function report(outcomes: Outcome[], updated: boolean): string {
          o.notes.length === 0
       )
          continue;
-      lines.push('', `## \`${o.check.name}\``, '');
+      lines.push('', `${tracked ? '###' : '##'} \`${o.check.name}\``, '');
       lines.push(...o.changes.map((c) => `- ${describe(c)}`));
       lines.push(
          ...o.values.map(
@@ -236,7 +321,7 @@ function report(outcomes: Outcome[], updated: boolean): string {
          );
       }
    }
-   if (failed.length > 0 && !updated) {
+   if ((failed.length > 0 || open.length > 0) && !updated) {
       lines.push(
          '',
          '## Next steps',
@@ -245,7 +330,13 @@ function report(outcomes: Outcome[], updated: boolean): string {
          '- **unexpected**: the call failed or returned nothing where data or a specific error was expected.',
          '- **drift**: update the response types in `src/types/responses/`, then accept the new shapes with `bun run drift --update`. An unknown position code needs `PositionCode` or `DraftPositionCode` (and the lists in `scripts/drift/values.ts`) widened instead.',
       );
+      if (tracked) {
+         lines.push(
+            '- An open finding is resolved once the baseline or types accept it, or, for results that don’t depend on the date, once a run no longer sees it. To drop findings that will never come back, close this issue; the next drift opens a fresh one.',
+         );
+      }
    }
+   if (tracked) lines.push('', writeState(tracked.findings));
    return `${lines.join('\n')}\n`;
 }
 
@@ -254,6 +345,11 @@ async function main() {
    const update = args.includes('--update');
    const reportAt = args.indexOf('--report');
    const reportPath = reportAt >= 0 ? args[reportAt + 1] : undefined;
+   const previousAt = args.indexOf('--previous');
+   const previousPath =
+      previousAt >= 0 && !update ? args[previousAt + 1] : undefined;
+   const newAt = args.indexOf('--new');
+   const newPath = newAt >= 0 ? args[newAt + 1] : undefined;
 
    config.logLevel = 'silent';
    config.timeout = 15_000;
@@ -286,10 +382,47 @@ async function main() {
       console.log(`\nWrote ${BASELINE_PATH}`);
    }
 
-   const text = report(outcomes, update);
+   let tracked: Tracked | undefined;
+   if (previousPath !== undefined) {
+      const today = new Date().toISOString().slice(0, 10);
+      const previous = existsSync(previousPath)
+         ? readState(readFileSync(previousPath, 'utf8'))
+         : [];
+      const { findings, fresh } = mergeFindings(
+         previous,
+         outcomes.flatMap(findingsOf),
+         {
+            checks: new Map(
+               outcomes.map((o) => [
+                  o.check.name,
+                  { status: o.status, volatile: !!o.check.volatile },
+               ]),
+            ),
+            baseline,
+            positionsFor,
+         },
+         today,
+      );
+      tracked = { findings, today };
+      if (newPath && fresh.length > 0) {
+         writeFileSync(
+            newPath,
+            `${['New API drift since the last report:', ...listFindings(fresh, today)].join('\n')}\n`,
+         );
+      }
+   }
+
+   const text = report(outcomes, update, tracked);
    if (reportPath) writeFileSync(reportPath, text);
    if (process.env.GITHUB_STEP_SUMMARY) {
       appendFileSync(process.env.GITHUB_STEP_SUMMARY, text);
+   }
+
+   const open = tracked?.findings.filter((f) => !f.resolved) ?? [];
+   if (open.length > 0) {
+      console.log('\nOpen findings:');
+      for (const f of open) console.log(`  ${f.check}: ${f.text}`);
+      process.exit(1);
    }
 
    const failed = outcomes.filter((o) => FAILING.includes(o.status));
