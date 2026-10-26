@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- `topSeedTeamAbbrev` and `bottomSeedTeamAbbrev` on the `seriesStatus` of team schedule games, newly returned by `team.schedule.season`
+- `overlay` on `EdgeByTheNumbers.sogTeam` and `EdgeByTheNumbers.highDangerSavesGoalie`, newly returned by `adv.byTheNumbers`
+- `EdgeOverlay.team`, set instead of `player` on overlays for team stats
+
 ## [0.7.1] - 2026-10-23
 
 ### Fixed

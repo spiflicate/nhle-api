@@ -111,7 +111,9 @@ interface SeriesStatus {
    seriesTitle: string;
    seriesLetter: SeriesLetter;
    neededToWin: number;
+   topSeedTeamAbbrev?: TeamAbbrev;
    topSeedWins: number;
+   bottomSeedTeamAbbrev?: TeamAbbrev;
    bottomSeedWins: number;
    gameNumberOfSeries: number;
 }
