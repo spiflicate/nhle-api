@@ -7448,5 +7448,22 @@
       "$.thumbnail": "string",
       "$.title": "string",
       "$.url": "string"
+   },
+   "reports.url": {
+      "$": "object",
+      "$.codes": "array",
+      "$.codes[]": "string"
+   },
+   "reports.gameTimes": {
+      "$": "object",
+      "$.date": "string",
+      "$.end": "object",
+      "$.end.local": "string",
+      "$.end.utc": "string",
+      "$.end.zone": "string",
+      "$.start": "object",
+      "$.start.local": "string",
+      "$.start.utc": "string",
+      "$.start.zone": "string"
    }
 }

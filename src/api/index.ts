@@ -1,4 +1,5 @@
 export * as adv from './edge-adv/index.ts';
 export * as stats from './edge-stats/index.ts';
 export * as gc from './gamecenter/index.ts';
+export * as reports from './reports/index.ts';
 export * as video from './video.ts';

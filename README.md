@@ -12,7 +12,7 @@ The library exposes a small, functional surface over the NHL "Game Center", Edge
 
 - Written in TypeScript and published as ESM/CJS
 - Thin functional wrappers over official NHL API routes
-- Typed responses for Game Center (`gc`), Edge advanced stats (`adv`), the Stats API (`stats`) and video metadata (`video`)
+- Typed responses for Game Center (`gc`), Edge advanced stats (`adv`), the Stats API (`stats`), the official HTML game reports (`reports`) and video metadata (`video`)
 - Every function resolves to an `APIResult` instead of throwing
 - Runtime configuration for timeouts, language and logging
 
@@ -75,7 +75,7 @@ The package root `nhle-api` re-exports the API namespaces, configuration, the HT
 
 ```ts
 // API namespaces
-import { adv, gc, stats, video } from 'nhle-api';
+import { adv, gc, reports, stats, video } from 'nhle-api';
 
 // Configuration and logging
 import { config, logConfig, logger } from 'nhle-api';
@@ -223,6 +223,26 @@ const goalies = await stats.goalies.getStatsWithBuilder('summary', (q) => ({
 
 See [docs/QUERY_BUILDER_GUIDE.md](docs/QUERY_BUILDER_GUIDE.md) for the builder.
 
+## Game Reports (`reports`)
+
+The official HTML game sheets on www.nhl.com (`https://www.nhl.com/scores/htmlreports/{season}/{code}{gameNumber}.HTM`). They carry data the JSON APIs don't.
+
+- `reports.url(gameId, code)`: URL of a report. Codes (`reports.REPORT_CODES`): `GS` Game Summary, `ES` Event Summary, `PL` Play-by-Play, `FS` Faceoff Summary, `FC` Faceoff Comparison, `RO` Playing Roster, `SS` Shot Summary, `TV`/`TH` Time on Ice (away/home)
+- `reports.gameTimes(gameId)`: when the game actually started and ended, from the Game Summary. The JSON APIs only carry the scheduled `startTimeUTC`, and the puck usually drops 10–20 minutes later
+
+```ts
+const result = await reports.gameTimes(2026020180);
+// {
+//   date: '2026-10-25',
+//   start: { local: '2:16', zone: 'CDT', utc: '2026-10-25T19:16:00Z' },
+//   end:   { local: '4:48', zone: 'CDT', utc: '2026-10-25T21:48:00Z' },
+// }
+```
+
+- The report prints 12-hour local times without am/pm. A start at 10:xx or 11:xx is read as morning, 12:xx as noon and 1:xx–9:xx as afternoon or evening; the end is the first matching time after the start, so an end past midnight falls on the next day.
+- `utc` is filled for EST/EDT, CST/CDT, MST/MDT, PST/PDT, CET/CEST and EET/EEST. Any other zone abbreviation keeps `local` and `zone` and gives `utc: null`.
+- `start` is null before the game has started and `end` is null while it is in progress. The report doesn't exist before the game, so the call gives a `NotFoundError` then.
+
 ## Video (`video`)
 
 - `video.metadata(videoId)`: title, descriptions, duration, poster and playable sources (with the best MP4 as `url`) for a Brightcove video id, such as a goal's `highlightClip` in `gc.game.landing`
@@ -259,6 +279,7 @@ if (result.success) {
 - ✅ Game Center endpoints with response types
 - ✅ Edge Advanced (`adv`) endpoints with response types
 - ✅ Stats API (`stats`) endpoints with typed reports
+- ✅ Official HTML game reports (`reports`): URLs and the recorded start/end time
 - ✅ Runtime configuration (`config`) and per-client settings (`NHLClient`)
 - ✅ Error classes and `APIResult` exported
 - ✅ Daily drift check against the live APIs
