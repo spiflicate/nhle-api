@@ -147,6 +147,20 @@ The official game sheets at `https://www.nhl.com/scores/htmlreports/{season}/{co
 
 - `url(gameId, code)`: the URL of a report. Codes (`REPORT_CODES`): `GS` Game Summary, `ES` Event Summary, `PL` Play-by-Play, `FS` Faceoff Summary, `FC` Faceoff Comparison, `RO` Playing Roster, `SS` Shot Summary, `TV`/`TH` Time on Ice (away/home).
 - `gameTimes(gameId, { scheduledStart? })`: when the game actually started and ended, from the Game Summary. The JSON APIs only carry the scheduled `startTimeUTC`, and the puck usually drops 8–12 minutes later.
+- `gameSummary(gameId, { scheduledStart?, raw? })`: the broader GS sheet: teams/score, `times`, attendance/venue, goals and on-ice sweaters, penalties, period/strength totals, goalie summaries, officials and stars. Player names/numbers remain as printed—no invented NHL IDs. A printed shootout-deciding scoring entry is preserved, not converted into a regulation goal. The parsed form requires the sheet's tables to be readable; use raw mode for unsupported/incomplete markup.
+- `shifts(gameId, { playByPlay? })`: shifts from both HTML time-on-ice reports, joined by team/sweater to the game's PBP roster. Pass an already-fetched PBP response to save that request. Returns `{ gameId, source: 'html', total, data }`; rows have elapsed period clocks, duration, player/team/sweater IDs, period and shift number. Shift `id` and `eventNumber` are `null`: HTML doesn't publish them. Report rows (including duplicates) are preserved, home then away. Missing/unreadable reports or unresolved sweaters return an error, never partial data or automatic JSON fallback. The separate JSON feed remains `stats.season.getShiftChart`.
+
+`gameSummary` and `shifts` accept `{ raw: true }` to skip parsing and return HTML in the usual `APIResult` wrapper. `gameTimes` is a parsed-only convenience method for the GS header; it does not require the rest of the sheet to be readable:
+
+```ts
+const shifts = await reports.shifts(2024020500); // parsed by default
+const html = await reports.shifts(2024020500, { raw: true });
+if (html.success) console.log(html.data.home, html.data.away); // TH / TV HTML
+const summary = await reports.gameSummary(2026020180, { raw: true });
+if (summary.success) console.log(summary.data); // GS HTML string
+```
+
+Raw mode makes only the report requests—no PBP or boxscore lookup—and ignores `playByPlay` / `scheduledStart`. It returns the client's decoded HTML text, not parsed data or exact HTTP wire bytes. Parsed `gameSummary` and `gameTimes` share the same scheduled-start lookup and UTC conversion rules; supplying `scheduledStart` saves the boxscore request.
 
 ```ts
 const result = await reports.gameTimes(2026020180);

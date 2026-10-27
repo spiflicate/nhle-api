@@ -567,6 +567,16 @@ const htmlReports: DriftCheck[] = [
    { name: 'reports.url', run: reportStatuses },
    { name: 'reports.gameTimes', run: () => reports.gameTimes(GAME) },
    {
+      name: 'reports.gameSummary (raw)',
+      run: () => reports.gameSummary(GAME, { raw: true }),
+   },
+   { name: 'reports.gameSummary', run: () => reports.gameSummary(GAME) },
+   { name: 'reports.shifts', run: () => reports.shifts(GAME) },
+   {
+      name: 'reports.shifts (raw)',
+      run: () => reports.shifts(GAME, { raw: true }),
+   },
+   {
       name: 'reports.gameTimes (unknown game)',
       run: () => reports.gameTimes(2024010999),
       expectError: 'NotFoundError',
