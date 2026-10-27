@@ -1,0 +1,132 @@
+{
+   "fixtures": [
+      {
+         "file": "GS020671-final-goalie-change.HTM",
+         "stage": "final",
+         "gameId": 2024020671,
+         "report": "GS",
+         "observation": "2024020671-GS-20261027T213539Z-a1",
+         "url": "https://www.nhl.com/scores/htmlreports/20242025/GS020671.HTM",
+         "requestStart": "2026-10-27T21:35:39.311Z",
+         "responseReceived": "2026-10-27T21:35:39.451Z",
+         "status": 200,
+         "bodyBytes": 38302,
+         "sha256": "97e0da4c266984b9767282dccef4cd71dce10d714a016de16ad2836ab41bf849",
+         "lastModified": "Fri, 19 Sep 2025 18:36:29 GMT",
+         "contentType": "text/html; charset=UTF-8",
+         "context": {
+            "observation": "2024020671-context-20261027T213538Z-a1",
+            "gameState": "OFF",
+            "gameScheduleState": "OK",
+            "startTimeUTC": "2025-01-11T21:00:00Z",
+            "period": 3,
+            "periodType": "REG",
+            "clock": "00:00",
+            "inIntermission": false,
+            "running": false
+         },
+         "collector": {
+            "version": "1",
+            "commit": "40f29333a8b30403d990d3fd2f7373b18a2b6c66",
+            "run": "https://github.com/spiflicate/nhle-api/actions/runs/40587998382"
+         },
+         "note": "In-game goalie change: PIT used Jarry then Nedeljkovic (OTT @ PIT, 2025-01-11)"
+      },
+      {
+         "file": "GS020673-final-so.HTM",
+         "stage": "final",
+         "gameId": 2024020673,
+         "report": "GS",
+         "observation": "2024020673-GS-20261027T213526Z-a1",
+         "url": "https://www.nhl.com/scores/htmlreports/20242025/GS020673.HTM",
+         "requestStart": "2026-10-27T21:35:26.625Z",
+         "responseReceived": "2026-10-27T21:35:26.763Z",
+         "status": 200,
+         "bodyBytes": 31789,
+         "sha256": "297c2bf9eb8d1cbe531fd4853665f5ece75e970efb13abae823c8f89c885265f",
+         "lastModified": "Fri, 19 Sep 2025 18:36:29 GMT",
+         "contentType": "text/html; charset=UTF-8",
+         "context": {
+            "observation": "2024020673-context-20261027T213525Z-a1",
+            "gameState": "OFF",
+            "gameScheduleState": "OK",
+            "startTimeUTC": "2025-01-12T00:00:00Z",
+            "period": 5,
+            "periodType": "SO",
+            "clock": "00:00",
+            "inIntermission": false,
+            "running": false
+         },
+         "collector": {
+            "version": "1",
+            "commit": "40f29333a8b30403d990d3fd2f7373b18a2b6c66",
+            "run": "https://github.com/spiflicate/nhle-api/actions/runs/40587998382"
+         },
+         "note": "Regular-season shootout (DAL @ MTL, 2025-01-11); prints the deciding SO entry in the scoring table"
+      },
+      {
+         "file": "GS020674-final-ot.HTM",
+         "stage": "final",
+         "gameId": 2024020674,
+         "report": "GS",
+         "observation": "2024020674-GS-20261027T213520Z-a1",
+         "url": "https://www.nhl.com/scores/htmlreports/20242025/GS020674.HTM",
+         "requestStart": "2026-10-27T21:35:20.340Z",
+         "responseReceived": "2026-10-27T21:35:20.498Z",
+         "status": 200,
+         "bodyBytes": 33910,
+         "sha256": "b968af10f1da637281e0b6b66f19ec79eb3e5e913db127afd01417f2f20628e0",
+         "lastModified": "Fri, 19 Sep 2025 18:36:29 GMT",
+         "contentType": "text/html; charset=UTF-8",
+         "context": {
+            "observation": "2024020674-context-20261027T213519Z-a1",
+            "gameState": "OFF",
+            "gameScheduleState": "OK",
+            "startTimeUTC": "2025-01-12T00:00:00Z",
+            "period": 4,
+            "periodType": "OT",
+            "clock": "01:41",
+            "inIntermission": false,
+            "running": false
+         },
+         "collector": {
+            "version": "1",
+            "commit": "40f29333a8b30403d990d3fd2f7373b18a2b6c66",
+            "run": "https://github.com/spiflicate/nhle-api/actions/runs/40587998382"
+         },
+         "note": "Regular-season overtime (TBL @ NJD, 2025-01-11), captured long after the game; Last-Modified shows a September 2025 regeneration"
+      },
+      {
+         "file": "GS030157-final-2ot.HTM",
+         "stage": "final",
+         "gameId": 2024030157,
+         "report": "GS",
+         "observation": "2024030157-GS-20261027T213532Z-a1",
+         "url": "https://www.nhl.com/scores/htmlreports/20242025/GS030157.HTM",
+         "requestStart": "2026-10-27T21:35:32.962Z",
+         "responseReceived": "2026-10-27T21:35:33.111Z",
+         "status": 200,
+         "bodyBytes": 37528,
+         "sha256": "f14b44d909323e07dfe2eca664d1e399a22060e137ec2bba26a700462348180b",
+         "lastModified": "Fri, 19 Sep 2025 18:36:44 GMT",
+         "contentType": "text/html; charset=UTF-8",
+         "context": {
+            "observation": "2024030157-context-20261027T213532Z-a1",
+            "gameState": "OFF",
+            "gameScheduleState": "OK",
+            "startTimeUTC": "2025-05-04T23:00:00Z",
+            "period": 5,
+            "periodType": "OT",
+            "clock": "03:50",
+            "inIntermission": false,
+            "running": false
+         },
+         "collector": {
+            "version": "1",
+            "commit": "40f29333a8b30403d990d3fd2f7373b18a2b6c66",
+            "run": "https://github.com/spiflicate/nhle-api/actions/runs/40587998382"
+         },
+         "note": "Playoff double overtime (STL @ WPG, 2025-05-04, R1 Game 7)"
+      }
+   ]
+}

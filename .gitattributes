@@ -1,0 +1,2 @@
+# Captured NHL reports are kept byte for byte; their hashes are tested
+test/fixtures/reports/captured/*.HTM -text
