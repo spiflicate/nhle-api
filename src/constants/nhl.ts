@@ -1,3 +1,4 @@
+import type { GameState } from '#/types/responses/gamecenter/common.ts';
 import { getCurrentSeason } from '#/utils/date.ts';
 
 // Values are based on the NHL API documentation and other sources.
@@ -235,16 +236,24 @@ export const PlayoffSeriesEnum = {
 };
 
 /**
- * All valid NHL game states.
+ * All NHL game states, in the order a game moves through them.
  */
 export const GameStateEnum = {
-   /** Future */
+   /** Future: scheduled, not started */
    FUT: 'FUT',
-   /** Live */
-   LIV: 'LIV',
-   /** Finished */
-   FIN: 'FIN',
-} as const;
+   /** Pregame: shortly before puck drop */
+   PRE: 'PRE',
+   /** Live: in progress */
+   LIVE: 'LIVE',
+   /** Critical: late in a close game, or in overtime */
+   CRIT: 'CRIT',
+   /** Over: play has ended, result not yet final */
+   OVER: 'OVER',
+   /** Final: result is final */
+   FINAL: 'FINAL',
+   /** Off: final and wrapped up */
+   OFF: 'OFF',
+} as const satisfies { [K in GameState]: K };
 
 /**
  * All valid NHL period types.

@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `topSeedTeamAbbrev` and `bottomSeedTeamAbbrev` on the `seriesStatus` of team schedule games, newly returned by `team.schedule.season`
 - `overlay` on `EdgeByTheNumbers.sogTeam` and `EdgeByTheNumbers.highDangerSavesGoalie`, newly returned by `adv.byTheNumbers`
 - `EdgeOverlay.team`, set instead of `player` on overlays for team stats
+- `OVER` in `GameState`, the state the API now reports between `LIVE`/`CRIT` and `FINAL`
+
+### Fixed
+
+- **Breaking:** the exported `GameState` type is the gamecenter response union (`FUT`, `PRE`, `LIVE`, `CRIT`, `OVER`, `FINAL`, `OFF`) instead of the stale `'FUT' | 'LIV' | 'FIN'`, which no response ever returned. `NHL.GameStateEnum` lists the same states; `GameStateEnum.LIV` and `GameStateEnum.FIN` are removed, so use `LIVE` and `FINAL`
 
 ## [0.7.1] - 2026-10-23
 

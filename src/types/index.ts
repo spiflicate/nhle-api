@@ -3,6 +3,7 @@ export * from './responses/edge-adv.ts';
 // export * as at from '../utils/schemas.ts';
 export type {
    DraftPositionCode,
+   GameState,
    LocalizedText,
    PositionCode,
 } from './responses/gamecenter/common.ts';
