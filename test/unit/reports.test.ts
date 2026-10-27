@@ -229,6 +229,13 @@ describe('parseGameTimes on reports saved during games', () => {
       });
    });
 
+   it.each([
+      ['GS020187-live-0418', 'Shootout'],
+      ['GS020187-live-0422', 'End of Shootout'],
+   ])("doesn't read the status line of %s (%s) as an end", (name) => {
+      expect(live(name, '2026-10-27T01:30:00Z').end).toBeNull();
+   });
+
    it('reads the start during overtime', () => {
       expect(live('GS020187-live-0416', '2026-10-27T01:30:00Z')).toEqual({
          date: '2026-10-26',
