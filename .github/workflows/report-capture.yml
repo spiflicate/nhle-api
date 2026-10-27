@@ -18,6 +18,11 @@
 name: Report capture
 
 on:
+  # Only so GitHub registers the workflow before it reaches the default
+  # branch (dispatch needs that); a push run does nothing
+  push:
+    branches: [claude/loving-ramanujan-eosm6y]
+    paths: [.github/workflows/report-capture.yml]
   workflow_dispatch:
     inputs:
       mode:
@@ -39,7 +44,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: report-capture-${{ inputs.mode }}-${{ inputs.games }}
+  group: report-capture-${{ github.event_name }}-${{ inputs.mode }}-${{ inputs.games }}
   cancel-in-progress: false
 
 env:
@@ -47,7 +52,7 @@ env:
 
 jobs:
   capture:
-    if: vars.REPORT_CAPTURE_DISABLED != 'true'
+    if: github.event_name == 'workflow_dispatch' && vars.REPORT_CAPTURE_DISABLED != 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 350
     strategy:
