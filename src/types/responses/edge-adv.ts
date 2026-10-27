@@ -25,6 +25,8 @@ export interface EdgeOverlay {
       firstName: LocalizedText;
       lastName: LocalizedText;
    };
+   /** Set instead of `player` when the stat belongs to a team */
+   team?: EdgeTeam;
    gameDate: string;
    awayTeam: {
       abbrev: string;
@@ -200,6 +202,7 @@ export interface EdgeByTheNumbers {
    };
    sogTeam: {
       team: EdgeTeam;
+      overlay?: EdgeOverlay;
       shots: number;
       sogDetails: {
          area: string;
@@ -209,6 +212,7 @@ export interface EdgeByTheNumbers {
    /** Goalie with the most high-danger saves; added to the API in October 2026. */
    highDangerSavesGoalie?: {
       player: EdgePlayer;
+      overlay?: EdgeOverlay;
       saves: number;
       shotLocationDetails: {
          area: string;

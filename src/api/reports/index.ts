@@ -102,7 +102,8 @@ export function url(gameId: GameId, code: ReportCode): string {
  * @returns Promise resolving to the local date and the start and end
  * times (`start` is null until the puck drops, `end` until the game
  * ends); a game whose report isn't published yet, which happens one to
- * two hours before the scheduled start, gives a NotFoundError result, and a header that can't be read or converted a ParseError
+ * two hours before the scheduled start, gives a NotFoundError result,
+ * and a header that can't be read or converted a ParseError
  *
  * @example
  * const result = await reports.gameTimes(2026020180);

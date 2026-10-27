@@ -1,20 +1,12 @@
-# NHLe API Library
+# nhle-api
 
 [![npm version](https://img.shields.io/npm/v/nhle-api.svg)](https://www.npmjs.com/package/nhle-api)
 [![npm downloads](https://img.shields.io/npm/dm/nhle-api.svg)](https://www.npmjs.com/package/nhle-api)
 [![license](https://img.shields.io/github/license/spiflicate/nhle-api.svg)](LICENSE)
 
-A modern TypeScript wrapper around the public NHL GameCenter and EdgeStats APIs with simple, composable functions and strong TypeScript typing.
+Typed TypeScript functions for the NHL's public web APIs: Game Center and Edge (`api-web.nhle.com`), the Stats API behind stats.nhl.com (`api.nhle.com/stats/rest`), the official HTML game reports on nhl.com, and video metadata for highlight clips.
 
-## Overview
-
-The library exposes a small, functional surface over the NHL "Game Center", Edge and Stats APIs and ships with response types for every endpoint.
-
-- Written in TypeScript and published as ESM/CJS
-- Thin functional wrappers over official NHL API routes
-- Typed responses for Game Center (`gc`), Edge advanced stats (`adv`), the Stats API (`stats`), the official HTML game reports (`reports`) and video metadata (`video`)
-- Every function resolves to an `APIResult` instead of throwing
-- Runtime configuration for timeouts, language and logging
+The NHL doesn't document these APIs, so the response types are written against what the endpoints actually return, and a daily job checks them against the live APIs (see [API drift check](CONTRIBUTING.md#api-drift-check)).
 
 ## Installation
 
@@ -22,198 +14,124 @@ The library exposes a small, functional surface over the NHL "Game Center", Edge
 npm install nhle-api
 ```
 
-The package ships both ESM and CJS builds; use standard `import`/`require` according to your toolchain.
+Ships ESM and CommonJS builds with type declarations. Requires Node 18 or later.
 
-## Quick Start
-
-The primary entrypoint is the Game Center API namespace `gc`:
+## Quick start
 
 ```ts
 import { gc } from 'nhle-api';
 
-// Get game landing page data
-const gameInfo = await gc.game.landing(2023020001);
+const result = await gc.game.landing(2023020001);
 
-// Get live play-by-play
-const playByPlay = await gc.game.playByPlay(2023020001);
-
-// Get boxscore
-const boxscore = await gc.game.boxscore(2023020001);
-
-// Get today's scores
-const scores = await gc.score(new Date());
-
-// Get current scoreboard
-const scoreboard = await gc.scoreboard();
-
-// Get team roster
-const roster = await gc.team.roster('TOR');
-
-// Get player landing page (Connor McDavid)
-const player = await gc.player.landing(8478402);
+if (result.success) {
+   console.log(result.data.venue.default);
+} else {
+   console.error(result.error.message);
+}
 ```
 
-## Configuration
+Every function returns a promise of an `APIResult`, which is either `{ success: true, data }` or `{ success: false, error }`. Requests don't throw; see [Results and errors](#results-and-errors).
 
-`config` holds the shared defaults. Change it at runtime; every request reads it, so changes apply even after the API modules are loaded:
+A few more calls:
 
 ```ts
-import { config, logConfig } from 'nhle-api';
-
-config.timeout = 10000; // ms, default 5000
-config.language = 'fr'; // 'en' (default) or 'fr'
-config.logLevel = 'error'; // 'silent' | 'error' | 'warn' (default) | 'info' | 'debug'
-
-logConfig();
+await gc.game.playByPlay(2023020001);
+await gc.game.boxscore(2023020001);
+await gc.score(); // today's scores
+await gc.scoreboard();
+await gc.team.roster('TOR');
+await gc.player.landing(8478402); // Connor McDavid
 ```
 
-See `docs/CONFIGURATION.md` for per-client settings.
+## Namespaces
 
-## Top-Level Exports
+The package exports five namespaces:
 
-The package root `nhle-api` re-exports the API namespaces, configuration, the HTTP client, error classes, constants and types:
+| Namespace | API | Covers |
+| --- | --- | --- |
+| `gc` | Game Center | Games, schedules, scores, standings, teams, players, draft |
+| `adv` | NHL Edge | Puck and player tracking: skating speed, shot speed, zone time |
+| `stats` | Stats API | The stats.nhl.com reports, leaders, milestones, shift charts |
+| `reports` | Game reports | The official HTML game sheets on nhl.com: report URLs, recorded start and end times |
+| `video` | Brightcove | Titles and playable sources for highlight clips |
 
-```ts
-// API namespaces
-import { adv, gc, reports, stats, video } from 'nhle-api';
+Seasons are written as `20242025`. Game types are `2` (regular season) and `3` (playoffs). Dates take a `Date` or a `'YYYY-MM-DD'` string, are read in the NHL's time zone (America/New_York), and default to today.
 
-// Configuration and logging
-import { config, logConfig, logger } from 'nhle-api';
+### `gc.game`
 
-// Result type and errors
-import { NHLError, NotFoundError, ValidationError } from 'nhle-api';
-import type { APIResult } from 'nhle-api';
+- `landing(gameId)`, `boxscore(gameId)`, `playByPlay(gameId)`, `reports(gameId)`
+- `wsc.gameStory(gameId)`, `wsc.playByPlay(gameId)`
+- `pptReplay.goal(gameId, eventId)`, `pptReplay.event(gameId, eventId)`: player and puck tracking for a replay
+- `schedule(date?)`, `scheduleCalendar(date?)`, `networkTVSchedule(date?)`
+- `playoffBracket(year?)`, `playoffSeries(season?)`, `playoffSeriesSchedule(seriesLetter, season?)`
+- `whereToWatch()`: deprecated. The NHL retired this endpoint and it now returns a `NotFoundError`.
 
-// Your own client (custom base URL, headers, timeout, error handling)
-import { NHLClient, createNHLClient } from 'nhle-api';
+### `gc.score` and `gc.scoreboard`
 
-// Cayenne filter builder for `stats`
-import { CayenneQueryBuilder } from 'nhle-api';
+- `score(date?)`: scores for a date
+- `scoreboard()`: the current scoreboard
 
-// Response and parameter types
-import type { EdgeSkaterDetail, GamecenterLanding, Season } from 'nhle-api';
-```
+### `gc.team`
 
-## Toolkit Entry Point
+- `roster(team, season?)`, `rosterSeasons(team)`, `prospects(team)`
+- `stats(team, season?, gameType?)`, `statsSeason(team)`
+- `standings(date?)`, `standingsSeason()`
+- `schedule.week(team, date?)`, `schedule.month(team, date?)`, `schedule.season(team, season?)`
 
-Use the `nhle-api/toolkit` subpath when you only need NHL constants and shared helpers. It does not load the API clients or configuration:
+Teams are three-letter abbreviations (`'TOR'`, `'TBL'`).
 
-```ts
-import {
-   NHL,
-   getCurrentSeason,
-   normalizeAbbrev,
-   resolvePath,
-} from 'nhle-api/toolkit';
+### `gc.player`
 
-const season = getCurrentSeason();
-const team = normalizeAbbrev('TB'); // 'TBL'
-const teamPath = resolvePath('/teams/{team}', { team });
-```
+- `landing(playerId)`, `gameLog(playerId, season?, gameType?)`
+- `statsLeaders.skaters(season?, gameType?)`, `statsLeaders.goalies(season?, gameType?)`
+- `spotlight()`, `search(query)`
 
-This entry point exports `NHL`, date helpers, `normalizeAbbrev`, `resolvePath`,
-the Cayenne query builder, team branding data, historical team palettes, and
-official logo URL helpers.
+### `gc.draft`
 
-## Game Center API (`gc`)
+- `picks(year?, round?)`, `tracker()`
+- `rankings(year?)` returns `skatersNA()`, `skatersIntl()`, `goaliesNA()`, `goaliesIntl()` and `all()`
 
-`gc` is the primary namespace for accessing live and historical NHL data.
+### `gc.misc`
 
-### `gc.game` – Game Data
+- `seasons()`
+- `meta.game(gameId)`, `meta.playoffSeries(seriesLetter, year?)`
+- `postalLookup(postalCode)`, `location()`, `partnerGame(countryCode)`
 
-- `playByPlay(gameId)` – Full live play-by-play event stream
-- `boxscore(gameId)` – Boxscore and team/player stats for a game
-- `landing(gameId)` – Game landing page data (summary, lines, etc.)
-- `reports(gameId)` – Game reports / right-rail data
-- `schedule(date?)` – Schedule for a given date (defaults to today)
-- `scheduleCalendar(date?)` – Calendar-style schedule for a date
-- `playoffBracket(year?)` – Playoff bracket for a given year
-- `playoffSeries(season?)` – Playoff series information for a season
-- `playoffSeriesSchedule(season, seriesLetter)` – Schedule for a playoff series
-- `whereToWatch()` – Regional broadcast / streaming info (deprecated: the NHL retired this endpoint and it returns 404)
-- `networkTVSchedule(date?)` – National TV schedule
-- `wsc.gameStory(gameId)` – Game story from the web service collection
-- `wsc.playByPlay(gameId)` – Play-by-play from the web service collection
-- `pptReplay.goal(gameId, eventId)` – Goal replay data for a specific event
-- `pptReplay.event(date?)` – Replay events for a given date (does not appear to be functional at this time)
-
-### `gc.score` – Scores & Scoreboards
-
-- `score(date?)` – Scores for a given date (defaults to today)
-- `scoreboard()` – Current live scoreboard
-
-### `gc.team` – Team Data
-
-- `roster(teamCode, season?)` – Team roster for a given season
-- `rosterSeasons(teamCode)` – Available roster seasons for a team
-- `prospects(teamCode)` – Team prospects
-- `clubStats(teamCode, season?)` – Club stats for a team/season
-- `clubStatsSeason(teamCode)` – Season-level club stats
-- `standings(date?)` – Standings for a given date
-- `standingsSeason()` – Season standings
-- `schedule.now(teamCode)` – Current schedule segment for a team
-- `schedule.month(teamCode, month)` – Team schedule for a given month
-- `schedule.season(teamCode, season)` – Full season schedule for a team
-
-### `gc.player` – Player Data
-
-- `landing(playerId)` – Player landing page data
-- `gameLog(playerId, season?, gameType?)` – Game log for a player
-- `spotlight()` – Featured players (spotlight carousel)
-- `search(query)` – Player search
-- `statsLeaders.season(season?, gameType?, category?, limit?)` – Season stat leaders
-- `statsLeaders.current(gameType?, category?, limit?)` – Current stat leaders
-
-### `gc.draft` – Draft Data
-
-- `picks(year?)` – Draft picks for a given year
-- `tracker()` – Draft tracker
-- `rankings(year?)` – Draft rankings (all, NA/International, skaters/goalies)
-
-### `gc.misc` – Miscellaneous
-
-- `seasons()` – All NHL seasons
-- `meta.game(gameId)` – Game metadata
-- `meta.gameVideo(gameId)` – Game video metadata
-- `postalLookup(postalCode)` – Postal/ZIP lookup (location info)
-- `location()` – Location info for current context
-- `partnerGame(country, date?)` – Partner game information
-
-## Edge Advanced Stats (`adv`)
-
-NHL Edge puck and player tracking data (`api-web.nhle.com/v1/edge`), with response types for every function (`EdgeSkaterDetail`, `EdgeTeamZoneTime`, ...).
+### `adv` (NHL Edge)
 
 - `adv.skaters`: `detail`, `comparison`, `leaders`, `shotLocation`, `shotSpeed`, `skatingDistance`, `skatingSpeed`, `zoneTime`, and `top10.{distance, shotLocation, shotSpeed, speed, zoneTime}`
 - `adv.goalies`: `player`, `compare`, `leaders`, `savePercentage`, `savePercentage5v5`, `saveLocation`, and `top10.{savePercentage, savePercentage5v5, saveLocation}`
 - `adv.teams`: `stats`, `compare`, `leaders`, `shotLocation`, `shotSpeed`, `skatingDistance`, `skatingSpeed`, `zoneTime`, and `top10.{shotLocation, shotSpeed, skatingDistance, skatingSpeed, zoneTime}`
-- `adv.byTheNumbers()`: the Edge home page's daily highlights
+- `adv.byTheNumbers()`: the daily highlights from the Edge home page
 
 ```ts
+import { adv } from 'nhle-api';
+
 const result = await adv.skaters.detail(8478402, 20242025, 2);
 if (result.success) console.log(result.data.skatingSpeed.speedMax.imperial);
 ```
 
-## Stats API (`stats`)
+### `stats` (Stats API)
 
-The stats.nhl.com reports (`api.nhle.com/stats/rest`). List endpoints answer `{ data, total }` and accept `cayenneExp`, `sort`, `dir`, `limit` and `start`.
-
-- `stats.skaters` / `stats.goalies` / `stats.teams`: `getStats(report, params)` for any report (`summary`, `realtime`, `powerplay`...; `SkaterReport`, `GoalieReport` and `TeamReport` list them), plus `getStatsWithParams`, `getStatsWithBuilder` and `getStatsWithFilters`
-- `stats.skaters.getPlayerInfo(params)`, `getLeaders(category, params)`, `getMilestones()`; the same leaders and milestones for goalies
-- `stats.teams.getAll(params)`, `getById(teamId, params)`
+- `stats.skaters`, `stats.goalies`, `stats.teams`: `getStats(report, params)` for any report (`'summary'`, `'realtime'`, `'powerplay'`, and the rest listed in `SkaterReport`, `GoalieReport` and `TeamReport`), plus `getStatsWithParams`, `getStatsWithBuilder` and `getStatsWithFilters`
+- `stats.skaters.getPlayerInfo(params)`; `getLeaders(category, params)` and `getMilestones()` on skaters and goalies
+- `stats.teams.getAll(params)`, `stats.teams.getById(teamId, params)`
 - `stats.season`: `getSeasons()`, `getGames(params)`, `getShiftChart(gameId)`, `getDraft()`
-- `stats.misc`: `getConfig()` (every report's columns), `getCountries()`, `getGlossary()`, `getFranchises()`
+- `stats.misc`: `getConfig()` (the columns of every report), `getCountries()`, `getGlossary()`, `getFranchises()`
+
+Report endpoints return `{ data, total }` and take `cayenneExp`, `sort`, `dir`, `limit` and `start`:
 
 ```ts
 import { stats } from 'nhle-api';
 
-const result = await stats.skaters.getStats('summary', {
+const skaters = await stats.skaters.getStats('summary', {
    cayenneExp: 'seasonId=20242025 and gameTypeId=2',
    sort: 'points',
    dir: 'desc',
    limit: 10,
 });
 
-// Or with the query builder
+// The same kind of filter, built with the query builder
 const goalies = await stats.goalies.getStatsWithBuilder('summary', (q) => ({
    cayenneExp: q.equals('seasonId', 20242025).greaterThan('gamesPlayed', 20).build(),
    sort: 'savePct',
@@ -221,14 +139,14 @@ const goalies = await stats.goalies.getStatsWithBuilder('summary', (q) => ({
 }));
 ```
 
-See [docs/QUERY_BUILDER_GUIDE.md](docs/QUERY_BUILDER_GUIDE.md) for the builder.
+The [query builder guide](docs/QUERY_BUILDER_GUIDE.md) covers the builder in full.
 
-## Game Reports (`reports`)
+### `reports` (game reports)
 
-The official HTML game sheets on www.nhl.com (`https://www.nhl.com/scores/htmlreports/{season}/{code}{gameNumber}.HTM`). They carry data the JSON APIs don't.
+The official game sheets at `https://www.nhl.com/scores/htmlreports/{season}/{code}{gameNumber}.HTM` carry data the JSON APIs don't.
 
-- `reports.url(gameId, code)`: URL of a report. Codes (`reports.REPORT_CODES`): `GS` Game Summary, `ES` Event Summary, `PL` Play-by-Play, `FS` Faceoff Summary, `FC` Faceoff Comparison, `RO` Playing Roster, `SS` Shot Summary, `TV`/`TH` Time on Ice (away/home)
-- `reports.gameTimes(gameId, { scheduledStart? })`: when the game actually started and ended, from the Game Summary. The JSON APIs only carry the scheduled `startTimeUTC`, and the puck usually drops 10–20 minutes later
+- `url(gameId, code)`: the URL of a report. Codes (`REPORT_CODES`): `GS` Game Summary, `ES` Event Summary, `PL` Play-by-Play, `FS` Faceoff Summary, `FC` Faceoff Comparison, `RO` Playing Roster, `SS` Shot Summary, `TV`/`TH` Time on Ice (away/home).
+- `gameTimes(gameId, { scheduledStart? })`: when the game actually started and ended, from the Game Summary. The JSON APIs only carry the scheduled `startTimeUTC`, and the puck usually drops 8–12 minutes later.
 
 ```ts
 const result = await reports.gameTimes(2026020180);
@@ -239,40 +157,36 @@ const result = await reports.gameTimes(2026020180);
 // }
 ```
 
-- The report prints 12-hour local times without am/pm. The start is the am or pm reading that falls between 1 hour before and 6 hours after the scheduled start, and a `ParseError` when neither does. The end is the first matching time after the start, so an end past midnight falls on the next day.
-- The scheduled start comes from the game's boxscore, fetched alongside the report. Pass `scheduledStart` (e.g. `startTimeUTC` from a schedule you already have) to skip that request:
+The report prints 12-hour local times with a zone abbreviation and no am/pm:
 
-```ts
-await reports.gameTimes(game.id, { scheduledStart: game.startTimeUTC });
-```
-- Times convert to UTC for EST/EDT, CST/CDT, MST/MDT, PST/PDT, CET/CEST and EET/EEST. Any other zone abbreviation, or a time without one, gives a `ParseError` rather than a UTC time that could be wrong.
-- When the times appear, as seen on 2026-10-26:
-  - The report is published one to two hours before the scheduled start; before that the call gives a `NotFoundError`.
-  - Until the puck drops the header reads `Start : EDT`, with no time, so `start` is null. That held 10 minutes past the scheduled start: pre-game ceremonies push the actual start 8–12 minutes later.
-  - The start time appears once the game is under way and stays fixed; `end` is null while the game is in progress, overtime included.
-  - The end time appears with the "Final" status within two minutes of the game ending.
+- Times convert to UTC for EST/EDT, CST/CDT, MST/MDT, PST/PDT, CET/CEST and EET/EEST. Any other abbreviation, or a time without one, gives a `ParseError` rather than a UTC time that could be wrong.
+- The start is the am or pm reading that falls between 1 hour before and 6 hours after the scheduled start, and a `ParseError` when neither does. The end is the first matching time after the start, so an end past midnight falls on the next day.
+- The scheduled start comes from the game's boxscore, fetched alongside the report. Pass `scheduledStart` (e.g. `startTimeUTC` from a schedule you already have) to skip that request.
 
-## Video (`video`)
+When the times appear, as seen on 2026-10-26:
 
-- `video.metadata(videoId)`: title, descriptions, duration, poster and playable sources (with the best MP4 as `url`) for a Brightcove video id, such as a goal's `highlightClip` in `gc.game.landing`
+- The report is published one to two hours before the scheduled start. Before that the call gives a `NotFoundError`.
+- Until the puck drops the header reads `Start : EDT`, with no time, so `start` is null. That held past the scheduled start, since pre-game ceremonies push the actual start 8–12 minutes later.
+- The start time appears once the game is under way. `end` stays null while the game is in progress, overtime and shootout included.
+- The end time appears with the "Final" status within two minutes of the game ending.
 
-## Types
+### `video`
 
-Response types are exported for every endpoint: Game Center (`GamecenterLanding`, `TeamRoster`...), Edge (`Edge*`) and the Stats API (`stats.SkaterStats`, `stats.Team`...), along with parameter types (`Season`, `GameId`, `TeamAbbrev`...) and shared shapes such as `LocalizedText`.
+`video.metadata(videoId)` returns the title, descriptions, duration, poster and sources of a Brightcove video, with the widest MP4 as `url`. The ids come from fields like `highlightClip` on the goals in `gc.game.landing`.
 
-### Results and errors
+## Results and errors
 
-Functions never throw for API failures. Each resolves to an `APIResult<T>`:
+API failures come back as values, not exceptions:
 
-- `{ success: true, data }` on success.
-- `{ success: false, error }` otherwise, where `error` is an `NHLError` subclass: `NotFoundError` (404), `ClientError` (other 4xx), `ServerError` (5xx), `RateLimitError` (429), `NetworkError`, or `ValidationError` for parameters rejected before any request.
-- `error.category` and `error.context` (endpoint, status code, response body) carry the details.
+- `{ success: true, data }` when the request succeeds.
+- `{ success: false, error }` otherwise. `error` is an `NHLError`, usually one of its subclasses: `NotFoundError` (404), `RateLimitError` (429), `ClientError` (other 4xx), `ServerError` (5xx), `NetworkError`, `ValidationError` when a parameter is rejected before any request is made, or `ParseError` when a response can't be read (e.g. a game report header).
+
+`error.category` and `error.context` (endpoint, status code, response body) carry the details.
 
 ```ts
 import { gc, NotFoundError } from 'nhle-api';
-import type { APIResult, GamecenterLanding } from 'nhle-api';
 
-const result: APIResult<GamecenterLanding> = await gc.game.landing(2023020001);
+const result = await gc.game.landing(2023020001);
 
 if (result.success) {
    console.log(result.data.venue.default);
@@ -283,67 +197,61 @@ if (result.success) {
 }
 ```
 
-## Roadmap / Status
+## Types
 
-- ✅ Game Center endpoints with response types
-- ✅ Edge Advanced (`adv`) endpoints with response types
-- ✅ Stats API (`stats`) endpoints with typed reports
-- ✅ Official HTML game reports (`reports`): URLs and the recorded start/end time
-- ✅ Runtime configuration (`config`) and per-client settings (`NHLClient`)
-- ✅ Error classes and `APIResult` exported
-- ✅ Daily drift check against the live APIs
+Response types are exported for every endpoint: Game Center (`GamecenterLanding`, `TeamRoster`, ...), Edge (`EdgeSkaterDetail`, `EdgeTeamZoneTime`, ...) and the Stats API (`stats.SkaterStats`, `stats.Team`, ...). Parameter types (`Season`, `GameId`, `TeamAbbrev`, ...) and shared shapes such as `LocalizedText` are exported too.
 
-For a detailed list of changes, see `CHANGELOG.md`.
+```ts
+import type { APIResult, GamecenterLanding, Season } from 'nhle-api';
+```
+
+## Configuration
+
+`config` holds the shared defaults. Every request reads it, so you can change it at any time:
+
+```ts
+import { config } from 'nhle-api';
+
+config.timeout = 10000; // ms, default 5000
+config.language = 'fr'; // 'en' (default) or 'fr'
+config.logLevel = 'error'; // 'silent' | 'error' | 'warn' (default) | 'info' | 'debug'
+```
+
+To use different settings for some requests (base URL, headers, timeout, error logging), create your own `NHLClient` or call `createNHLClient`. [docs/CONFIGURATION.md](docs/CONFIGURATION.md) has the details.
+
+## Toolkit
+
+`nhle-api/toolkit` has the constants and helpers without the API clients:
+
+```ts
+import { getCurrentSeason, normalizeAbbrev, resolvePath } from 'nhle-api/toolkit';
+
+const season = getCurrentSeason(); // '20262027' during the 2026-27 season
+const team = normalizeAbbrev('TB'); // 'TBL'
+const path = resolvePath('/teams/{team}', { team }); // '/teams/TBL'
+```
+
+It exports the `NHL` constants, date helpers, `normalizeAbbrev`, `resolvePath`, the Cayenne query builder, team branding (colors, including historical ones) and logo URL helpers.
 
 ## Docs
 
-- [Configuration](docs/CONFIGURATION.md) - Code-defined configuration and default values
-- [Query Builder Guide](docs/QUERY_BUILDER_GUIDE.md) - Cayenne query builder for stats APIs
+- [Configuration](docs/CONFIGURATION.md)
+- [Query builder guide](docs/QUERY_BUILDER_GUIDE.md)
+- [Changelog](CHANGELOG.md)
+- [Contributing](CONTRIBUTING.md)
 
 ## Contributing
 
-This project is still evolving and feedback is very welcome.
+Issues and PRs are welcome. If an endpoint returns something the types don't match, open an issue with the function you called, its arguments, the library version, and a sample of the response if you can.
 
-- **Bug reports / issues:** If an endpoint returns unexpected data, response parsing fails, or types don’t match the real API, please open a GitHub issue with the endpoint, parameters, and (sanitized) sample payloads if possible.
-- **Type improvements:** PRs or issues that improve response coverage, fix missing/incorrect fields, or refine enums and unions are particularly helpful.
-- **JSDoc / docs:** Additions or corrections to JSDoc on public types and functions, or clarifications to the guides in `docs/`, are also very much appreciated.
-
-Before filing an issue, check the `CHANGELOG.md` for recent changes and breaking notes, and include the library version you’re using.
-
-## API drift check
-
-The NHL APIs are undocumented and change without notice. `bun run drift` calls every public function against the live APIs (with a finished season, game and draft) and compares each response's structure with `scripts/drift/baseline.json`. It fails when an endpoint stops answering, an error response changes, or a field is added, removed or changes type. Values are ignored, and so are fields that turn `null`. Translations in localized strings (`{ default, fr, cs, ... }`) count as one field.
-
-The **API drift** workflow runs it daily and on demand (Actions → API drift → Run workflow). A failure opens one `api-drift` issue with the report, which the next passing run closes. It never runs on PRs, so upstream changes don't block unrelated work.
-
-When an API really has changed:
-
-1. Update the response types in `src/types/responses/`.
-2. Accept the new shapes with `bun run drift --update` and commit the baseline.
-
-Checks for date- or location-dependent data (scoreboard, draft tracker) are marked `volatile`: a field missing today is only noted, and `--update` adds to their baseline instead of replacing it. When you add a library function, add a check in `scripts/drift/checks.ts`; `test/unit/drift.test.ts` fails if a public function has none.
-
-## Releasing
-
-1. Move the `Unreleased` notes in `CHANGELOG.md` under the new version.
-2. Bump the version and tag it: `npm version patch` (or `minor`/`major`).
-3. Push the commit and tag: `git push --follow-tags`.
-
-4. Approve the staged version with 2FA, on npmjs.com (the package's **Staged Packages** tab) or with `npm stage approve <stage-id>`.
-
-The **Release** workflow checks that the tag matches `package.json`, runs the full CI suite and `check:package`, stages the version on npm with provenance, and creates a GitHub release. It uses [npm trusted publishing](https://docs.npmjs.com/trusted-publishers), so there is no npm token in the repo, and [staged publishing](https://docs.npmjs.com/staged-publishing), so nothing goes live until a maintainer approves it.
-
-One-time setup on npmjs.com:
-
-1. Open the `nhle-api` package's **Settings → Trusted publishing** and add GitHub Actions with user `spiflicate`, repository `nhle-api` and workflow `release.yml`. Leave "Allow npm publish" and "Allow npm dist-tag" unchecked, so CI can only stage.
-2. Under **Publishing access**, choose "Require two-factor authentication and disallow tokens".
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the development setup, the API drift check and the release process.
 
 ## Support
 
-If you find this library helpful, consider supporting its development:
+If this library is useful to you, you can support it here:
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/R6R01DV0JD)
 
 ## License
 
-This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
+MIT. See [LICENSE](LICENSE).
