@@ -3,8 +3,9 @@
  * data. Stable ids point at a finished season, game and draft, so their
  * shapes should only change when the NHL APIs do.
  */
-import { adv, gc, stats, video } from '#/api/index.ts';
+import { adv, gc, reports, stats, video } from '#/api/index.ts';
 import type { APIResult } from '#/client/types.ts';
+import { ErrorCategory, NHLError } from '#/errors/index.ts';
 
 const SEASON = 20242025;
 const REG = 2;
@@ -541,9 +542,41 @@ const media: DriftCheck[] = [
    },
 ];
 
+/** Every report of GAME, by the URLs `reports.url` builds */
+async function reportStatuses(): Promise<APIResult<unknown>> {
+   const missing: string[] = [];
+   for (const code of reports.REPORT_CODES) {
+      const response = await fetch(reports.url(GAME, code), {
+         method: 'HEAD',
+      });
+      if (!response.ok) missing.push(`${code} ${response.status}`);
+   }
+   if (missing.length > 0) {
+      return {
+         success: false,
+         error: new NHLError(
+            `reports missing: ${missing.join(', ')}`,
+            ErrorCategory.CLIENT,
+         ),
+      };
+   }
+   return { success: true, data: { codes: [...reports.REPORT_CODES] } };
+}
+
+const htmlReports: DriftCheck[] = [
+   { name: 'reports.url', run: reportStatuses },
+   { name: 'reports.gameTimes', run: () => reports.gameTimes(GAME) },
+   {
+      name: 'reports.gameTimes (unknown game)',
+      run: () => reports.gameTimes(2024010999),
+      expectError: 'NotFoundError',
+   },
+];
+
 export const checks: DriftCheck[] = [
    ...gamecenter,
    ...edge,
    ...statsApi,
    ...media,
+   ...htmlReports,
 ];

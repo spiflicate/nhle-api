@@ -4,7 +4,7 @@
 [![npm downloads](https://img.shields.io/npm/dm/nhle-api.svg)](https://www.npmjs.com/package/nhle-api)
 [![license](https://img.shields.io/github/license/spiflicate/nhle-api.svg)](LICENSE)
 
-Typed TypeScript functions for the NHL's public web APIs: Game Center and Edge (`api-web.nhle.com`), the Stats API behind stats.nhl.com (`api.nhle.com/stats/rest`), and video metadata for highlight clips.
+Typed TypeScript functions for the NHL's public web APIs: Game Center and Edge (`api-web.nhle.com`), the Stats API behind stats.nhl.com (`api.nhle.com/stats/rest`), the official HTML game reports on nhl.com, and video metadata for highlight clips.
 
 The NHL doesn't document these APIs, so the response types are written against what the endpoints actually return, and a daily job checks them against the live APIs (see [API drift check](CONTRIBUTING.md#api-drift-check)).
 
@@ -45,13 +45,14 @@ await gc.player.landing(8478402); // Connor McDavid
 
 ## Namespaces
 
-The package exports four namespaces:
+The package exports five namespaces:
 
 | Namespace | API | Covers |
 | --- | --- | --- |
 | `gc` | Game Center | Games, schedules, scores, standings, teams, players, draft |
 | `adv` | NHL Edge | Puck and player tracking: skating speed, shot speed, zone time |
 | `stats` | Stats API | The stats.nhl.com reports, leaders, milestones, shift charts |
+| `reports` | Game reports | The official HTML game sheets on nhl.com: report URLs, recorded start and end times |
 | `video` | Brightcove | Titles and playable sources for highlight clips |
 
 Seasons are written as `20242025`. Game types are `2` (regular season) and `3` (playoffs). Dates take a `Date` or a `'YYYY-MM-DD'` string, are read in the NHL's time zone (America/New_York), and default to today.
@@ -140,6 +141,35 @@ const goalies = await stats.goalies.getStatsWithBuilder('summary', (q) => ({
 
 The [query builder guide](docs/QUERY_BUILDER_GUIDE.md) covers the builder in full.
 
+### `reports` (game reports)
+
+The official game sheets at `https://www.nhl.com/scores/htmlreports/{season}/{code}{gameNumber}.HTM` carry data the JSON APIs don't.
+
+- `url(gameId, code)`: the URL of a report. Codes (`REPORT_CODES`): `GS` Game Summary, `ES` Event Summary, `PL` Play-by-Play, `FS` Faceoff Summary, `FC` Faceoff Comparison, `RO` Playing Roster, `SS` Shot Summary, `TV`/`TH` Time on Ice (away/home).
+- `gameTimes(gameId, { scheduledStart? })`: when the game actually started and ended, from the Game Summary. The JSON APIs only carry the scheduled `startTimeUTC`, and the puck usually drops 8–12 minutes later.
+
+```ts
+const result = await reports.gameTimes(2026020180);
+// {
+//   date: '2026-10-25',
+//   start: { local: '2:16', zone: 'CDT', utc: '2026-10-25T19:16:00Z' },
+//   end:   { local: '4:48', zone: 'CDT', utc: '2026-10-25T21:48:00Z' },
+// }
+```
+
+The report prints 12-hour local times with a zone abbreviation and no am/pm:
+
+- Times convert to UTC for EST/EDT, CST/CDT, MST/MDT, PST/PDT, CET/CEST and EET/EEST. Any other abbreviation, or a time without one, gives a `ParseError` rather than a UTC time that could be wrong.
+- The start is the am or pm reading that falls between 1 hour before and 6 hours after the scheduled start, and a `ParseError` when neither does. The end is the first matching time after the start, so an end past midnight falls on the next day.
+- The scheduled start comes from the game's boxscore, fetched alongside the report. Pass `scheduledStart` (e.g. `startTimeUTC` from a schedule you already have) to skip that request.
+
+When the times appear, as seen on 2026-10-26:
+
+- The report is published one to two hours before the scheduled start. Before that the call gives a `NotFoundError`.
+- Until the puck drops the header reads `Start : EDT`, with no time, so `start` is null. That held past the scheduled start, since pre-game ceremonies push the actual start 8–12 minutes later.
+- The start time appears once the game is under way. `end` stays null while the game is in progress, overtime and shootout included.
+- The end time appears with the "Final" status within two minutes of the game ending.
+
 ### `video`
 
 `video.metadata(videoId)` returns the title, descriptions, duration, poster and sources of a Brightcove video, with the widest MP4 as `url`. The ids come from fields like `highlightClip` on the goals in `gc.game.landing`.
@@ -149,7 +179,7 @@ The [query builder guide](docs/QUERY_BUILDER_GUIDE.md) covers the builder in ful
 API failures come back as values, not exceptions:
 
 - `{ success: true, data }` when the request succeeds.
-- `{ success: false, error }` otherwise. `error` is an `NHLError`, usually one of its subclasses: `NotFoundError` (404), `RateLimitError` (429), `ClientError` (other 4xx), `ServerError` (5xx), `NetworkError`, or `ValidationError` when a parameter is rejected before any request is made.
+- `{ success: false, error }` otherwise. `error` is an `NHLError`, usually one of its subclasses: `NotFoundError` (404), `RateLimitError` (429), `ClientError` (other 4xx), `ServerError` (5xx), `NetworkError`, `ValidationError` when a parameter is rejected before any request is made, or `ParseError` when a response can't be read (e.g. a game report header).
 
 `error.category` and `error.context` (endpoint, status code, response body) carry the details.
 
