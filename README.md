@@ -246,7 +246,11 @@ const result = await reports.gameTimes(2026020180);
 await reports.gameTimes(game.id, { scheduledStart: game.startTimeUTC });
 ```
 - Times convert to UTC for EST/EDT, CST/CDT, MST/MDT, PST/PDT, CET/CEST and EET/EEST. Any other zone abbreviation, or a time without one, gives a `ParseError` rather than a UTC time that could be wrong.
-- `start` is null before the game has started and `end` is null while it is in progress. The report doesn't exist before the game, so the call gives a `NotFoundError` then.
+- When the times appear, as seen on 2026-10-26:
+  - The report is published one to two hours before the scheduled start; before that the call gives a `NotFoundError`.
+  - Until the puck drops the header reads `Start : EDT`, with no time, so `start` is null. That held 10 minutes past the scheduled start: pre-game ceremonies push the actual start 8–12 minutes later.
+  - The start time appears once the game is under way and stays fixed; `end` is null while the game is in progress, overtime included.
+  - The end time appears with the "Final" status within two minutes of the game ending.
 
 ## Video (`video`)
 

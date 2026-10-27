@@ -4,8 +4,7 @@
  * Base URL: https://www.nhl.com/scores/htmlreports
  * ======================================================================
  * The reports carry data the JSON APIs don't, such as the time a game
- * actually started. A report for a game that hasn't been played returns
- * 404.
+ * actually started. A report that hasn't been published yet returns 404.
  */
 
 import { createNHLClient } from '#/client/index.ts';
@@ -101,8 +100,9 @@ export function url(gameId: GameId, code: ReportCode): string {
  * @param gameId - 10-digit game id
  * @param options - Optional scheduled start
  * @returns Promise resolving to the local date and the start and end
- * times; a game whose report doesn't exist yet gives a NotFoundError
- * result, and a header that can't be read or converted a ParseError
+ * times (`start` is null until the puck drops, `end` until the game
+ * ends); a game whose report isn't published yet, which happens one to
+ * two hours before the scheduled start, gives a NotFoundError result, and a header that can't be read or converted a ParseError
  *
  * @example
  * const result = await reports.gameTimes(2026020180);

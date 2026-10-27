@@ -197,6 +197,47 @@ describe('parseGameTimes', () => {
    });
 });
 
+describe('parseGameTimes on reports saved during games', () => {
+   /** A report saved on 2026-10-26/27 while the game was being played */
+   function live(name: string, scheduledStart: string): GameTimes {
+      const html = readFileSync(
+         new URL(`../fixtures/reports/${name}.HTM`, import.meta.url),
+         'utf8',
+      );
+      const result = parseGameTimes(html, new Date(scheduledStart));
+      if (!result.success) throw result.error;
+      return result.data;
+   }
+
+   it.each([
+      // Before puck drop the header reads 'Start : EDT', with no time
+      ['GS020185-live-2251', '2026-10-26T23:00:00Z'],
+      ['GS020186-live-2251', '2026-10-27T00:30:00Z'],
+   ])('gives null times in the pre-game report %s', (name, scheduled) => {
+      expect(live(name, scheduled)).toEqual({
+         date: '2026-10-26',
+         start: null,
+         end: null,
+      });
+   });
+
+   it('reads the start once the puck has dropped', () => {
+      expect(live('GS020185-live-2316', '2026-10-26T23:00:00Z')).toEqual({
+         date: '2026-10-26',
+         start: { local: '7:10', zone: 'EDT', utc: '2026-10-26T23:10:00Z' },
+         end: null,
+      });
+   });
+
+   it('reads the start during overtime', () => {
+      expect(live('GS020187-live-0416', '2026-10-27T01:30:00Z')).toEqual({
+         date: '2026-10-26',
+         start: { local: '7:38', zone: 'MDT', utc: '2026-10-27T01:38:00Z' },
+         end: null,
+      });
+   });
+});
+
 describe('reports.gameTimes', () => {
    const originalFetch = globalThis.fetch;
    const REPORT = 'https://www.nhl.com/scores/htmlreports/';
