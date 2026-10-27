@@ -28,6 +28,7 @@
       "../untitled folder/example-data/*.ts",
       "scripts/*",
       "scripts/drift/*.ts",
+      "scripts/report-capture/*.ts",
       "../untitled folder/errors.ts",
       "../untitled folder/val.ts"
    ],

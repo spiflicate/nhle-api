@@ -236,7 +236,8 @@ async function observe(
          obs.sha256 = storeBody(opts.data, bytes);
          obs.body = `bodies/${obs.sha256.slice(0, 2)}/${obs.sha256}.gz`;
          if (kind === 'context' && res.ok) {
-            obs.context = readContext(bytes);
+            const context = readContext(bytes);
+            if (context) obs.context = context;
          }
       } catch (error) {
          obs.error =
