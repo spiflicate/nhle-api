@@ -15,8 +15,8 @@
  *
  * Fails when an endpoint is unreachable, an error response stops looking
  * the way the client expects, or a response gains, loses or retypes a
- * field, or sends a position code its types don't declare. Runs on a
- * schedule in .github/workflows/drift.yml.
+ * field, or sends a position code or game state its types don't
+ * declare. Runs on a schedule in .github/workflows/drift.yml.
  */
 import {
    appendFileSync,
@@ -45,9 +45,11 @@ import {
    shapeOf,
 } from './drift/shape.ts';
 import {
-   positionsFor,
+   allowedValues,
+   describeValue,
    type UnknownValue,
-   unknownPositions,
+   unknownValuesFor,
+   VALUE_LABELS,
 } from './drift/values.ts';
 
 export const BASELINE_PATH = join(import.meta.dir, 'drift/baseline.json');
@@ -163,8 +165,7 @@ async function evaluate(
    }
 
    const shape = shapeOf(result.data);
-   const allowed = positionsFor(check.name);
-   const values = allowed ? unknownPositions(result.data, allowed) : [];
+   const values = unknownValuesFor(check.name, result.data);
    const expected = baseline[check.name];
    if (!expected) {
       return { ...base, shape, values, status: 'no baseline', detail: '' };
@@ -179,7 +180,7 @@ async function evaluate(
       changes.length > 0 &&
          `${changes.length} field change${changes.length === 1 ? '' : 's'}`,
       values.length > 0 &&
-         `${values.length} unknown position code${values.length === 1 ? '' : 's'}`,
+         `${values.length} unknown value${values.length === 1 ? '' : 's'}`,
    ]
       .filter(Boolean)
       .join(', ');
@@ -235,10 +236,10 @@ function findingsOf(o: Outcome): RunFinding[] {
       ...o.values.map(
          (v): RunFinding => ({
             check,
-            kind: 'position',
+            kind: v.kind,
             path: v.path,
             value: v.value,
-            text: `unknown position code \`${v.value}\` at \`${v.path}\``,
+            text: describeValue(v),
          }),
       ),
    ];
@@ -306,12 +307,7 @@ function report(
          continue;
       lines.push('', `${tracked ? '###' : '##'} \`${o.check.name}\``, '');
       lines.push(...o.changes.map((c) => `- ${describe(c)}`));
-      lines.push(
-         ...o.values.map(
-            (v) =>
-               `- unknown position code \`${v.value}\` at \`${v.path}\``,
-         ),
-      );
+      lines.push(...o.values.map((v) => `- ${describeValue(v)}`));
       if (o.notes.length > 0) {
          lines.push(
             '',
@@ -328,7 +324,7 @@ function report(
          '',
          '- **unavailable**: the API did not answer. Re-run the workflow; if it persists, the endpoint may have moved.',
          '- **unexpected**: the call failed or returned nothing where data or a specific error was expected.',
-         '- **drift**: update the response types in `src/types/responses/`, then accept the new shapes with `bun run drift --update`. An unknown position code needs `PositionCode` or `DraftPositionCode` (and the lists in `scripts/drift/values.ts`) widened instead.',
+         '- **drift**: update the response types in `src/types/responses/`, then accept the new shapes with `bun run drift --update`. An unknown position code or game state needs `PositionCode`, `DraftPositionCode` or `GameState` (and the lists in `scripts/drift/values.ts`) widened instead.',
       );
       if (tracked) {
          lines.push(
@@ -399,7 +395,7 @@ async function main() {
                ]),
             ),
             baseline,
-            positionsFor,
+            allowedValues,
          },
          today,
       );
@@ -426,7 +422,7 @@ async function main() {
    }
 
    const failed = outcomes.filter((o) => FAILING.includes(o.status));
-   // --update accepts shapes, but an unknown position code needs a type change
+   // --update accepts shapes, but an unknown value needs a type change
    const blocking = update
       ? failed.filter(
            (o) =>
@@ -439,7 +435,9 @@ async function main() {
          console.log(`\n${o.check.name}: ${o.status} ${o.detail}`);
          for (const c of o.changes) console.log(`  ${describe(c)}`);
          for (const v of o.values) {
-            console.log(`  unknown position code ${v.value} at ${v.path}`);
+            console.log(
+               `  unknown ${VALUE_LABELS[v.kind]} ${v.value} at ${v.path}`,
+            );
          }
       }
       process.exit(1);

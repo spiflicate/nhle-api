@@ -13,6 +13,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `overlay` on `EdgeByTheNumbers.sogTeam` and `EdgeByTheNumbers.highDangerSavesGoalie`, newly returned by `adv.byTheNumbers`
 - `EdgeOverlay.team`, set instead of `player` on overlays for team stats
 - `OVER` in `GameState`, the state the API now reports between `LIVE`/`CRIT` and `FINAL`
+- The drift check flags game states a response's types don't declare, and `--update` won't accept them
+
+### Changed
+
+- `gameState` on playoff series schedule games and on `GameMeta` is typed as `GameState` instead of `string`
 
 ### Fixed
 
