@@ -2,8 +2,19 @@
  * Common types used in Gamecenter API responses
  */
 
-/** The current state of the game. */
-export type GameState = 'OFF' | 'FUT' | 'LIVE' | 'PRE' | 'CRIT' | 'FINAL';
+/**
+ * The current state of the game, in the order a game moves through them:
+ * `FUT`, `PRE`, `LIVE`, `CRIT`, `OVER`, `FINAL`, `OFF`.
+ * See `NHL.GameStateEnum` for what each one means.
+ */
+export type GameState =
+   | 'FUT'
+   | 'PRE'
+   | 'LIVE'
+   | 'CRIT'
+   | 'OVER'
+   | 'FINAL'
+   | 'OFF';
 
 /** The current state of the game. */
 export type GameScheduleState = 'OK' | 'TBD' | 'CNCL' | (string & {});

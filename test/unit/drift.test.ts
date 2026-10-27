@@ -22,10 +22,12 @@ import {
    shapeOf,
 } from '../../scripts/drift/shape.ts';
 import {
+   allowedValues,
    DRAFT_POSITION_CODES,
+   GAME_STATES,
    POSITION_CODES,
-   positionsFor,
-   unknownPositions,
+   unknownValues,
+   unknownValuesFor,
 } from '../../scripts/drift/values.ts';
 
 describe('shapeOf', () => {
@@ -152,10 +154,10 @@ describe('mergeShapes', () => {
    });
 });
 
-describe('unknownPositions', () => {
+describe('unknownValues', () => {
    test('reports each undeclared code once per path', () => {
       expect(
-         unknownPositions(
+         unknownValues(
             {
                homeTeam: {
                   forwards: [
@@ -166,34 +168,73 @@ describe('unknownPositions', () => {
                },
                players: { 8478402: { positionCode: 'W' } },
             },
+            'position',
             POSITION_CODES,
          ),
       ).toEqual([
-         { path: '$.homeTeam.forwards[].position', value: 'LW' },
-         { path: '$.players.{id}.positionCode', value: 'W' },
+         {
+            kind: 'position',
+            path: '$.homeTeam.forwards[].position',
+            value: 'LW',
+         },
+         {
+            kind: 'position',
+            path: '$.players.{id}.positionCode',
+            value: 'W',
+         },
       ]);
    });
 
    test('accepts declared codes and ignores non-string positions', () => {
       expect(
-         unknownPositions(
+         unknownValues(
             {
                picks: [{ position: 'C/LW' }, { position: 'RW' }],
                position: { x: 1 },
             },
+            'position',
             DRAFT_POSITION_CODES,
          ),
       ).toEqual([]);
    });
 });
 
-describe('positionsFor', () => {
+describe('allowedValues', () => {
    test('picks the draft codes for draft checks', () => {
-      expect(positionsFor('gc.draft.picks 2024 1')).toBe(
+      expect(allowedValues('gc.draft.picks 2024 1', 'position')).toBe(
          DRAFT_POSITION_CODES,
       );
-      expect(positionsFor('gc.game.boxscore')).toBe(POSITION_CODES);
-      expect(positionsFor('stats.skater')).toBeUndefined();
+      expect(allowedValues('gc.game.boxscore', 'position')).toBe(
+         POSITION_CODES,
+      );
+      expect(allowedValues('stats.skater', 'position')).toBeUndefined();
+   });
+
+   test('checks game states across gc only', () => {
+      expect(allowedValues('gc.score', 'gameState')).toBe(GAME_STATES);
+      expect(allowedValues('stats.skater', 'gameState')).toBeUndefined();
+   });
+});
+
+describe('unknownValuesFor', () => {
+   test('reports undeclared positions and game states together', () => {
+      expect(
+         unknownValuesFor('gc.score', {
+            games: [
+               { gameState: 'OVER', position: 'C' },
+               { gameState: 'SUSP', position: 'X' },
+            ],
+         }),
+      ).toEqual([
+         { kind: 'position', path: '$.games[].position', value: 'X' },
+         { kind: 'gameState', path: '$.games[].gameState', value: 'SUSP' },
+      ]);
+   });
+
+   test('ignores game states outside gc', () => {
+      expect(
+         unknownValuesFor('stats.skater', { gameState: 'SUSP' }),
+      ).toEqual([]);
    });
 });
 
@@ -230,7 +271,7 @@ describe('mergeFindings', () => {
          ['gc.score', { status, volatile: options.volatile ?? false }],
       ]),
       baseline: { 'gc.score': options.shape ?? { $: 'object' } },
-      positionsFor: () => new Set(['C']),
+      allowedValues: () => new Set(['C', 'OVER']),
    });
 
    test('adds new findings and reports them as fresh', () => {
@@ -309,6 +350,23 @@ describe('mergeFindings', () => {
       };
       const { findings } = mergeFindings(
          [tracked(position)],
+         [],
+         judge('ok', { volatile: true }),
+         '2026-10-02',
+      );
+      expect(findings[0]?.resolved).toBe('2026-10-02');
+   });
+
+   test('resolves an unknown game state once the types declare it', () => {
+      const state: RunFinding = {
+         check: 'gc.score',
+         kind: 'gameState',
+         path: '$.games[].gameState',
+         value: 'OVER',
+         text: 'unknown game state `OVER` at `$.games[].gameState`',
+      };
+      const { findings } = mergeFindings(
+         [tracked(state)],
          [],
          judge('ok', { volatile: true }),
          '2026-10-02',

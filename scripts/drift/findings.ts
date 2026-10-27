@@ -9,12 +9,14 @@
  * happens not to see it.
  */
 import type { Shape } from './shape.ts';
+import type { ValueKind } from './values.ts';
 
 export type FindingKind =
    | 'added'
    | 'removed'
    | 'changed'
    | 'position'
+   | 'gameState'
    | 'unavailable'
    | 'unexpected'
    | 'no baseline';
@@ -23,11 +25,11 @@ export type FindingKind =
 export interface RunFinding {
    check: string;
    kind: FindingKind;
-   /** Field path, for shape and position findings */
+   /** Field path, for shape and value findings */
    path?: string;
    /** Live kinds at `path`, for added and changed fields */
    kinds?: string;
-   /** The undeclared code, for position findings */
+   /** The undeclared value, for value findings */
    value?: string;
    /** Markdown description */
    text: string;
@@ -52,7 +54,10 @@ export interface Judge {
    /** Every check in this run, by name */
    checks: ReadonlyMap<string, CheckRun>;
    baseline: Readonly<Record<string, Shape>>;
-   positionsFor: (check: string) => ReadonlySet<string> | undefined;
+   allowedValues: (
+      check: string,
+      kind: ValueKind,
+   ) => ReadonlySet<string> | undefined;
 }
 
 const ERRORS: FindingKind[] = ['unavailable', 'unexpected'];
@@ -73,7 +78,10 @@ function accepted(f: Finding, judge: Judge): boolean {
       case 'removed':
          return shape !== undefined && !((f.path ?? '') in shape);
       case 'position':
-         return judge.positionsFor(f.check)?.has(f.value ?? '') ?? true;
+      case 'gameState':
+         return (
+            judge.allowedValues(f.check, f.kind)?.has(f.value ?? '') ?? true
+         );
       case 'no baseline':
          return shape !== undefined;
       default:
