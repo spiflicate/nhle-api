@@ -1,0 +1,100 @@
+# Captures real NHL HTML report snapshots (all nine RTSS reports) for
+# offline fixtures. It only runs when started by hand (Actions → Report
+# capture → Run workflow); tests never touch the network.
+#
+# campaign: polls one game from now until its follow-ups are done
+#   (see scripts/report-capture/README.md for the limits). A job may run
+#   at most 6 hours, so the run is a chain of sequential windows that
+#   each resume from the state committed to the data branch. Windows left
+#   over once the campaign is done exit within a minute.
+# snapshot: captures every report of the listed games once.
+#
+# Evidence is committed to the `report-captures` branch after every poll
+# (durable) and uploaded as an artifact at the end of every window, even
+# a failed one (kept 90 days).
+#
+# To stop: cancel the run, or set the repository variable
+# REPORT_CAPTURE_DISABLED to `true` (checked when each window starts).
+name: Report capture
+
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: campaign (one game's lifecycle) or snapshot (one capture of each game)
+        type: choice
+        options: [campaign, snapshot]
+        default: campaign
+      games:
+        description: Game id for a campaign; comma-separated ids for a snapshot
+        required: true
+      label:
+        description: Snapshot label, e.g. final-ot
+        default: snapshot
+      budget:
+        description: Maximum NHL requests (campaign total, or this snapshot)
+        default: '800'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: report-capture-${{ inputs.mode }}-${{ inputs.games }}
+  cancel-in-progress: false
+
+env:
+  CAPTURE_BRANCH: report-captures
+
+jobs:
+  capture:
+    if: vars.REPORT_CAPTURE_DISABLED != 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        # One entry for a snapshot; seven ~5.5 hour windows for a campaign
+        window: ${{ fromJSON(inputs.mode == 'campaign' && '[1,2,3,4,5,6,7]' || '[1]') }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+
+      - name: Check out the capture branch
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if git ls-remote --exit-code --heads origin "$CAPTURE_BRANCH"; then
+            git fetch --depth=1 origin "$CAPTURE_BRANCH"
+            git worktree add -B "$CAPTURE_BRANCH" data FETCH_HEAD
+          else
+            git worktree add --orphan -b "$CAPTURE_BRANCH" data
+            cp scripts/report-capture/DATA_README.md data/README.md
+            git -C data add README.md
+            git -C data commit -q -m 'Start report capture evidence branch'
+            git -C data push -q origin "HEAD:refs/heads/$CAPTURE_BRANCH"
+          fi
+
+      - name: Capture
+        env:
+          MODE: ${{ inputs.mode }}
+          GAMES: ${{ inputs.games }}
+          LABEL: ${{ inputs.label }}
+          BUDGET: ${{ inputs.budget }}
+        run: |
+          if [ "$MODE" = campaign ]; then
+            until=$(date -u -d '+330 minutes' +%FT%TZ)
+            bun scripts/report-capture/collect.ts campaign --game "$GAMES" \
+              --data data --until "$until" --budget "$BUDGET" --commit
+          else
+            bun scripts/report-capture/collect.ts snapshot --games "$GAMES" \
+              --data data --label "$LABEL" --budget "$BUDGET" --commit
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: report-capture-${{ inputs.mode }}-${{ github.run_id }}-w${{ matrix.window }}
+          path: data/
+          retention-days: 90
+          if-no-files-found: warn
