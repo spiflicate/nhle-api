@@ -109,7 +109,7 @@ function main(): void {
          ? a.requestStart.localeCompare(b.requestStart)
          : a.gameId - b.gameId,
    );
-   writeFileSync(MANIFEST, `${JSON.stringify(manifest, null, 2)}\n`);
+   writeFileSync(MANIFEST, `${JSON.stringify(manifest, null, 3)}\n`);
    console.log(
       `${name}: ${stage} (${obs.kind} ${obs.status}, ${obs.bodyBytes} bytes)`,
    );

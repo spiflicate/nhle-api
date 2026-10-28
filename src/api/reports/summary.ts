@@ -81,6 +81,10 @@ export interface GameSummary {
    homeTeam: SummaryTeam;
    attendance: number | null;
    venue: string | null;
+   /**
+    * Status line as printed, e.g. 'Period 2 (09:49 Remaining)', 'End of
+    * Period 1' or 'Final'; empty until shortly before the puck drops.
+    */
    status: string;
    /** Includes the deciding SO entry if printed; not a reconstructed goal feed. */
    goals: SummaryGoal[];
@@ -95,6 +99,10 @@ export interface GameSummary {
       standbyReferees: string[];
       standbyLinespeople: string[];
    };
+   /**
+    * Empty until the stars are chosen. During the game the sheet prints
+    * placeholder rows with only a team, which are left out.
+    */
    stars: SummaryStar[];
 }
 
@@ -129,11 +137,34 @@ function pair<T>(
    };
 }
 
+/**
+ * Until attendance is printed, during the first period, the header line
+ * after the date holds the venue alone
+ */
+function venueAlone(info: string[]): string | null {
+   const date = info.findIndex((value) =>
+      /^\w+day,\s+\w+\s+\d{1,2},\s+\d{4}$/.test(value),
+   );
+   const next = date >= 0 ? info[date + 1] : undefined;
+   return next && !/^(?:Start|End|Game|Attendance)\b/.test(next)
+      ? next
+      : null;
+}
+
 export function parseGameSummary(
    gameId: number,
    html: string,
    scheduledStart?: Date,
 ): APIResult<GameSummary> {
+   // Every published sheet, before, during and after the game, ends with
+   // </html> and holds every section (empty until filled), so a missing
+   // close means the download was cut off rather than the game unfinished
+   if (!/<\/html>\s*$/i.test(html)) {
+      return {
+         success: false,
+         error: new ParseError('The Game Summary is truncated'),
+      };
+   }
    const times = parseGameTimes(html, scheduledStart);
    if (!times.success) return times;
    try {
@@ -327,14 +358,18 @@ export function parseGameSummary(
          /^1\.$/.test(rows(table)[0]?.[0] ?? ''),
       );
       const stars = starTable
-         ? rows(starTable).map((row) => {
+         ? rows(starTable).flatMap((row) => {
               width(row, 4);
-              return {
-                 rank: integer(row[0]?.replace('.', '')),
-                 team: row[1] ?? '',
-                 position: row[2] ?? '',
-                 player: row[3] ?? '',
-              };
+              // A placeholder, e.g. '1. BUF .', has no position or player
+              if (!row[2] && !/[A-Za-z0-9]/.test(row[3] ?? '')) return [];
+              return [
+                 {
+                    rank: integer(row[0]?.replace('.', '')),
+                    team: row[1] ?? '',
+                    position: row[2] ?? '',
+                    player: row[3] ?? '',
+                 },
+              ];
            })
          : [];
       return {
@@ -348,7 +383,7 @@ export function parseGameSummary(
             attendance: attendance
                ? integer(attendance[1]?.replaceAll(',', ''))
                : null,
-            venue: attendance?.[2] ?? null,
+            venue: attendance?.[2] ?? venueAlone(info),
             status: required(info[info.length - 1], 'status'),
             goals,
             penalties,
