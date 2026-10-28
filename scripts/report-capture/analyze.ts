@@ -38,7 +38,7 @@ const text = (html: string) =>
       .trim();
 
 /** The generation stamp in each report's footer, e.g. 2026-10-27-17.03.31 */
-const STAMP_RE = /\d{4}-\d{2}-\d{2}-\d{2}\.\d{2}\.\d{2}/g;
+const STAMP_RE = /\d{4}-\d{2}-\d{2}[- ]\d{2}\.\d{2}\.\d{2}/g;
 export const withoutStamp = (html: string) => html.replace(STAMP_RE, '');
 
 /** The status line every report prints at the end of its GameInfo table */
