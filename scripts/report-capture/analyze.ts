@@ -37,6 +37,10 @@ const text = (html: string) =>
       .replace(/\s+/g, ' ')
       .trim();
 
+/** The generation stamp in each report's footer, e.g. 2026-10-27-17.03.31 */
+const STAMP_RE = /\d{4}-\d{2}-\d{2}-\d{2}\.\d{2}\.\d{2}/g;
+export const withoutStamp = (html: string) => html.replace(STAMP_RE, '');
+
 /** The status line every report prints at the end of its GameInfo table */
 export function headerStatus(html: string): string | null {
    const info = /<table[^>]*id="GameInfo"[^>]*>([\s\S]*?)<\/table>/i.exec(
@@ -149,8 +153,12 @@ export function analyze(dataDir: string, gameId: number): string {
       let prev: string | null = null;
       for (const o of lines.filter((l) => l.kind === code)) {
          const html = o.status === 200 ? readBody(dataDir, o) : null;
-         const changed = o.sha256 !== prev ? '' : ' (same)';
-         prev = o.sha256;
+         // Reports are regenerated every few minutes with a new footer
+         // stamp, so compare bodies without it
+         const key = html ? withoutStamp(html) : o.sha256;
+         const changed =
+            key === prev ? ' (same)' : o.sha256 && prev ? ' (changed)' : '';
+         prev = key;
          const row = [
             o.poll,
             o.requestStart,
