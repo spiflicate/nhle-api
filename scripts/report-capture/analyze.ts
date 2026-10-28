@@ -54,7 +54,9 @@ export function headerStatus(html: string): string | null {
       .filter((v) => v !== '');
    const last = cells[cells.length - 1] ?? null;
    // Before play the last cell is the end/start line, not a status
-   return last && /^(Start|End|Attendance)\b/.test(last) ? '' : last;
+   return last && /^(?:(?:Start|End)\s*(?:\d|:)|Attendance\b)/.test(last)
+      ? ''
+      : last;
 }
 
 /** What the Game Summary sections held */
