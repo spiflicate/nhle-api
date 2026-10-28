@@ -162,9 +162,15 @@ accepted every one of the 39 published GS versions.
 
 ## Next day
 
-Pending: follow-up polls at final + 3, 9, 15 and 24 hours (08:24, 14:24 and
-20:24 UTC on 2026-10-28 and 05:24 UTC on 2026-10-29). This section is
-updated once they have run.
+Follow-up polls at final + 3, 9, 15 and 24 hours (08:24, 14:24 and 20:24
+UTC on 2026-10-28 and 05:24 UTC on 2026-10-29):
+
+| Follow-up | Result |
+|---|---|
+| +3 h (08:24) | All nine reports byte-identical to the 05:35:01 versions; `Last-Modified` unchanged |
+| +9 h (14:24) | pending |
+| +15 h (20:24) | pending |
+| +24 h (05:24) | pending |
 
 ## Coverage gaps
 
