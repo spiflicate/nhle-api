@@ -3,12 +3,14 @@
   "scheduledStartUTC": "2026-10-28T02:30:00Z",
   "matchup": "BUF @ SJS",
   "budget": 800,
-  "requests": 540,
-  "polls": 54,
+  "requests": 550,
+  "polls": 55,
   "firstPollAt": "2026-10-27T21:34:07.354Z",
-  "lastPollAt": "2026-10-28T06:24:08.070Z",
+  "lastPollAt": "2026-10-28T08:24:08.047Z",
   "finalObservedAt": "2026-10-28T05:24:08.027Z",
-  "followUpsDone": [],
+  "followUpsDone": [
+    3
+  ],
   "done": false,
   "doneReason": null,
   "statesSeen": {
