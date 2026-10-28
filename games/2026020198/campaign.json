@@ -3,16 +3,17 @@
   "scheduledStartUTC": "2026-10-28T02:30:00Z",
   "matchup": "BUF @ SJS",
   "budget": 800,
-  "requests": 320,
-  "polls": 32,
+  "requests": 330,
+  "polls": 33,
   "firstPollAt": "2026-10-27T21:34:07.354Z",
-  "lastPollAt": "2026-10-28T02:44:07.939Z",
+  "lastPollAt": "2026-10-28T02:54:07.951Z",
   "finalObservedAt": null,
   "followUpsDone": [],
   "done": false,
   "doneReason": null,
   "statesSeen": {
     "FUT": "2026-10-27T21:34:07.354Z",
-    "PRE": "2026-10-28T02:04:07.881Z"
+    "PRE": "2026-10-28T02:04:07.881Z",
+    "LIVE": "2026-10-28T02:54:07.951Z"
   }
 }
