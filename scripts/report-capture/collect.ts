@@ -36,7 +36,7 @@ import {
 import { join } from 'node:path';
 import { gunzipSync, gzipSync } from 'node:zlib';
 
-export const COLLECTOR_VERSION = '1';
+export const COLLECTOR_VERSION = '2';
 
 export const REPORT_CODES = [
    'GS',
@@ -77,6 +77,8 @@ export const DEFAULTS = {
    afterFinalMinutes: 60,
    /** Single polls this many hours after the first final observation */
    followUpHours: [3, 9, 15, 24],
+   /** A follow-up later than this is recorded as missed */
+   followUpGraceMinutes: 60,
 } as const;
 
 export function reportUrl(gameId: number, code: ReportCode): string {
@@ -143,6 +145,8 @@ export interface CampaignState {
    /** First context response with gameState FINAL or OFF */
    finalObservedAt: string | null;
    followUpsDone: number[];
+   /** Follow-ups not polled within an hour of when they were due */
+   followUpsMissed?: number[];
    done: boolean;
    doneReason: string | null;
    /** Highest gameState seen, and when each was first seen */
@@ -424,15 +428,30 @@ export async function campaign(
          // Follow-ups are anchored to the first final observation, or to
          // the end of the window when final was never seen
          const anchor = final ?? continuousEnd;
+         // A follow-up more than an hour late is recorded as missed, not
+         // polled under a label it doesn't match
+         state.followUpsMissed ??= [];
+         const missed = state.followUpsMissed;
+         for (const h of DEFAULTS.followUpHours) {
+            const late = Date.now() - (anchor + h * 3_600_000);
+            if (
+               late > ms(DEFAULTS.followUpGraceMinutes) &&
+               !state.followUpsDone.includes(h) &&
+               !missed.includes(h)
+            ) {
+               missed.push(h);
+            }
+         }
          const pending = DEFAULTS.followUpHours.filter(
-            (h) => !state.followUpsDone.includes(h),
+            (h) => !state.followUpsDone.includes(h) && !missed.includes(h),
          );
          if (pending.length === 0) {
             state.done = true;
-            state.doneReason =
+            state.doneReason = `${
                final === null
-                  ? 'window ended without a final state; follow-ups done'
-                  : 'final observed; follow-ups done';
+                  ? 'window ended without a final state'
+                  : 'final observed'
+            }; follow-ups done${missed.length ? ` (missed: ${missed.join(', ')} h)` : ''}`;
             break;
          }
          if (state.requests + PER_POLL > state.budget) {
@@ -448,7 +467,14 @@ export async function campaign(
       if (nextAt > Date.now()) {
          const wait = nextAt - Date.now();
          if (Date.now() + wait >= until.getTime()) {
+            // Idle out this window so the next one, which starts when
+            // this ends, picks the poll up
             saveState(opts.data, state);
+            persist(opts, `capture ${gameId} waiting for ${phase} poll`);
+            console.log(
+               `next ${phase} poll at ${new Date(nextAt).toISOString()}, after this window; idling until ${until.toISOString()}`,
+            );
+            await sleep(Math.max(0, until.getTime() - Date.now()));
             break;
          }
          console.log(

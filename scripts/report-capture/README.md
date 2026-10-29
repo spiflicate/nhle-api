@@ -60,6 +60,10 @@ The same can be done through the API
   `max-parallel: 1`), each a window of about 5.5 hours (the hosted-runner
   job limit is 6 hours). The collector sleeps between polls inside a job,
   so polls land on time.
+- A window whose next poll falls after its end idles until the end, so
+  the next window takes the poll. (Collector version 1 exited such a window
+  at once instead, which spent all seven windows by the morning after the
+  first campaign and lost its 9 and 15 hour follow-ups.)
 - State is persisted, not derived: each job reads
   `games/<id>/campaign.json` from the evidence branch and resumes. Windows
   left over after the campaign is done exit within a minute.
@@ -75,7 +79,7 @@ Defined in `DEFAULTS` in `collect.ts`:
 | Requests per poll | 10: the gamecenter boxscore (context) and the nine reports |
 | Poll interval (continuous window) | 10 minutes |
 | Continuous window | from the first poll until 60 minutes after the context first shows `FINAL`/`OFF`, and never longer than 12 hours |
-| Follow-up polls | 3, 9, 15 and 24 hours after final was first observed (after the window's end if final never was) |
+| Follow-up polls | 3, 9, 15 and 24 hours after final was first observed (after the window's end if final never was); one more than 60 minutes late is recorded in `followUpsMissed` instead of being polled |
 | Request budget | 800 per campaign, retries and context requests included; 60 are held back for follow-ups |
 | Retries | one retry, 5 s later, after a network error, timeout (30 s) or 5xx; a 404 is never retried |
 | Pace | 0.5 s between requests within a poll |
