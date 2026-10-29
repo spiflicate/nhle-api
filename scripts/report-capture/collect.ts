@@ -338,7 +338,9 @@ function persist(opts: Options, message: string): void {
       console.error(commit.stderr || commit.stdout);
    }
    const branch = process.env.CAPTURE_BRANCH ?? 'report-captures';
-   for (let i = 0; i < 4; i++) {
+   // Several campaigns can push to the branch at once; a commit left
+   // unpushed here goes out with the next poll's push
+   for (let i = 0; i < 8; i++) {
       if (
          git('push', '-q', 'origin', `HEAD:refs/heads/${branch}`).status ===
          0
@@ -346,9 +348,9 @@ function persist(opts: Options, message: string): void {
          return;
       }
       git('pull', '-q', '--rebase', 'origin', branch);
-      spawnSync('sleep', [String(2 ** (i + 1))]);
+      spawnSync('sleep', [String(1 + Math.random() * 2 ** Math.min(i, 4))]);
    }
-   console.error('push failed; evidence stays in the job artifact');
+   console.error('push failed; retried with the next poll');
 }
 
 function loadState(
