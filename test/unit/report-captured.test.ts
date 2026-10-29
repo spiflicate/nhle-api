@@ -297,6 +297,36 @@ describe('Game Summary lifecycle (2026020198)', () => {
       }).toEqual(first);
    });
 
+   it('reflects the next-day revision', () => {
+      const settled = gs('09-settled-final');
+      const nextDay = gs('10-next-day');
+      const shots = (s: GameSummary) =>
+         s.byPeriod.away.map((p) => [p.period, p.shots]);
+      expect(shots(settled)).toEqual([
+         ['1', 16],
+         ['2', 14],
+         ['3', 10],
+         ['TOT', 40],
+      ]);
+      expect(shots(nextDay)).toEqual([
+         ['1', 17],
+         ['2', 14],
+         ['3', 10],
+         ['TOT', 41],
+      ]);
+      expect(
+         nextDay.goalies.home
+            .find((g) => g.sweaterNumber === 30)
+            ?.goalsShotsAgainst.at(-1),
+      ).toEqual({ period: 'TOT', goals: 1, shots: 40 });
+      // Nothing else changed
+      expect({
+         ...nextDay,
+         byPeriod: settled.byPeriod,
+         goalies: settled.goalies,
+      }).toEqual(settled);
+   });
+
    it('rejects a sheet cut off before </html> but still reads its times', () => {
       const html = bytes('GS020198-09-settled-final.HTM').toString('utf8');
       const cut = html.slice(0, html.indexOf('3 STARS'));

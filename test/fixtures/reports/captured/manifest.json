@@ -927,6 +927,38 @@
             "run": "https://github.com/spiflicate/nhle-api/actions/runs/40587827813"
          },
          "note": "Last version of the night (Last-Modified 05:35:01Z): one team's period-3 shots corrected 8 to 7 (total 24 to 23) versus the first final"
+      },
+      {
+         "file": "GS020198-10-next-day.HTM",
+         "stage": "next day",
+         "gameId": 2026020198,
+         "report": "GS",
+         "observation": "2026020198-GS-20261029T054737Z-a1",
+         "url": "https://www.nhl.com/scores/htmlreports/20262027/GS020198.HTM",
+         "requestStart": "2026-10-29T05:47:37.954Z",
+         "responseReceived": "2026-10-29T05:47:38.032Z",
+         "status": 200,
+         "bodyBytes": 31124,
+         "sha256": "fd556a90d08948171a5edb7e8e9b02113927424e01620fe4b56d67f9be0e74b8",
+         "lastModified": "Wed, 28 Oct 2026 20:04:25 GMT",
+         "contentType": "text/html; charset=UTF-8",
+         "context": {
+            "observation": "2026020198-context-20261029T054737Z-a1",
+            "gameState": "OFF",
+            "gameScheduleState": "OK",
+            "startTimeUTC": "2026-10-28T02:30:00Z",
+            "period": 3,
+            "periodType": "REG",
+            "clock": "00:00",
+            "inIntermission": false,
+            "running": false
+         },
+         "collector": {
+            "version": "2",
+            "commit": "5c9696e65013cb0cd3c179a44e17f972ae29b9b8",
+            "run": "https://github.com/spiflicate/nhle-api/actions/runs/40825408845"
+         },
+         "note": "Final+24h follow-up (taken 23 min late after a collector fix; the 9 h and 15 h follow-ups were missed). Regenerated 2026-10-28 20:04:25Z, about 14.7 h after final: one BUF period-1 shot added (16 to 17, total 40 to 41); PL reclassified a Dahlin MISS as a SHOT"
       }
    ]
 }

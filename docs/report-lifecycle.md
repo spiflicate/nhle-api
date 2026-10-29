@@ -9,7 +9,7 @@ Every response is on the
 [`report-captures`](https://github.com/spiflicate/nhle-api/tree/report-captures)
 branch (`games/2026020198/`), and the curated subset is in
 `test/fixtures/reports/captured/` (provenance in its `manifest.json`).
-Next-day follow-up polls run 3, 9, 15 and 24 hours after final; see
+Follow-up polls 3 and 24 hours after final caught a next-day revision; see
 [Next day](#next-day).
 
 One game establishes examples, not NHL guarantees. **Observations** are
@@ -32,7 +32,9 @@ reported in the same poll. `Last-Modified` is the report's own header.
 | 43–44 | 04:34–04:44 | +124 | LIVE, intermission | `End of Period 2` |
 | 48 | 05:24 | +174 | **FINAL** | `Final`, `End 10:21 PDT`, real stars (`Last-Modified` 05:23:55) |
 | 49 | 05:34 | +184 | FINAL | **Correction**: SJS period-3 shots 8 → 7, total 24 → 23 (`Last-Modified` 05:33:19) |
-| 50–54 | 05:44–06:24 | +194 to +234 | FINAL, OFF from 05:54 | Only a trailing newline added (`Last-Modified` 05:35:01); unchanged after |
+| 50–54 | 05:44–06:24 | +194 to +234 | FINAL, OFF from 05:54 | Only a trailing newline added (`Last-Modified` 05:35:01) |
+| 55 | 08:24 | final + 3 h | OFF | Unchanged |
+| 56 | 05:47 next day | final + 24 h | OFF | **Next-day revision**: BUF period-1 shots 16 → 17 (`Last-Modified` 20:04:25 on Oct 28) |
 
 ## Observations
 
@@ -162,15 +164,52 @@ accepted every one of the 39 published GS versions.
 
 ## Next day
 
-Follow-up polls at final + 3, 9, 15 and 24 hours (08:24, 14:24 and 20:24
-UTC on 2026-10-28 and 05:24 UTC on 2026-10-29):
-
 | Follow-up | Result |
 |---|---|
-| +3 h (08:24) | All nine reports byte-identical to the 05:35:01 versions; `Last-Modified` unchanged |
-| +9 h (14:24) | pending |
-| +15 h (20:24) | pending |
-| +24 h (05:24) | pending |
+| +3 h (08:24, Oct 28) | All nine reports byte-identical to the 05:35:01 versions |
+| +9 h, +15 h | **Missed** (collector bug, see below) |
+| +24 h (05:47, Oct 29; due 05:24) | All nine **regenerated at 20:04:25 UTC on Oct 28**, about 14 h 40 min after final (1:04 pm at the venue) |
+
+**Observations** (05:35:01 versions against the next-day versions):
+
+- **GS**: one shot added to BUF's period 1 (16 → 17, total 40 → 41), and to
+  SJS goalie #30's shots against (1-39 → 1-40). Nothing else in the sheet
+  changed. Fixture: `GS020198-10-next-day.HTM`.
+- **PL**: the cause. A Dahlin wrist shot from 54 ft was reclassified from
+  `MISS` (wide left) to `SHOT` (on goal), and a hit's recipient was changed
+  from BUF #6 Benson to BUF #8 Zellweger.
+- **ES** and **SS** carry the same extra shot. **FS, FC, RO, TV, TH**
+  changed only in their footer stamps.
+- `Last-Modified` was the same for all nine reports, so the whole set is
+  regenerated, not just the changed reports.
+
+So this game had **two rounds of corrections**: shots within 10 minutes of
+the final, and an event reclassification the next afternoon. Because the
++9 h and +15 h polls were missed, when the next-day versions first became
+available is known only from `Last-Modified` (20:04:25 UTC), not from an
+observed transition. Whether reports change again later than 24 hours is
+not known.
+
+**Hypothesis**: next-day revisions come from a scoring review that
+regenerates every report at once; a cached "final" sheet can be stale until
+then.
+
+## Collection incidents
+
+- Collector version 1 exited a workflow window as soon as its next poll
+  fell after the window's end, instead of idling until the end. After the
+  +3 h follow-up, the five remaining windows started and stopped within a
+  minute, and the +9 h and +15 h follow-ups never ran. Version 2 idles out
+  the window and records a follow-up more than an hour late as missed
+  (`followUpsMissed` in `campaign.json`); the campaign was resumed with it
+  ([run 40825408845](https://github.com/spiflicate/nhle-api/actions/runs/40825408845))
+  for the +24 h poll.
+- While testing that fix, one poll (10 requests, 05:46:45 UTC on Oct 29) was
+  made from a development session into a scratch directory. It is not part
+  of the evidence.
+- NHL requests: 560 for the campaign (56 polls × 10, no retries needed),
+  40 for the historical snapshot, plus 46 schedule/boxscore discovery
+  requests to pick the historical games and the 10 test requests above.
 
 ## Coverage gaps
 
@@ -187,7 +226,9 @@ UTC on 2026-10-28 and 05:24 UTC on 2026-10-29):
 - **When attendance appears is not established.** It appeared late in
   period 1 here, but the saved Oct 26 overtime sheet (`GS020187-live-0416`)
   still had none. One game can't tell what decides it.
-- **Next-day revisions**: pending (see above).
+- **Next-day revisions: one example**, with its time known only from
+  `Last-Modified`; the +9 h and +15 h observations are missing. No evidence
+  beyond 24 hours.
 - **Exact wire bytes**: not captured. Bodies are stored after HTTP
   content-encoding was removed (UTF-8, as declared).
 - **Parsers for ES, PL, FS, FC, RO, SS** don't exist yet. Their lifecycle
