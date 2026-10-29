@@ -12,8 +12,8 @@
     3,
     24
   ],
-  "done": false,
-  "doneReason": null,
+  "done": true,
+  "doneReason": "final observed; follow-ups done (missed: 9, 15 h)",
   "statesSeen": {
     "FUT": "2026-10-27T21:34:07.354Z",
     "PRE": "2026-10-28T02:04:07.881Z",
