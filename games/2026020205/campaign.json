@@ -3,14 +3,15 @@
   "scheduledStartUTC": "2026-10-29T23:00:00Z",
   "matchup": "UTA @ PIT",
   "budget": 800,
-  "requests": 210,
-  "polls": 21,
+  "requests": 220,
+  "polls": 22,
   "firstPollAt": "2026-10-30T00:00:03.635Z",
-  "lastPollAt": "2026-10-30T11:00:03.805Z",
+  "lastPollAt": "2026-10-30T17:00:03.817Z",
   "finalObservedAt": "2026-10-30T02:00:03.803Z",
   "followUpsDone": [
     3,
-    9
+    9,
+    15
   ],
   "done": false,
   "doneReason": null,
