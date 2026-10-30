@@ -3,13 +3,14 @@
   "scheduledStartUTC": "2026-10-30T00:00:00Z",
   "matchup": "MTL @ DAL",
   "budget": 800,
-  "requests": 240,
-  "polls": 24,
+  "requests": 250,
+  "polls": 25,
   "firstPollAt": "2026-10-30T00:00:13.382Z",
-  "lastPollAt": "2026-10-30T05:40:13.621Z",
+  "lastPollAt": "2026-10-30T11:40:13.634Z",
   "finalObservedAt": "2026-10-30T02:40:13.610Z",
   "followUpsDone": [
-    3
+    3,
+    9
   ],
   "done": false,
   "doneReason": null,
