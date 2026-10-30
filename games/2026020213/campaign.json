@@ -3,11 +3,11 @@
   "scheduledStartUTC": "2026-10-30T02:00:00Z",
   "matchup": "VAN @ SJS",
   "budget": 800,
-  "requests": 270,
-  "polls": 27,
+  "requests": 280,
+  "polls": 28,
   "firstPollAt": "2026-10-30T00:00:19.884Z",
-  "lastPollAt": "2026-10-30T04:20:20.109Z",
-  "finalObservedAt": null,
+  "lastPollAt": "2026-10-30T04:30:20.112Z",
+  "finalObservedAt": "2026-10-30T04:30:20.112Z",
   "followUpsDone": [],
   "done": false,
   "doneReason": null,
@@ -15,6 +15,7 @@
     "FUT": "2026-10-30T00:00:19.884Z",
     "PRE": "2026-10-30T01:30:19.990Z",
     "LIVE": "2026-10-30T02:10:20.042Z",
-    "CRIT": "2026-10-30T04:20:20.109Z"
+    "CRIT": "2026-10-30T04:20:20.109Z",
+    "FINAL": "2026-10-30T04:30:20.112Z"
   }
 }
