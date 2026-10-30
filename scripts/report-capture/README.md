@@ -81,7 +81,7 @@ Defined in `DEFAULTS` in `collect.ts`:
 | Continuous window | from the first poll until 60 minutes after the context first shows `FINAL`/`OFF`, and never longer than 12 hours |
 | Follow-up polls | 3, 9, 15 and 24 hours after final was first observed (after the window's end if final never was); one more than 60 minutes late is recorded in `followUpsMissed` instead of being polled |
 | Request budget | 800 per campaign, retries and context requests included; 60 are held back for follow-ups |
-| Retries | one retry, 5 s later, after a network error, timeout (30 s) or 5xx; a 404 is never retried |
+| Retries | one retry, 5 s later, after a network error, timeout (30 s), 5xx, or (from collector version 3) a 200 report body that doesn't end with `</html>` (`truncated: true`); a 404 is never retried |
 | Pace | 0.5 s between requests within a poll |
 
 The original Game-Summary-only brief capped a campaign at 180 requests.

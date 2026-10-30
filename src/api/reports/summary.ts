@@ -27,6 +27,21 @@ export interface SummaryGoal {
    assists: string[];
    onIce: { away: number[]; home: number[] };
 }
+/**
+ * A penalty shot that didn't score, printed in the scoring table as
+ * 'Unsuccessful Penalty Shot' with no goal number
+ */
+export interface SummaryMissedPenaltyShot {
+   period: string;
+   time: string;
+   /** e.g. 'EV-PS' */
+   strength: string;
+   team: string;
+   /** Printed sweater and name, e.g. '91 F.NAZAR' */
+   shooter: string;
+   /** The sweaters printed in the on-ice columns: shooter and goalie */
+   onIce: { away: number[]; home: number[] };
+}
 export interface SummaryPenalty {
    number: number;
    period: string;
@@ -88,6 +103,7 @@ export interface GameSummary {
    status: string;
    /** Includes the deciding SO entry if printed; not a reconstructed goal feed. */
    goals: SummaryGoal[];
+   missedPenaltyShots: SummaryMissedPenaltyShot[];
    penalties: { away: SummaryPenalty[]; home: SummaryPenalty[] };
    byPeriod: { away: SummaryPeriod[]; home: SummaryPeriod[] };
    powerPlays: { away: SummaryStrength[]; home: SummaryStrength[] };
@@ -198,7 +214,8 @@ export function parseGameSummary(
       };
       const info = rows(byId('GameInfo')).flat();
       const attendance = info
-         .map((value) => /^Attendance\s+([\d,]+)\s+at\s+(.+)$/.exec(value))
+         // The number is left out until it is announced: 'Attendance  at X'
+         .map((value) => /^Attendance\s+([\d,]*)\s*at\s+(.+)$/.exec(value))
          .find(Boolean);
       const scoring = required(
          matching(['G', 'Per', 'Time', 'Str', 'Team'])[0],
@@ -206,22 +223,41 @@ export function parseGameSummary(
       );
       const sweaters = (value: string) =>
          value ? value.split(',').map((part) => integer(part.trim())) : [];
-      const goals = dataRows(scoring).map((row) => {
-         width(row, 10);
+      const scoringRows = dataRows(scoring);
+      const missed = (row: string[]) =>
+         row[0] === '-' && row.includes('Unsuccessful Penalty Shot');
+      const missedPenaltyShots = scoringRows.filter(missed).map((row) => {
+         width(row, 9);
          return {
-            number: integer(row[0]),
             period: row[1] ?? '',
             time: row[2] ?? '',
             strength: row[3] ?? '',
             team: row[4] ?? '',
-            scorer: row[5] ?? '',
-            assists: row.slice(6, 8).filter(Boolean),
+            shooter: row[5] ?? '',
             onIce: {
-               away: sweaters(row[8] ?? ''),
-               home: sweaters(row[9] ?? ''),
+               away: sweaters(row[7] ?? ''),
+               home: sweaters(row[8] ?? ''),
             },
          };
       });
+      const goals = scoringRows
+         .filter((row) => !missed(row))
+         .map((row) => {
+            width(row, 10);
+            return {
+               number: integer(row[0]),
+               period: row[1] ?? '',
+               time: row[2] ?? '',
+               strength: row[3] ?? '',
+               team: row[4] ?? '',
+               scorer: row[5] ?? '',
+               assists: row.slice(6, 8).filter(Boolean),
+               onIce: {
+                  away: sweaters(row[8] ?? ''),
+                  home: sweaters(row[9] ?? ''),
+               },
+            };
+         });
       const penalties = pair(
          matching(['#', 'Per', 'Time', 'Player', 'PIM', 'Penalty']),
          (table) =>
@@ -380,12 +416,13 @@ export function parseGameSummary(
             times: times.data,
             awayTeam: team('Visitor'),
             homeTeam: team('Home'),
-            attendance: attendance
-               ? integer(attendance[1]?.replaceAll(',', ''))
+            attendance: attendance?.[1]
+               ? integer(attendance[1].replaceAll(',', ''))
                : null,
             venue: attendance?.[2] ?? venueAlone(info),
             status: required(info[info.length - 1], 'status'),
             goals,
+            missedPenaltyShots,
             penalties,
             byPeriod,
             powerPlays: pair(matching(['5v4', '5v3', '4v3']), strength),

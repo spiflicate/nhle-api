@@ -27,6 +27,7 @@ export type {
    GameSummary,
    SummaryGoal,
    SummaryGoalie,
+   SummaryMissedPenaltyShot,
    SummaryPenalty,
    SummaryPeriod,
    SummaryStar,

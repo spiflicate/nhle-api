@@ -959,6 +959,326 @@
             "run": "https://github.com/spiflicate/nhle-api/actions/runs/40825408845"
          },
          "note": "Final+24h follow-up (taken 23 min late after a collector fix; the 9 h and 15 h follow-ups were missed). Regenerated 2026-10-28 20:04:25Z, about 14.7 h after final: one BUF period-1 shot added (16 to 17, total 40 to 41); PL reclassified a Dahlin MISS as a SHOT"
+      },
+      {
+         "file": "GS020203-final-missed-penalty-shot.HTM",
+         "stage": "final",
+         "gameId": 2026020203,
+         "report": "GS",
+         "observation": "2026020203-GS-20261030T031009Z-a1",
+         "url": "https://www.nhl.com/scores/htmlreports/20262027/GS020203.HTM",
+         "requestStart": "2026-10-30T03:10:09.065Z",
+         "responseReceived": "2026-10-30T03:10:09.239Z",
+         "status": 200,
+         "bodyBytes": 34390,
+         "sha256": "585c808a15a344d654e08f4aad9157f497eba89e3d3a268558daf00f57fd73df",
+         "lastModified": "Fri, 30 Oct 2026 02:34:46 GMT",
+         "contentType": "text/html; charset=UTF-8",
+         "context": {
+            "observation": "2026020203-context-20261030T031008Z-a1",
+            "gameState": "OFF",
+            "gameScheduleState": "OK",
+            "startTimeUTC": "2026-10-29T23:30:00Z",
+            "period": 3,
+            "periodType": "REG",
+            "clock": "00:00",
+            "inIntermission": false,
+            "running": false
+         },
+         "collector": {
+            "version": "2",
+            "commit": "f9ededc71dc90194700725a525ae95eca2e38d65",
+            "run": "https://github.com/spiflicate/nhle-api/actions/runs/40976815443"
+         },
+         "note": "CHI @ DET: the scoring table prints an unsuccessful penalty shot (Nazar, period 2 11:18, EV-PS) as a row with '-' for the number and 'Unsuccessful Penalty Shot' across the assist columns"
+      },
+      {
+         "file": "GS020205-live-ot-duplicate-goal.HTM",
+         "stage": "live overtime",
+         "gameId": 2026020205,
+         "report": "GS",
+         "observation": "2026020205-GS-20261030T015004Z-a1",
+         "url": "https://www.nhl.com/scores/htmlreports/20262027/GS020205.HTM",
+         "requestStart": "2026-10-30T01:50:04.391Z",
+         "responseReceived": "2026-10-30T01:50:04.570Z",
+         "status": 200,
+         "bodyBytes": 35894,
+         "sha256": "f1e038156cbe6c3c0f329daa595388942a4bcdaab6059ca74705e2b7c1e94e8b",
+         "lastModified": "Fri, 30 Oct 2026 01:49:43 GMT",
+         "contentType": "text/html; charset=UTF-8",
+         "context": {
+            "observation": "2026020205-context-20261030T015003Z-a1",
+            "gameState": "CRIT",
+            "gameScheduleState": "OK",
+            "startTimeUTC": "2026-10-29T23:00:00Z",
+            "period": 4,
+            "periodType": "OT",
+            "clock": "01:33",
+            "inIntermission": false,
+            "running": false
+         },
+         "collector": {
+            "version": "2",
+            "commit": "f9ededc71dc90194700725a525ae95eca2e38d65",
+            "run": "https://github.com/spiflicate/nhle-api/actions/runs/40976810138"
+         },
+         "note": "UTA @ PIT, context CRIT OT 01:33: status 'OT (01:33 Remaining)' lists two OT goals (3:24 Hayton, 3:27 Sergachev) and a 5-3 score; the first final keeps only Sergachev's"
+      },
+      {
+         "file": "GS020205-first-final-ot.HTM",
+         "stage": "immediately final, overtime",
+         "gameId": 2026020205,
+         "report": "GS",
+         "observation": "2026020205-GS-20261030T020004Z-a1",
+         "url": "https://www.nhl.com/scores/htmlreports/20262027/GS020205.HTM",
+         "requestStart": "2026-10-30T02:00:04.381Z",
+         "responseReceived": "2026-10-30T02:00:04.607Z",
+         "status": 200,
+         "bodyBytes": 35557,
+         "sha256": "92b88b1dcf7dc682c162d8af0c981923dbb34fc45193cc3e26315f96ba304717",
+         "lastModified": "Fri, 30 Oct 2026 01:59:42 GMT",
+         "contentType": "text/html; charset=UTF-8",
+         "context": {
+            "observation": "2026020205-context-20261030T020003Z-a1",
+            "gameState": "FINAL",
+            "gameScheduleState": "OK",
+            "startTimeUTC": "2026-10-29T23:00:00Z",
+            "period": 4,
+            "periodType": "OT",
+            "clock": "01:33",
+            "inIntermission": false,
+            "running": false
+         },
+         "collector": {
+            "version": "2",
+            "commit": "f9ededc71dc90194700725a525ae95eca2e38d65",
+            "run": "https://github.com/spiflicate/nhle-api/actions/runs/40976810138"
+         },
+         "note": "First Final 10 minutes later: 4-3, one OT goal (goal 5 had already moved from 19:37 to 19:35 between the last period-3 sheet and the live OT sheet)"
+      },
+      {
+         "file": "GS020210-live-ot.HTM",
+         "stage": "live overtime",
+         "gameId": 2026020210,
+         "report": "GS",
+         "observation": "2026020210-GS-20261030T024016Z-a1",
+         "url": "https://www.nhl.com/scores/htmlreports/20262027/GS020210.HTM",
+         "requestStart": "2026-10-30T02:40:16.385Z",
+         "responseReceived": "2026-10-30T02:40:16.481Z",
+         "status": 200,
+         "bodyBytes": 35100,
+         "sha256": "3d2b4fb78368b5917583c8ed3b7c46d374939d89b200f211148f6a5fcfe5bb41",
+         "lastModified": "Fri, 30 Oct 2026 02:40:07 GMT",
+         "contentType": "text/html; charset=UTF-8",
+         "context": {
+            "observation": "2026020210-context-20261030T024015Z-a1",
+            "gameState": "CRIT",
+            "gameScheduleState": "OK",
+            "startTimeUTC": "2026-10-30T00:00:00Z",
+            "period": 4,
+            "periodType": "OT",
+            "clock": "04:43",
+            "inIntermission": false,
+            "running": false
+         },
+         "collector": {
+            "version": "2",
+            "commit": "f9ededc71dc90194700725a525ae95eca2e38d65",
+            "run": "https://github.com/spiflicate/nhle-api/actions/runs/40976829831"
+         },
+         "note": "NYI @ MIN: status 'OT (04:43 Remaining)', OT row in period totals with no OT goal yet"
+      },
+      {
+         "file": "GS020210-final-no-attendance.HTM",
+         "stage": "immediately final, overtime",
+         "gameId": 2026020210,
+         "report": "GS",
+         "observation": "2026020210-GS-20261030T025016Z-a1",
+         "url": "https://www.nhl.com/scores/htmlreports/20262027/GS020210.HTM",
+         "requestStart": "2026-10-30T02:50:16.414Z",
+         "responseReceived": "2026-10-30T02:50:16.518Z",
+         "status": 200,
+         "bodyBytes": 35998,
+         "sha256": "3546d5605ee84e02928a79ed812f24a80138ea6cf8369c67b055aa9fec5d4c56",
+         "lastModified": "Fri, 30 Oct 2026 02:49:55 GMT",
+         "contentType": "text/html; charset=UTF-8",
+         "context": {
+            "observation": "2026020210-context-20261030T025015Z-a1",
+            "gameState": "FINAL",
+            "gameScheduleState": "OK",
+            "startTimeUTC": "2026-10-30T00:00:00Z",
+            "period": 4,
+            "periodType": "OT",
+            "clock": "04:27",
+            "inIntermission": false,
+            "running": false
+         },
+         "collector": {
+            "version": "2",
+            "commit": "f9ededc71dc90194700725a525ae95eca2e38d65",
+            "run": "https://github.com/spiflicate/nhle-api/actions/runs/40976829831"
+         },
+         "note": "First Final (OT winner printed) before attendance appeared"
+      },
+      {
+         "file": "GS020210-final-attendance.HTM",
+         "stage": "final, attendance added",
+         "gameId": 2026020210,
+         "report": "GS",
+         "observation": "2026020210-GS-20261030T030016Z-a1",
+         "url": "https://www.nhl.com/scores/htmlreports/20262027/GS020210.HTM",
+         "requestStart": "2026-10-30T03:00:16.482Z",
+         "responseReceived": "2026-10-30T03:00:16.637Z",
+         "status": 200,
+         "bodyBytes": 36004,
+         "sha256": "f99e8170911dc599f833b1f86ca7080c5ce97f7eb591aba4a8aa91f4ec5ac03d",
+         "lastModified": "Fri, 30 Oct 2026 03:00:10 GMT",
+         "contentType": "text/html; charset=UTF-8",
+         "context": {
+            "observation": "2026020210-context-20261030T030015Z-a1",
+            "gameState": "FINAL",
+            "gameScheduleState": "OK",
+            "startTimeUTC": "2026-10-30T00:00:00Z",
+            "period": 4,
+            "periodType": "OT",
+            "clock": "04:27",
+            "inIntermission": false,
+            "running": false
+         },
+         "collector": {
+            "version": "2",
+            "commit": "f9ededc71dc90194700725a525ae95eca2e38d65",
+            "run": "https://github.com/spiflicate/nhle-api/actions/runs/40976829831"
+         },
+         "note": "Next version: attendance 18,155 added after the final"
+      },
+      {
+         "file": "GS020213-not-published.HTM",
+         "stage": "before publication",
+         "gameId": 2026020213,
+         "report": "GS",
+         "observation": "2026020213-GS-20261030T003020Z-a1",
+         "url": "https://www.nhl.com/scores/htmlreports/20262027/GS020213.HTM",
+         "requestStart": "2026-10-30T00:30:20.499Z",
+         "responseReceived": "2026-10-30T00:30:20.574Z",
+         "status": 404,
+         "bodyBytes": 196,
+         "sha256": "80c3fe2ae1062abf56456f52518bd670f9ec3917b7f85e152b347ac6b6faf880",
+         "lastModified": null,
+         "contentType": "text/html; charset=iso-8859-1",
+         "context": {
+            "observation": "2026020213-context-20261030T003019Z-a1",
+            "gameState": "FUT",
+            "gameScheduleState": "OK",
+            "startTimeUTC": "2026-10-30T02:00:00Z",
+            "period": null,
+            "periodType": null,
+            "clock": null,
+            "inIntermission": null,
+            "running": null
+         },
+         "collector": {
+            "version": "2",
+            "commit": "f9ededc71dc90194700725a525ae95eca2e38d65",
+            "run": "https://github.com/spiflicate/nhle-api/actions/runs/40976842444"
+         },
+         "note": "VAN @ SJS still 404 at T-90m"
+      },
+      {
+         "file": "GS020213-published.HTM",
+         "stage": "published, pregame",
+         "gameId": 2026020213,
+         "report": "GS",
+         "observation": "2026020213-GS-20261030T004020Z-a1",
+         "url": "https://www.nhl.com/scores/htmlreports/20262027/GS020213.HTM",
+         "requestStart": "2026-10-30T00:40:20.462Z",
+         "responseReceived": "2026-10-30T00:40:20.548Z",
+         "status": 200,
+         "bodyBytes": 20361,
+         "sha256": "d780dd9fa6513f70b3ca75eaec118f7b6de562ae849515d67f6a27978fb9a5dd",
+         "lastModified": "Fri, 30 Oct 2026 00:39:20 GMT",
+         "contentType": "text/html; charset=UTF-8",
+         "context": {
+            "observation": "2026020213-context-20261030T004019Z-a1",
+            "gameState": "FUT",
+            "gameScheduleState": "OK",
+            "startTimeUTC": "2026-10-30T02:00:00Z",
+            "period": null,
+            "periodType": null,
+            "clock": null,
+            "inIntermission": null,
+            "running": null
+         },
+         "collector": {
+            "version": "2",
+            "commit": "f9ededc71dc90194700725a525ae95eca2e38d65",
+            "run": "https://github.com/spiflicate/nhle-api/actions/runs/40976842444"
+         },
+         "note": "First published version, Last-Modified 00:39:20Z (T-81m)"
+      },
+      {
+         "file": "ES020213-empty-200.HTM",
+         "stage": "truncated response",
+         "gameId": 2026020213,
+         "report": "ES",
+         "observation": "2026020213-ES-20261030T014021Z-a1",
+         "url": "https://www.nhl.com/scores/htmlreports/20262027/ES020213.HTM",
+         "requestStart": "2026-10-30T01:40:21.218Z",
+         "responseReceived": "2026-10-30T01:40:21.297Z",
+         "status": 200,
+         "bodyBytes": 0,
+         "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+         "lastModified": "Fri, 30 Oct 2026 01:40:21 GMT",
+         "contentType": "text/html; charset=UTF-8",
+         "context": {
+            "observation": "2026020213-context-20261030T014020Z-a1",
+            "gameState": "PRE",
+            "gameScheduleState": "OK",
+            "startTimeUTC": "2026-10-30T02:00:00Z",
+            "period": null,
+            "periodType": null,
+            "clock": null,
+            "inIntermission": null,
+            "running": null
+         },
+         "collector": {
+            "version": "2",
+            "commit": "f9ededc71dc90194700725a525ae95eca2e38d65",
+            "run": "https://github.com/spiflicate/nhle-api/actions/runs/40976842444"
+         },
+         "note": "HTTP 200 with an empty body, requested at 01:40:20 while the report was being rewritten (Last-Modified 01:40:21); the next poll was complete"
+      },
+      {
+         "file": "FS020213-truncated-200.HTM",
+         "stage": "truncated response",
+         "gameId": 2026020213,
+         "report": "FS",
+         "observation": "2026020213-FS-20261030T035022Z-a1",
+         "url": "https://www.nhl.com/scores/htmlreports/20262027/FS020213.HTM",
+         "requestStart": "2026-10-30T03:50:22.347Z",
+         "responseReceived": "2026-10-30T03:50:22.394Z",
+         "status": 200,
+         "bodyBytes": 32525,
+         "sha256": "c49fc1f57fe4bd416d5a3741f54d1c2d95e3fd7275de926213cea10c6ac353c7",
+         "lastModified": "Fri, 30 Oct 2026 03:49:21 GMT",
+         "contentType": "text/html; charset=UTF-8",
+         "context": {
+            "observation": "2026020213-context-20261030T035020Z-a1",
+            "gameState": "LIVE",
+            "gameScheduleState": "OK",
+            "startTimeUTC": "2026-10-30T02:00:00Z",
+            "period": 3,
+            "periodType": "REG",
+            "clock": "19:06",
+            "inIntermission": false,
+            "running": true
+         },
+         "collector": {
+            "version": "2",
+            "commit": "f9ededc71dc90194700725a525ae95eca2e38d65",
+            "run": "https://github.com/spiflicate/nhle-api/actions/runs/40976842444"
+         },
+         "note": "HTTP 200 cut off mid-row (32,525 bytes, no closing tags), requested 61 s after Last-Modified 03:49:21; the next poll was complete"
       }
    ]
 }

@@ -7589,6 +7589,7 @@
       "$.homeTeam": "object",
       "$.homeTeam.name": "string",
       "$.homeTeam.score": "number",
+      "$.missedPenaltyShots": "array",
       "$.officials": "object",
       "$.officials.linespeople": "array",
       "$.officials.linespeople[]": "string",

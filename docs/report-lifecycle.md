@@ -1,4 +1,4 @@
-# HTML report lifecycle: what one game showed
+# HTML report lifecycle: what the captured games showed
 
 Evidence: game **2026020198**, BUF @ SJS, scheduled 2026-10-28 02:30 UTC
 (7:30 pm PDT), decided **in regulation** (2-0). All nine reports and the
@@ -10,9 +10,12 @@ Every response is on the
 branch (`games/2026020198/`), and the curated subset is in
 `test/fixtures/reports/captured/` (provenance in its `manifest.json`).
 Follow-up polls 3 and 24 hours after final caught a next-day revision; see
-[Next day](#next-day).
+[Next day](#next-day-buf--sjs).
 
-One game establishes examples, not NHL guarantees. **Observations** are
+A second night added all 11 games of 2026-10-29, including three
+overtime games; see [Second night](#second-night-11-games-2026-102930).
+
+Twelve games establish examples, not NHL guarantees. **Observations** are
 what the captured responses show; **hypotheses** are labelled as such.
 
 ## Timeline
@@ -140,13 +143,25 @@ report is complete HTML with empty sections; none of the captured sheets
 was missing a table. Two final sheets lacked the trailing newline after
 `</html>`, so the check must allow for that.
 
-**Conclusion applied**: `parseGameSummary` now rejects a sheet that does
-not end in `</html>` as truncated, instead of returning, for example, an
-empty `stars` list for a sheet cut off before its last table. `gameTimes`
-needs only the header and still reads such a sheet.
+**Second night (11 games)**: 9 of 2,934 successful responses were **truncated
+200s**: chunked, no `Content-Length`, cut off mid-tag, one of them empty
+(0 bytes). Eight came from VAN @ SJS (ES, FS, SS, TV ×3, TH) and one from
+NYI @ MIN (RO); none was a GS. In each case the next poll got the complete
+report. So truncation is not hypothetical: the server occasionally serves a
+cut-off report with status 200. Fixtures: `ES020213-empty-200.HTM`,
+`FS020213-truncated-200.HTM`.
 
-**Hypothesis**: the same holds for the other eight reports; their parsers
-should apply the same check. Not tested beyond these 43 polls.
+**Hypothesis**: they are reads that overlap a regeneration. The empty ES
+was requested at 01:40:20 with `Last-Modified` 01:40:21, but the cut-off FS
+was requested 61 s after its `Last-Modified`, so this is not proven.
+
+**Conclusion applied**: `parseGameSummary` rejects a sheet that does not
+end in `</html>` as truncated, instead of returning, for example, an empty
+`stars` list for a sheet cut off before its last table. `gameTimes` needs
+only the header and still reads such a sheet. A caller that gets the
+truncation error should re-request the report. Parsers for the other
+eight reports need the same check. From collector version 3, the
+collector itself retries a truncated body once.
 
 ## Parser changes made from this evidence
 
@@ -159,10 +174,64 @@ In `src/api/reports/summary.ts` (from PR #42):
 3. `venue` is read when the header prints it without attendance. Before, it
    was `null` until attendance appeared.
 
-No change was needed for pregame or live sheets otherwise: the parser
-accepted every one of the 39 published GS versions.
+4. `venue` is also read from `Attendance  at <venue>`, the attendance line
+   without a number, which NYI @ MIN printed until after its final.
+5. Unsuccessful penalty shots go to a new `missedPenaltyShots` list. The
+   scoring table prints them as `- | 2 | 11:18 | EV-PS | CHI | 91 F.NAZAR |
+   Unsuccessful Penalty Shot | 91 | 36` (no goal number, one cell across
+   the assist columns, shooter and goalie as on-ice), which failed the whole
+   parse: 15 of CHI @ DET's sheets, from the shot on.
 
-## Next day
+With these, the parser accepts all 326 published GS versions captured
+across the 12 games.
+
+## Second night: 11 games (2026-10-29/30)
+
+All 11 games of 2026-10-29 were captured
+(runs [40976807011](https://github.com/spiflicate/nhle-api/actions/runs/40976807011)
+and the ten after it, one per game, started at 23:59 UTC). Four were already
+live and four in `PRE`, so only the three 02:00 UTC games were caught before
+puck drop. Every campaign saw the final; no network errors or 5xx.
+
+| Game | Result | First poll | Notes |
+|---|---|---|---|
+| 2026020203 CHI @ DET | 1-4 | live P1 | unsuccessful penalty shot |
+| 2026020204 WPG @ TBL | REG | live P1 | |
+| 2026020205 UTA @ PIT | 4-3 **OT** | live P1 | live OT sheet with two OT goals |
+| 2026020206 CBJ @ CAR | REG | live P1 | |
+| 2026020207 BOS @ STL | REG | PRE | |
+| 2026020208 WSH @ NSH | REG | PRE | |
+| 2026020209 MTL @ DAL | REG | PRE | |
+| 2026020210 NYI @ MIN | 4-3 **OT** | PRE | live OT; attendance only after final |
+| 2026020211 BUF @ ANA | REG | FUT, published | |
+| 2026020212 OTT @ LAK | 5-6 **OT** | FUT, published | OT shorter than a poll interval |
+| 2026020213 VAN @ SJS | REG | FUT, **404** | published T−81 min |
+
+**Observations**
+
+- **Publication time varies.** VAN @ SJS was 404 until 00:39:20 UTC, 81
+  minutes before its start; BUF @ ANA and OTT @ LAK, at the same start
+  time, were already published at T−2 h; BUF @ SJS (night one) published at
+  T−147 min. Each game's 10-minute regeneration keeps the second of its
+  first publication (VAN @ SJS at :x9:20).
+- **Overtime live**: the status reads `OT (mm:ss Remaining)`, the period
+  table gains an `OT` row (zeros until a shot) between `3` and `TOT`, and
+  OT goals print with period `OT`.
+- **A live sheet can contradict itself.** UTA @ PIT's sheet at
+  `OT (01:33 Remaining)` listed two overtime goals, Hayton at 3:24 and
+  Sergachev at 3:27, with a 5-3 score. Overtime ends at the first goal; the
+  first final, 10 minutes later, kept only Sergachev's and read 4-3. The
+  parser reports what is printed and does not try to enforce the rules.
+- **Attendance can come after the final.** NYI @ MIN printed
+  `Attendance  at Grand Casino Arena`, with no number, through its first
+  `Final`; 18,155 appeared in the next version.
+- No shootout this night; OTT @ LAK's overtime ended between two polls, so
+  only its `End of Period 3` and `Final` sheets exist.
+
+**Next day**: follow-ups at final + 3, 9, 15 and 24 hours are running; the
+wrap-up on 2026-10-31 adds them here.
+
+## Next day (BUF @ SJS)
 
 | Follow-up | Result |
 |---|---|
@@ -214,18 +283,18 @@ then.
 ## Coverage gaps
 
 - **Regulation lifecycle: covered** by this game.
-- **Overtime and shootout lifecycles: missing.** Final OT and SO sheets
-  are covered by historical captures (`GS020674-final-ot`,
-  `GS020673-final-so`) and the earlier live captures already in
-  `test/fixtures/reports/` (`GS020187-live-*`, OT and shootout status
-  lines), but not a same-game OT/SO lifecycle with provenance.
+- **Overtime lifecycle: covered** for the live OT and first final (UTA @
+  PIT, NYI @ MIN), but neither of those games was captured before puck
+  drop.
+- **Shootout lifecycle: missing.** Covered by a historical final
+  (`GS020673-final-so`) and the earlier live captures in
+  `test/fixtures/reports/` (`GS020187-live-*`), not by a captured lifecycle.
 - **Playoff lifecycle: missing.** Multi-overtime is covered only by a
   historical final (`GS030157-final-2ot`).
 - **Late start or postponement, neutral-site and Global Series games:
   missing.**
-- **When attendance appears is not established.** It appeared late in
-  period 1 here, but the saved Oct 26 overtime sheet (`GS020187-live-0416`)
-  still had none. One game can't tell what decides it.
+- **When attendance appears is not established.** Late in period 1 for
+  BUF @ SJS, after the final for NYI @ MIN.
 - **Next-day revisions: one example**, with its time known only from
   `Last-Modified`; the +9 h and +15 h observations are missing. No evidence
   beyond 24 hours.

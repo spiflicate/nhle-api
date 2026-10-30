@@ -344,6 +344,105 @@ describe('Game Summary lifecycle (2026020198)', () => {
    });
 });
 
+/** Sheets from the 11 games captured on 2026-10-29/30 */
+describe('Game Summary sheets from a full night of games', () => {
+   it('reads a live overtime sheet', () => {
+      const s = summary('GS020210-live-ot.HTM');
+      expect(s.status).toBe('OT (04:43 Remaining)');
+      expect(s.times.end).toBeNull();
+      expect(
+         s.byPeriod.away.map((p) => [p.period, p.goals, p.shots]),
+      ).toEqual([
+         ['1', 1, 10],
+         ['2', 1, 6],
+         ['3', 1, 8],
+         ['OT', 0, 1],
+         ['TOT', 3, 25],
+      ]);
+   });
+
+   it('reports a live sheet as printed, even when it contradicts itself', () => {
+      // Two overtime goals and a 5-3 score: the live sheet printed both
+      // entries, and the final 10 minutes later kept only the second
+      const live = summary('GS020205-live-ot-duplicate-goal.HTM');
+      expect([live.awayTeam.score, live.homeTeam.score]).toEqual([5, 3]);
+      expect(
+         live.goals
+            .filter((g) => g.period === 'OT')
+            .map((g) => [g.time, g.scorer]),
+      ).toEqual([
+         ['3:24', '27 B.HAYTON(2)'],
+         ['3:27', '98 M.SERGACHEV(4)'],
+      ]);
+      const final = summary('GS020205-first-final-ot.HTM');
+      expect([final.awayTeam.score, final.homeTeam.score]).toEqual([4, 3]);
+      expect(
+         final.goals
+            .filter((g) => g.period === 'OT')
+            .map((g) => [g.time, g.scorer]),
+      ).toEqual([['3:27', '98 M.SERGACHEV(4)']]);
+   });
+
+   it('reads the venue when attendance is printed without a number', () => {
+      // 'Attendance  at Grand Casino Arena', even after the final
+      const s = summary('GS020210-final-no-attendance.HTM');
+      expect(s.status).toBe('Final');
+      expect(s.attendance).toBeNull();
+      expect(s.venue).toBe('Grand Casino Arena');
+      expect(summary('GS020210-final-attendance.HTM').attendance).toBe(
+         18155,
+      );
+   });
+
+   it('keeps an unsuccessful penalty shot out of the goals', () => {
+      const s = summary('GS020203-final-missed-penalty-shot.HTM');
+      expect([s.awayTeam.score, s.homeTeam.score]).toEqual([1, 4]);
+      expect(s.goals.map((g) => g.number)).toEqual([1, 2, 3, 4, 5]);
+      expect(s.missedPenaltyShots).toEqual([
+         {
+            period: '2',
+            time: '11:18',
+            strength: 'EV-PS',
+            team: 'CHI',
+            shooter: '91 F.NAZAR',
+            onIce: { away: [91], home: [36] },
+         },
+      ]);
+      expect(
+         summary('GS020198-09-settled-final.HTM').missedPenaltyShots,
+      ).toEqual([]);
+   });
+
+   it('reads a sheet published later than the one before', () => {
+      // VAN @ SJS: 404 at T-90m, published at T-81m
+      expect(entry('GS020213-not-published.HTM').status).toBe(404);
+      const s = summary('GS020213-published.HTM');
+      expect(s.status).toBe('');
+      expect(s.times.start).toBeNull();
+      expect(s.venue).toBe('SAP Center at San Jose');
+   });
+
+   it.each([
+      ['ES020213-empty-200.HTM', 0],
+      ['FS020213-truncated-200.HTM', 32525],
+   ])('has a real truncated 200 response, %s', (file, size) => {
+      const body = bytes(file);
+      expect(entry(file).status).toBe(200);
+      expect(body.byteLength).toBe(size);
+      expect(/<\/html>\s*$/i.test(body.toString('utf8'))).toBeFalse();
+   });
+
+   it('rejects an empty 200 Game Summary as truncated', () => {
+      const result = parseGameSummary(
+         2026020213,
+         bytes('ES020213-empty-200.HTM').toString('utf8'),
+      );
+      expect(result.success).toBeFalse();
+      if (!result.success)
+         expect(result.error.message).toContain('truncated');
+   });
+});
+
 describe('reports on captured responses', () => {
    const originalFetch = globalThis.fetch;
    const originalLevel = config.logLevel;

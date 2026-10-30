@@ -36,7 +36,7 @@ import {
 import { join } from 'node:path';
 import { gunzipSync, gzipSync } from 'node:zlib';
 
-export const COLLECTOR_VERSION = '2';
+export const COLLECTOR_VERSION = '3';
 
 export const REPORT_CODES = [
    'GS',
@@ -115,6 +115,11 @@ export interface Observation {
    body: string | null;
    /** Network error, timeout or body read failure */
    error: string | null;
+   /**
+    * A 200 report body that doesn't end with </html>: reports are
+    * sometimes served cut off, even empty, while being regenerated
+    */
+   truncated?: boolean;
    collector: {
       version: string;
       commit: string | null;
@@ -239,6 +244,11 @@ async function observe(
          obs.bodyBytes = bytes.byteLength;
          obs.sha256 = storeBody(opts.data, bytes);
          obs.body = `bodies/${obs.sha256.slice(0, 2)}/${obs.sha256}.gz`;
+         if (kind !== 'context' && res.status === 200) {
+            obs.truncated = !/<\/html>\s*$/i.test(
+               new TextDecoder().decode(bytes.subarray(-64)),
+            );
+         }
          if (kind === 'context' && res.ok) {
             const context = readContext(bytes);
             if (context) obs.context = context;
@@ -255,7 +265,9 @@ async function observe(
          `${JSON.stringify(obs)}\n`,
       );
       const retryable =
-         obs.error !== null || (obs.status !== null && obs.status >= 500);
+         obs.error !== null ||
+         (obs.status !== null && obs.status >= 500) ||
+         obs.truncated === true;
       if (!retryable) break;
       if (attempt <= RETRIES) await sleep(RETRY_DELAY_MS);
    }
