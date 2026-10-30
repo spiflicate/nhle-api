@@ -3,16 +3,17 @@
   "scheduledStartUTC": "2026-10-29T23:00:00Z",
   "matchup": "CBJ @ CAR",
   "budget": 800,
-  "requests": 110,
-  "polls": 11,
+  "requests": 120,
+  "polls": 12,
   "firstPollAt": "2026-10-30T00:00:05.173Z",
-  "lastPollAt": "2026-10-30T01:40:05.285Z",
-  "finalObservedAt": null,
+  "lastPollAt": "2026-10-30T01:50:05.301Z",
+  "finalObservedAt": "2026-10-30T01:50:05.301Z",
   "followUpsDone": [],
   "done": false,
   "doneReason": null,
   "statesSeen": {
     "LIVE": "2026-10-30T00:00:05.173Z",
-    "CRIT": "2026-10-30T01:40:05.285Z"
+    "CRIT": "2026-10-30T01:40:05.285Z",
+    "FINAL": "2026-10-30T01:50:05.301Z"
   }
 }
