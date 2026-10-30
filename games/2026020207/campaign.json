@@ -3,16 +3,17 @@
   "scheduledStartUTC": "2026-10-30T00:00:00Z",
   "matchup": "BOS @ STL",
   "budget": 800,
-  "requests": 160,
-  "polls": 16,
+  "requests": 170,
+  "polls": 17,
   "firstPollAt": "2026-10-30T00:00:10.326Z",
-  "lastPollAt": "2026-10-30T02:30:10.424Z",
+  "lastPollAt": "2026-10-30T02:40:10.426Z",
   "finalObservedAt": null,
   "followUpsDone": [],
   "done": false,
   "doneReason": null,
   "statesSeen": {
     "PRE": "2026-10-30T00:00:10.326Z",
-    "LIVE": "2026-10-30T00:10:10.336Z"
+    "LIVE": "2026-10-30T00:10:10.336Z",
+    "CRIT": "2026-10-30T02:40:10.426Z"
   }
 }
