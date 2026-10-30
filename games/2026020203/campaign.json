@@ -3,16 +3,17 @@
   "scheduledStartUTC": "2026-10-29T23:30:00Z",
   "matchup": "CHI @ DET",
   "budget": 800,
-  "requests": 130,
-  "polls": 13,
+  "requests": 140,
+  "polls": 14,
   "firstPollAt": "2026-10-30T00:00:08.338Z",
-  "lastPollAt": "2026-10-30T02:00:08.442Z",
-  "finalObservedAt": null,
+  "lastPollAt": "2026-10-30T02:10:08.465Z",
+  "finalObservedAt": "2026-10-30T02:10:08.465Z",
   "followUpsDone": [],
   "done": false,
   "doneReason": null,
   "statesSeen": {
     "LIVE": "2026-10-30T00:00:08.338Z",
-    "CRIT": "2026-10-30T02:00:08.442Z"
+    "CRIT": "2026-10-30T02:00:08.442Z",
+    "FINAL": "2026-10-30T02:10:08.465Z"
   }
 }
