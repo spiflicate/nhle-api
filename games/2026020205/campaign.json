@@ -1,0 +1,17 @@
+{
+  "gameId": 2026020205,
+  "scheduledStartUTC": "2026-10-29T23:00:00Z",
+  "matchup": "UTA @ PIT",
+  "budget": 800,
+  "requests": 10,
+  "polls": 1,
+  "firstPollAt": "2026-10-30T00:00:03.635Z",
+  "lastPollAt": "2026-10-30T00:00:03.635Z",
+  "finalObservedAt": null,
+  "followUpsDone": [],
+  "done": false,
+  "doneReason": null,
+  "statesSeen": {
+    "LIVE": "2026-10-30T00:00:03.635Z"
+  }
+}
