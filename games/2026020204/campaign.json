@@ -3,16 +3,17 @@
   "scheduledStartUTC": "2026-10-29T23:00:00Z",
   "matchup": "WPG @ TBL",
   "budget": 800,
-  "requests": 110,
-  "polls": 11,
+  "requests": 120,
+  "polls": 12,
   "firstPollAt": "2026-10-30T00:00:04.991Z",
-  "lastPollAt": "2026-10-30T01:40:05.106Z",
-  "finalObservedAt": null,
+  "lastPollAt": "2026-10-30T01:50:05.129Z",
+  "finalObservedAt": "2026-10-30T01:50:05.129Z",
   "followUpsDone": [],
   "done": false,
   "doneReason": null,
   "statesSeen": {
     "LIVE": "2026-10-30T00:00:04.991Z",
-    "CRIT": "2026-10-30T01:40:05.106Z"
+    "CRIT": "2026-10-30T01:40:05.106Z",
+    "FINAL": "2026-10-30T01:50:05.129Z"
   }
 }
