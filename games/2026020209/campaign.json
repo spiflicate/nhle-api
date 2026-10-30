@@ -3,17 +3,18 @@
   "scheduledStartUTC": "2026-10-30T00:00:00Z",
   "matchup": "MTL @ DAL",
   "budget": 800,
-  "requests": 160,
-  "polls": 16,
+  "requests": 170,
+  "polls": 17,
   "firstPollAt": "2026-10-30T00:00:13.382Z",
-  "lastPollAt": "2026-10-30T02:30:13.597Z",
-  "finalObservedAt": null,
+  "lastPollAt": "2026-10-30T02:40:13.610Z",
+  "finalObservedAt": "2026-10-30T02:40:13.610Z",
   "followUpsDone": [],
   "done": false,
   "doneReason": null,
   "statesSeen": {
     "PRE": "2026-10-30T00:00:13.382Z",
     "LIVE": "2026-10-30T00:10:13.403Z",
-    "CRIT": "2026-10-30T02:30:13.597Z"
+    "CRIT": "2026-10-30T02:30:13.597Z",
+    "FINAL": "2026-10-30T02:40:13.610Z"
   }
 }
