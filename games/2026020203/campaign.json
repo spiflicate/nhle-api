@@ -1,0 +1,17 @@
+{
+  "gameId": 2026020203,
+  "scheduledStartUTC": "2026-10-29T23:30:00Z",
+  "matchup": "CHI @ DET",
+  "budget": 800,
+  "requests": 10,
+  "polls": 1,
+  "firstPollAt": "2026-10-30T00:00:08.338Z",
+  "lastPollAt": "2026-10-30T00:00:08.338Z",
+  "finalObservedAt": null,
+  "followUpsDone": [],
+  "done": false,
+  "doneReason": null,
+  "statesSeen": {
+    "LIVE": "2026-10-30T00:00:08.338Z"
+  }
+}
