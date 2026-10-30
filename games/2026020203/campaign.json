@@ -3,14 +3,15 @@
   "scheduledStartUTC": "2026-10-29T23:30:00Z",
   "matchup": "CHI @ DET",
   "budget": 800,
-  "requests": 220,
-  "polls": 22,
+  "requests": 230,
+  "polls": 23,
   "firstPollAt": "2026-10-30T00:00:08.338Z",
-  "lastPollAt": "2026-10-30T11:10:08.491Z",
+  "lastPollAt": "2026-10-30T17:10:08.472Z",
   "finalObservedAt": "2026-10-30T02:10:08.465Z",
   "followUpsDone": [
     3,
-    9
+    9,
+    15
   ],
   "done": false,
   "doneReason": null,
