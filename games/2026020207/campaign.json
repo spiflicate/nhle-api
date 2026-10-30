@@ -3,14 +3,15 @@
   "scheduledStartUTC": "2026-10-30T00:00:00Z",
   "matchup": "BOS @ STL",
   "budget": 800,
-  "requests": 260,
-  "polls": 26,
+  "requests": 270,
+  "polls": 27,
   "firstPollAt": "2026-10-30T00:00:10.326Z",
-  "lastPollAt": "2026-10-30T11:50:10.459Z",
+  "lastPollAt": "2026-10-30T17:50:10.437Z",
   "finalObservedAt": "2026-10-30T02:50:10.435Z",
   "followUpsDone": [
     3,
-    9
+    9,
+    15
   ],
   "done": false,
   "doneReason": null,
