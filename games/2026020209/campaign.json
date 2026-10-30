@@ -1,0 +1,17 @@
+{
+  "gameId": 2026020209,
+  "scheduledStartUTC": "2026-10-30T00:00:00Z",
+  "matchup": "MTL @ DAL",
+  "budget": 800,
+  "requests": 10,
+  "polls": 1,
+  "firstPollAt": "2026-10-30T00:00:13.382Z",
+  "lastPollAt": "2026-10-30T00:00:13.382Z",
+  "finalObservedAt": null,
+  "followUpsDone": [],
+  "done": false,
+  "doneReason": null,
+  "statesSeen": {
+    "PRE": "2026-10-30T00:00:13.382Z"
+  }
+}
