@@ -3,13 +3,14 @@
   "scheduledStartUTC": "2026-10-29T23:00:00Z",
   "matchup": "WPG @ TBL",
   "budget": 800,
-  "requests": 190,
-  "polls": 19,
+  "requests": 200,
+  "polls": 20,
   "firstPollAt": "2026-10-30T00:00:04.991Z",
-  "lastPollAt": "2026-10-30T04:50:05.149Z",
+  "lastPollAt": "2026-10-30T10:50:05.145Z",
   "finalObservedAt": "2026-10-30T01:50:05.129Z",
   "followUpsDone": [
-    3
+    3,
+    9
   ],
   "done": false,
   "doneReason": null,
