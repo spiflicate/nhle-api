@@ -3,16 +3,17 @@
   "scheduledStartUTC": "2026-10-30T00:00:00Z",
   "matchup": "WSH @ NSH",
   "budget": 800,
-  "requests": 170,
-  "polls": 17,
+  "requests": 180,
+  "polls": 18,
   "firstPollAt": "2026-10-30T00:00:12.348Z",
-  "lastPollAt": "2026-10-30T02:40:12.561Z",
+  "lastPollAt": "2026-10-30T02:50:12.568Z",
   "finalObservedAt": null,
   "followUpsDone": [],
   "done": false,
   "doneReason": null,
   "statesSeen": {
     "PRE": "2026-10-30T00:00:12.348Z",
-    "LIVE": "2026-10-30T00:30:12.377Z"
+    "LIVE": "2026-10-30T00:30:12.377Z",
+    "CRIT": "2026-10-30T02:50:12.568Z"
   }
 }
