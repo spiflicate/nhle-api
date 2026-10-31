@@ -3,15 +3,16 @@
   "scheduledStartUTC": "2026-10-29T23:00:00Z",
   "matchup": "CBJ @ CAR",
   "budget": 800,
-  "requests": 210,
-  "polls": 21,
+  "requests": 220,
+  "polls": 22,
   "firstPollAt": "2026-10-30T00:00:05.173Z",
-  "lastPollAt": "2026-10-30T16:50:05.312Z",
+  "lastPollAt": "2026-10-31T01:50:05.309Z",
   "finalObservedAt": "2026-10-30T01:50:05.301Z",
   "followUpsDone": [
     3,
     9,
-    15
+    15,
+    24
   ],
   "done": false,
   "doneReason": null,
