@@ -3,15 +3,16 @@
   "scheduledStartUTC": "2026-10-30T02:00:00Z",
   "matchup": "VAN @ SJS",
   "budget": 800,
-  "requests": 360,
-  "polls": 36,
+  "requests": 370,
+  "polls": 37,
   "firstPollAt": "2026-10-30T00:00:19.884Z",
-  "lastPollAt": "2026-10-30T19:30:20.117Z",
+  "lastPollAt": "2026-10-31T04:30:20.124Z",
   "finalObservedAt": "2026-10-30T04:30:20.112Z",
   "followUpsDone": [
     3,
     9,
-    15
+    15,
+    24
   ],
   "done": false,
   "doneReason": null,
