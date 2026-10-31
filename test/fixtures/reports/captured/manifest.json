@@ -993,6 +993,70 @@
          "note": "CHI @ DET: the scoring table prints an unsuccessful penalty shot (Nazar, period 2 11:18, EV-PS) as a row with '-' for the number and 'Unsuccessful Penalty Shot' across the assist columns"
       },
       {
+         "file": "GS020204-first-final.HTM",
+         "stage": "immediately final",
+         "gameId": 2026020204,
+         "report": "GS",
+         "observation": "2026020204-GS-20261030T015005Z-a1",
+         "url": "https://www.nhl.com/scores/htmlreports/20262027/GS020204.HTM",
+         "requestStart": "2026-10-30T01:50:05.730Z",
+         "responseReceived": "2026-10-30T01:50:05.977Z",
+         "status": 200,
+         "bodyBytes": 38798,
+         "sha256": "a552066abcd02bbaf5b8bbbec8bb3051fa244fd1b2a8e82c1a0bad423a62f424",
+         "lastModified": "Fri, 30 Oct 2026 01:49:50 GMT",
+         "contentType": "text/html; charset=UTF-8",
+         "context": {
+            "observation": "2026020204-context-20261030T015005Z-a1",
+            "gameState": "FINAL",
+            "gameScheduleState": "OK",
+            "startTimeUTC": "2026-10-29T23:00:00Z",
+            "period": 3,
+            "periodType": "REG",
+            "clock": "00:00",
+            "inIntermission": false,
+            "running": false
+         },
+         "collector": {
+            "version": "2",
+            "commit": "f9ededc71dc90194700725a525ae95eca2e38d65",
+            "run": "https://github.com/spiflicate/nhle-api/actions/runs/40976807011"
+         },
+         "note": "WPG @ TBL first Final: end time printed, but no attendance, no stars and no goalie decisions yet"
+      },
+      {
+         "file": "GS020204-settled-final.HTM",
+         "stage": "settled final",
+         "gameId": 2026020204,
+         "report": "GS",
+         "observation": "2026020204-GS-20261030T025005Z-a1",
+         "url": "https://www.nhl.com/scores/htmlreports/20262027/GS020204.HTM",
+         "requestStart": "2026-10-30T02:50:05.792Z",
+         "responseReceived": "2026-10-30T02:50:06.026Z",
+         "status": 200,
+         "bodyBytes": 39333,
+         "sha256": "8b5b7077f1b9b3b37ebbbdac740157bd771917f38421633513abf80cc80165ce",
+         "lastModified": "Fri, 30 Oct 2026 02:09:13 GMT",
+         "contentType": "text/html; charset=UTF-8",
+         "context": {
+            "observation": "2026020204-context-20261030T025005Z-a1",
+            "gameState": "OFF",
+            "gameScheduleState": "OK",
+            "startTimeUTC": "2026-10-29T23:00:00Z",
+            "period": 3,
+            "periodType": "REG",
+            "clock": "00:00",
+            "inIntermission": false,
+            "running": false
+         },
+         "collector": {
+            "version": "2",
+            "commit": "f9ededc71dc90194700725a525ae95eca2e38d65",
+            "run": "https://github.com/spiflicate/nhle-api/actions/runs/40976807011"
+         },
+         "note": "Last version of the night: attendance 19,092, three stars, (W)/(L) after the goalies' names, goalie TOI moved by 2 seconds"
+      },
+      {
          "file": "GS020205-live-ot-duplicate-goal.HTM",
          "stage": "live overtime",
          "gameId": 2026020205,
@@ -1055,6 +1119,70 @@
             "run": "https://github.com/spiflicate/nhle-api/actions/runs/40976810138"
          },
          "note": "First Final 10 minutes later: 4-3, one OT goal (goal 5 had already moved from 19:37 to 19:35 between the last period-3 sheet and the live OT sheet)"
+      },
+      {
+         "file": "GS020205-settled-final-ot.HTM",
+         "stage": "settled final, overtime",
+         "gameId": 2026020205,
+         "report": "GS",
+         "observation": "2026020205-GS-20261030T030004Z-a1",
+         "url": "https://www.nhl.com/scores/htmlreports/20262027/GS020205.HTM",
+         "requestStart": "2026-10-30T03:00:04.512Z",
+         "responseReceived": "2026-10-30T03:00:04.790Z",
+         "status": 200,
+         "bodyBytes": 35563,
+         "sha256": "c270b8910fd326a18a9ed6f71a71bb887c61bf6259b1795a6f6bedfef5ac7640",
+         "lastModified": "Fri, 30 Oct 2026 02:46:19 GMT",
+         "contentType": "text/html; charset=UTF-8",
+         "context": {
+            "observation": "2026020205-context-20261030T030003Z-a1",
+            "gameState": "OFF",
+            "gameScheduleState": "OK",
+            "startTimeUTC": "2026-10-29T23:00:00Z",
+            "period": 4,
+            "periodType": "OT",
+            "clock": "01:33",
+            "inIntermission": false,
+            "running": false
+         },
+         "collector": {
+            "version": "2",
+            "commit": "f9ededc71dc90194700725a525ae95eca2e38d65",
+            "run": "https://github.com/spiflicate/nhle-api/actions/runs/40976810138"
+         },
+         "note": "UTA @ PIT an hour after the final: goal 4 'unassisted' became assisted by 6 K.KORCZAK; goalie TOI moved by a second"
+      },
+      {
+         "file": "GS020205-next-day-ot.HTM",
+         "stage": "next day, overtime",
+         "gameId": 2026020205,
+         "report": "GS",
+         "observation": "2026020205-GS-20261031T020004Z-a1",
+         "url": "https://www.nhl.com/scores/htmlreports/20262027/GS020205.HTM",
+         "requestStart": "2026-10-31T02:00:04.402Z",
+         "responseReceived": "2026-10-31T02:00:04.676Z",
+         "status": 200,
+         "bodyBytes": 35563,
+         "sha256": "19a4ed2c4c9e6caf7334c58b1963e85d0665badd77fa466aaf9c896fb08c0426",
+         "lastModified": "Fri, 30 Oct 2026 17:02:31 GMT",
+         "contentType": "text/html; charset=UTF-8",
+         "context": {
+            "observation": "2026020205-context-20261031T020003Z-a1",
+            "gameState": "OFF",
+            "gameScheduleState": "OK",
+            "startTimeUTC": "2026-10-29T23:00:00Z",
+            "period": 4,
+            "periodType": "OT",
+            "clock": "01:33",
+            "inIntermission": false,
+            "running": false
+         },
+         "collector": {
+            "version": "2",
+            "commit": "f9ededc71dc90194700725a525ae95eca2e38d65",
+            "run": "https://github.com/spiflicate/nhle-api/actions/runs/40976810138"
+         },
+         "note": "Regenerated 2026-10-30 17:02:31Z: one UTA period-2 shot moved to PIT (shots 34-34 became 35-33)"
       },
       {
          "file": "GS020210-live-ot.HTM",
@@ -1151,6 +1279,70 @@
             "run": "https://github.com/spiflicate/nhle-api/actions/runs/40976829831"
          },
          "note": "Next version: attendance 18,155 added after the final"
+      },
+      {
+         "file": "GS020212-first-final-ot.HTM",
+         "stage": "immediately final, overtime",
+         "gameId": 2026020212,
+         "report": "GS",
+         "observation": "2026020212-GS-20261030T050020Z-a1",
+         "url": "https://www.nhl.com/scores/htmlreports/20262027/GS020212.HTM",
+         "requestStart": "2026-10-30T05:00:20.352Z",
+         "responseReceived": "2026-10-30T05:00:20.565Z",
+         "status": 200,
+         "bodyBytes": 44750,
+         "sha256": "483d10f187efc173958402153e24e208063ddf3195fa91bdc174b9284609bd77",
+         "lastModified": "Fri, 30 Oct 2026 05:00:02 GMT",
+         "contentType": "text/html; charset=UTF-8",
+         "context": {
+            "observation": "2026020212-context-20261030T050019Z-a1",
+            "gameState": "FINAL",
+            "gameScheduleState": "OK",
+            "startTimeUTC": "2026-10-30T02:00:00Z",
+            "period": 4,
+            "periodType": "OT",
+            "clock": "01:23",
+            "inIntermission": false,
+            "running": false
+         },
+         "collector": {
+            "version": "2",
+            "commit": "f9ededc71dc90194700725a525ae95eca2e38d65",
+            "run": "https://github.com/spiflicate/nhle-api/actions/runs/40976837531"
+         },
+         "note": "OTT @ LAK first Final: LAK's backup goalie printed with 00:00 time on ice"
+      },
+      {
+         "file": "GS020212-settled-final-ot.HTM",
+         "stage": "settled final, overtime",
+         "gameId": 2026020212,
+         "report": "GS",
+         "observation": "2026020212-GS-20261030T060035Z-a1",
+         "url": "https://www.nhl.com/scores/htmlreports/20262027/GS020212.HTM",
+         "requestStart": "2026-10-30T06:00:35.741Z",
+         "responseReceived": "2026-10-30T06:00:35.895Z",
+         "status": 200,
+         "bodyBytes": 44756,
+         "sha256": "e7adbe618212663889523d20f6cdbad1e119ed670b1770d65b081311c1e2de88",
+         "lastModified": "Fri, 30 Oct 2026 05:16:52 GMT",
+         "contentType": "text/html; charset=UTF-8",
+         "context": {
+            "observation": "2026020212-context-20261030T060035Z-a1",
+            "gameState": "OFF",
+            "gameScheduleState": "OK",
+            "startTimeUTC": "2026-10-30T02:00:00Z",
+            "period": 4,
+            "periodType": "OT",
+            "clock": "01:23",
+            "inIntermission": false,
+            "running": false
+         },
+         "collector": {
+            "version": "2",
+            "commit": "f9ededc71dc90194700725a525ae95eca2e38d65",
+            "run": "https://github.com/spiflicate/nhle-api/actions/runs/40976837531"
+         },
+         "note": "Later the same night: the backup's 00:00 cells became blank"
       },
       {
          "file": "GS020213-not-published.HTM",

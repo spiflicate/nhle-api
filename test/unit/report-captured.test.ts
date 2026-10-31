@@ -443,6 +443,78 @@ describe('Game Summary sheets from a full night of games', () => {
    });
 });
 
+/** How a final sheet settled over the following hour and the next day */
+describe('Game Summary finals settling', () => {
+   it('adds attendance, stars and goalie decisions after the first final', () => {
+      const first = summary('GS020204-first-final.HTM');
+      const settled = summary('GS020204-settled-final.HTM');
+      expect(first.status).toBe('Final');
+      expect(first.times.end).not.toBeNull();
+      expect([first.attendance, first.stars]).toEqual([null, []]);
+      expect(settled.attendance).toBe(19092);
+      expect(settled.stars).toHaveLength(3);
+      const decisions = (s: GameSummary) =>
+         [...s.goalies.away, ...s.goalies.home]
+            .filter((g) => g.kind === 'goalie')
+            .map((g) => [g.name, g.decision]);
+      expect(decisions(first)).toEqual([
+         ['DAWS, NICO', null],
+         ['SKINNER, STUART', null],
+         ['HILDEBY, DENNIS', null],
+         ['VASILEVSKIY, ANDREI', null],
+      ]);
+      // The names stay the same when '(L)' and '(W)' are printed
+      expect(decisions(settled)).toEqual([
+         ['DAWS, NICO', null],
+         ['SKINNER, STUART', 'L'],
+         ['HILDEBY, DENNIS', null],
+         ['VASILEVSKIY, ANDREI', 'W'],
+      ]);
+   });
+
+   it('reads a shootout loss as an OT decision', () => {
+      expect(
+         summary('GS020673-final-so.HTM').goalies.home.map((g) => [
+            g.name,
+            g.decision,
+         ]),
+      ).toEqual([
+         ['MONTEMBEAULT, SAM', 'OT'],
+         ['DOBES, JAKUB', null],
+         ['EMPTY NET', null],
+         ['TEAM TOTALS', null],
+      ]);
+   });
+
+   it("gives no assists for 'unassisted', and reflects one added later", () => {
+      expect(
+         summary('GS020205-first-final-ot.HTM').goals[3]?.assists,
+      ).toEqual([]);
+      expect(
+         summary('GS020205-settled-final-ot.HTM').goals[3]?.assists,
+      ).toEqual(['6 K.KORCZAK(6)']);
+   });
+
+   it('turns a backup goalie from 00:00 to blank after the first final', () => {
+      const toi = (file: string) =>
+         summary(file).goalies.home.find((g) => g.sweaterNumber === 31)
+            ?.timeOnIce.total;
+      expect(toi('GS020212-first-final-ot.HTM')).toBe('00:00');
+      expect(toi('GS020212-settled-final-ot.HTM')).toBeNull();
+   });
+
+   it('reflects a next-day shot correction in an overtime game', () => {
+      const shots = (s: GameSummary) => [
+         s.byPeriod.away.at(-1)?.shots,
+         s.byPeriod.home.at(-1)?.shots,
+      ];
+      expect(shots(summary('GS020205-settled-final-ot.HTM'))).toEqual([
+         34, 34,
+      ]);
+      expect(shots(summary('GS020205-next-day-ot.HTM'))).toEqual([35, 33]);
+   });
+});
+
 describe('reports on captured responses', () => {
    const originalFetch = globalThis.fetch;
    const originalLevel = config.logLevel;

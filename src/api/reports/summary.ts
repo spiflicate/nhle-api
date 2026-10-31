@@ -67,6 +67,12 @@ export interface SummaryStrength {
 export interface SummaryGoalie {
    kind: 'goalie' | 'empty-net' | 'team-total';
    sweaterNumber: number | null;
+   /**
+    * The decision printed after the name once the game is final: 'W', 'L',
+    * or 'OT' (an overtime or shootout loss); null before then, and for
+    * goalies without one
+    */
+   decision: 'W' | 'L' | 'OT' | null;
    name: string;
    timeOnIce: {
       evenStrength: string | null;
@@ -167,6 +173,17 @@ function venueAlone(info: string[]): string | null {
       : null;
 }
 
+/** 'ELLIS, COLTEN (W)' → name and decision; the suffix is added after the final */
+function decided(value: string): Pick<SummaryGoalie, 'name' | 'decision'> {
+   const match = /^(.*?)\s*\((W|L|OT)\)$/.exec(value);
+   return match
+      ? {
+           name: match[1] ?? '',
+           decision: (match[2] ?? null) as SummaryGoalie['decision'],
+        }
+      : { name: value, decision: null };
+}
+
 export function parseGameSummary(
    gameId: number,
    html: string,
@@ -251,7 +268,10 @@ export function parseGameSummary(
                strength: row[3] ?? '',
                team: row[4] ?? '',
                scorer: row[5] ?? '',
-               assists: row.slice(6, 8).filter(Boolean),
+               // 'unassisted' fills the first assist column when there are none
+               assists: row
+                  .slice(6, 8)
+                  .filter((assist) => assist && assist !== 'unassisted'),
                onIce: {
                   away: sweaters(row[8] ?? ''),
                   home: sweaters(row[9] ?? ''),
@@ -349,7 +369,7 @@ export function parseGameSummary(
          goalies[side].push({
             kind,
             sweaterNumber: kind === 'goalie' ? integer(values[0]) : null,
-            name: values[offset - 1] ?? '',
+            ...decided(values[offset - 1] ?? ''),
             timeOnIce: {
                evenStrength: values[offset] || null,
                powerPlay: values[offset + 1] || null,

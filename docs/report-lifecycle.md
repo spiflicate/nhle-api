@@ -182,8 +182,13 @@ In `src/api/reports/summary.ts` (from PR #42):
    the assist columns, shooter and goalie as on-ice), which failed the whole
    parse: 15 of CHI @ DET's sheets, from the shot on.
 
-With these, the parser accepts all 326 published GS versions captured
-across the 12 games.
+6. A goalie's decision is a separate `decision` field (`'W' | 'L' | 'OT' |
+   null`). Before, it was part of `name`, so the same goalie's name changed
+   between the first and the settled final.
+7. `unassisted` is no longer returned as an assist.
+
+With these, the parser accepts all 362 published GS versions captured
+across the 12 games, follow-ups included.
 
 ## Second night: 11 games (2026-10-29/30)
 
@@ -228,8 +233,39 @@ puck drop. Every campaign saw the final; no network errors or 5xx.
 - No shootout this night; OTT @ LAK's overtime ended between two polls, so
   only its `End of Period 3` and `Final` sheets exist.
 
-**Next day**: follow-ups at final + 3, 9, 15 and 24 hours are running; the
-wrap-up on 2026-10-31 adds them here.
+**After the final** (all 44 follow-ups ran on time; none missed). Parsed GS
+compared between the first `Final`, the last version an hour later and
+the next day:
+
+| Game | First final → an hour later | Next day (GS `Last-Modified`) |
+|---|---|---|
+| CHI @ DET | attendance; 2 SOG to DET; `(L)` | no GS change (ES/PL 16:42) |
+| WPG @ TBL | attendance; stars; `(W)`/`(L)`; goalie TOI ±2 s | no GS change (ES/PL/SS 16:55) |
+| UTA @ PIT | `unassisted` → assisted; goalie TOI ±1 s | 1 SOG moved PIT → UTA (17:02) |
+| CBJ @ CAR | — | no change (stamp only, 13:52) |
+| BOS @ STL | — | 1 SOG removed (17:08) |
+| WSH @ NSH | 1 SOG removed (03:09, 10 min after final); other reports regenerated again at 05:34 | 1 SOG added (17:40) |
+| MTL @ DAL | — | no GS change (ES/PL/SS 17:47) |
+| NYI @ MIN | attendance | 1 SOG added (18:00) |
+| BUF @ ANA | attendance; 1 SOG; `(W)`/`(L)` | no change (stamp only, 14:00) |
+| OTT @ LAK | backup goalie `00:00` → blank | no GS change (ES/PL 18:07) |
+| VAN @ SJS | — | not regenerated at all |
+
+- **Every game but one was regenerated the next day**, between 13:52 and
+  18:08 UTC (about 9 to 16 hours after the final), the whole set of nine
+  reports at once. Five changed a GS shot total; four changed only other
+  reports (ES, PL, SS: the event-level detail); two changed nothing but
+  the footer stamp.
+- **The first `Final` is not the final word**: within about an hour,
+  attendance (4 games), stars (WPG @ TBL), goalie decisions, assists, goalie
+  time on ice and shots were all filled in or corrected.
+- **A zero can turn into a blank**: OTT @ LAK's backup goalie was printed
+  with `00:00` time on ice in the first final, then blank.
+- Goalie decisions appear after the name: `(W)`, `(L)`, and `(OT)` for an
+  overtime or shootout loss. Some games had them in the first final
+  (OTT @ LAK), others only later.
+- No report changed between 24 hours and the last follow-up of any game
+  besides those listed, but nothing was watched beyond 24 hours.
 
 ## Next day (BUF @ SJS)
 
@@ -294,10 +330,9 @@ then.
 - **Late start or postponement, neutral-site and Global Series games:
   missing.**
 - **When attendance appears is not established.** Late in period 1 for
-  BUF @ SJS, after the final for NYI @ MIN.
-- **Next-day revisions: one example**, with its time known only from
-  `Last-Modified`; the +9 h and +15 h observations are missing. No evidence
-  beyond 24 hours.
+  BUF @ SJS, only after the first final for four games on the second night.
+- **Next-day revisions: covered** for 12 games; none watched beyond 24
+  hours after the final.
 - **Exact wire bytes**: not captured. Bodies are stored after HTTP
   content-encoding was removed (UTF-8, as declared).
 - **Parsers for ES, PL, FS, FC, RO, SS** don't exist yet. Their lifecycle
