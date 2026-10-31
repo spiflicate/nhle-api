@@ -3,15 +3,16 @@
   "scheduledStartUTC": "2026-10-30T00:00:00Z",
   "matchup": "WSH @ NSH",
   "budget": 800,
-  "requests": 280,
-  "polls": 28,
+  "requests": 290,
+  "polls": 29,
   "firstPollAt": "2026-10-30T00:00:12.348Z",
-  "lastPollAt": "2026-10-30T18:00:12.587Z",
+  "lastPollAt": "2026-10-31T03:00:12.590Z",
   "finalObservedAt": "2026-10-30T03:00:12.585Z",
   "followUpsDone": [
     3,
     9,
-    15
+    15,
+    24
   ],
   "done": false,
   "doneReason": null,
