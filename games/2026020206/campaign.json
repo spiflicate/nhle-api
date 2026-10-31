@@ -14,8 +14,8 @@
     15,
     24
   ],
-  "done": false,
-  "doneReason": null,
+  "done": true,
+  "doneReason": "final observed; follow-ups done",
   "statesSeen": {
     "LIVE": "2026-10-30T00:00:05.173Z",
     "CRIT": "2026-10-30T01:40:05.285Z",
