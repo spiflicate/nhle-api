@@ -3,15 +3,16 @@
   "scheduledStartUTC": "2026-10-30T02:00:00Z",
   "matchup": "OTT @ LAK",
   "budget": 800,
-  "requests": 400,
-  "polls": 40,
+  "requests": 410,
+  "polls": 41,
   "firstPollAt": "2026-10-30T00:00:19.194Z",
-  "lastPollAt": "2026-10-30T20:00:19.795Z",
+  "lastPollAt": "2026-10-31T05:00:19.771Z",
   "finalObservedAt": "2026-10-30T05:00:19.765Z",
   "followUpsDone": [
     3,
     9,
-    15
+    15,
+    24
   ],
   "done": false,
   "doneReason": null,
