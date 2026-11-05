@@ -23,7 +23,8 @@
  * of the game-scoped endpoints, and the scoreboard and schedule, run on
  * the slow cadence, and right after a game changes state so every state
  * gets a full set of responses. Stops when every watched game is OFF,
- * after --max-min, or on Ctrl-C, and writes the report either way.
+ * after --max-min, or on Ctrl-C, and writes the report either way; with
+ * --report it also rewrites the report every slow cycle while running.
  *
  * Fails when a response has a field the baseline lacks, a field of a new
  * type, or a game state or position code the types don't declare, or a
@@ -285,6 +286,16 @@ async function main() {
          mark(await call('gc.game.schedule', () => gc.game.schedule(date)));
       }
       burst = next;
+      // Keep a report on disk in case the run is killed
+      if (reportPath && tick % slowEvery === 0) {
+         writeFileSync(
+            reportPath,
+            liveReport(run, new Date(), {
+               date,
+               stopReason: 'still running',
+            }),
+         );
+      }
 
       if (games.every((g) => finished.has(g.id))) {
          stopReason = 'every game is OFF';
