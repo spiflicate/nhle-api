@@ -1,0 +1,105 @@
+# Captures one game's Game Summary report through its lifecycle (404,
+# pregame, live, intermissions, final, next day) with
+# scripts/gs-capture/collect.ts. Each run is one tick of the campaign.
+#
+# Activation (once this is on the default branch):
+#   1. Settings → Secrets and variables → Actions → Variables: set
+#      GS_CAPTURE to `on`. Scheduled runs do nothing without it.
+#   2. Actions → GS capture → Run workflow, command `start` (optionally
+#      with a game id; otherwise the first tick picks the earliest game
+#      at least six hours away).
+# The campaign ends by itself after the next-day snapshot, at 180 NHL
+# requests or after a twelve-hour polling window. To stop early, run the
+# workflow with command `stop`, or set GS_CAPTURE to `off`.
+#
+# State and evidence live on the gs-capture-data branch (created on the
+# first run), committed after every tick, so nothing depends on a
+# runner or a session staying up. Each run also uploads the active
+# campaign as an artifact, kept 90 days, even when the tick fails.
+#
+# Scheduled runs are best effort: GitHub can start them late or skip
+# them under load, and turns schedules off after 60 days without
+# repository activity. Gaps show up in the campaign's summary.md.
+name: GS capture
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+    inputs:
+      command:
+        description: start, tick or stop
+        required: true
+        default: tick
+        type: choice
+        options: [tick, start, stop]
+      game:
+        description: Game id for `start` (optional)
+        required: false
+        default: ''
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gs-capture
+  cancel-in-progress: false
+
+jobs:
+  tick:
+    if: github.event_name == 'workflow_dispatch' || vars.GS_CAPTURE == 'on'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      DATA: gs-capture-data
+      DATA_BRANCH: gs-capture-data
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+
+      - name: Check out the data branch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if git fetch origin "$DATA_BRANCH"; then
+            git worktree add "$DATA" "origin/$DATA_BRANCH"
+            git -C "$DATA" checkout -B "$DATA_BRANCH"
+          else
+            git worktree add --orphan -b "$DATA_BRANCH" "$DATA"
+          fi
+
+      - name: Run the collector
+        env:
+          COMMAND: ${{ github.event_name == 'schedule' && 'tick' || inputs.command }}
+          GAME: ${{ inputs.game }}
+        run: |
+          args=("$COMMAND" --data "$DATA")
+          if [ "$COMMAND" = start ] && [ -n "$GAME" ]; then
+            args+=(--game "$GAME")
+          fi
+          bun scripts/gs-capture/collect.ts "${args[@]}"
+
+      - name: Commit the observations
+        if: always()
+        run: |
+          cd "$DATA"
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -q -m "GS capture: ${{ github.event_name }} run ${{ github.run_id }}"
+            git push origin "$DATA_BRANCH"
+          fi
+          active=$(cat ACTIVE 2>/dev/null || true)
+          if [ -n "$active" ] && [ -f "$active/summary.md" ]; then
+            cat "$active/summary.md" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: gs-capture-${{ github.run_id }}
+          path: |
+            ${{ env.DATA }}
+            !${{ env.DATA }}/.git
+          retention-days: 90
+          if-no-files-found: ignore

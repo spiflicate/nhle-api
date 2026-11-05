@@ -42,6 +42,17 @@ Each response is compared with the same baseline as `bun run drift`, the way a v
 
 The **API drift (live games)** workflow runs the same thing by hand (Actions → API drift (live games) → Run workflow). It doesn't file issues.
 
+## Game Summary lifecycle capture
+
+`scripts/gs-capture/collect.ts` follows one game's Game Summary (GS) report from before it is published to the next day, to see how an unfinished report really looks (#43). The **GS capture** workflow runs it every ten minutes; each run is one tick, and the state and evidence are committed to the `gs-capture-data` branch, so collection doesn't depend on anyone's computer or session.
+
+- **Window:** from six hours before the scheduled start until an hour after the game is first seen final, then one snapshot a day after the start. The continuous window is capped at twelve hours and the campaign at 180 NHL requests, discovery, context and retries included; two are kept back for the next-day snapshot.
+- **Each tick** fetches the GS report and the game's landing JSON, whose state, period and clock are recorded as context. Context corroborates; it never replaces what the report printed.
+- **Evidence:** every request is a line in `<campaign>/observations.jsonl` (URL, UTC request and response times, status, response headers, body SHA-256 and size, collector commit, errors and retries). Bodies are saved once under `objects/<sha256>`, as the bytes fetch returned after undoing Content-Encoding, not decoded (GS reports are ISO-8859-1). `summary.md` lists the stages covered and missed, and every change of report and game state.
+- **Activation:** set the repository variable `GS_CAPTURE` to `on`, then run the workflow with command `start` (and a game id, or let the first tick pick the earliest game at least six hours away). Stop with command `stop` or by setting `GS_CAPTURE` to `off`. Scheduled runs are best effort; late or skipped ticks show up as gaps.
+
+Normal tests never call the NHL: curated snapshots from a campaign become fixtures, with their provenance.
+
 ## Releasing (maintainers)
 
 1. Move the `Unreleased` notes in `CHANGELOG.md` under the new version.
