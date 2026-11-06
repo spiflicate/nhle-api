@@ -55,6 +55,8 @@ interface Team {
    score?: number;
    sog?: number;
    radioLink?: string;
+   /** French-language radio stream, for teams that have one */
+   radioLinkFr?: string;
 }
 
 interface Clock {
@@ -167,6 +169,8 @@ interface Goal {
    highlightClip?: number;
    discreteClip?: number;
    goalsToDate: number;
+   /** The scorer's goal number in this game; so far only seen on a second goal */
+   goalInGame?: number;
    awayScore: number;
    homeScore: number;
    leadingTeamAbbrev?: LocalizedText;

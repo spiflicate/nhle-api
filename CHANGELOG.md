@@ -18,10 +18,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `EdgeOverlay.team`, set instead of `player` on overlays for team stats
 - `OVER` in `GameState`, the state the API now reports between `LIVE`/`CRIT` and `FINAL`
 - The drift check flags game states a response's types don't declare, and `--update` won't accept them
+- Live-only fields found by polling the 2026-11-05 slate: `radioLinkFr` on gamecenter team objects; `languageCode`, `parentId` and `logoUrls` on TV broadcasts; `situation` on live `gc.score` games and right-rail `seasonSeries` games; `servedBy` on landing penalties; `goalInGame` on landing, wsc and play-by-play goals
 
 ### Changed
 
 - `gameState` on playoff series schedule games and on `GameMeta` is typed as `GameState` instead of `string`
+- `summary.shootout` on `gc.game.landing` is typed as a list or, while a shootout is in progress, a `{ liveScore, events }` object, which the API sends then
 
 ### Fixed
 
