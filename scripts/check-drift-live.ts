@@ -17,6 +17,7 @@
  *                       (default 6), staggered across games
  *    --max-min <n>      stop after n minutes (default 360)
  *    --report <path>    write the Markdown report there
+ *    --samples <dir>    save each response that brings a new finding
  *    --update           merge every live shape into the baseline
  *
  * Every poll calls `gc.score` and each watched game's landing. The rest
@@ -32,7 +33,13 @@
  * limit or not found). Missing fields are fine: the baseline is a
  * finished game.
  */
-import { appendFileSync, readFileSync, writeFileSync } from 'node:fs';
+import {
+   appendFileSync,
+   mkdirSync,
+   readFileSync,
+   writeFileSync,
+} from 'node:fs';
+import { join } from 'node:path';
 import { gc } from '#/api/index.ts';
 import type { APIResult } from '#/client/types.ts';
 import { config } from '#/config/index.ts';
@@ -161,6 +168,8 @@ async function main() {
    const maxMs = number(args, '--max-min', 360) * 60_000;
    const reportPath = option(args, '--report');
    const update = args.includes('--update');
+   const samples = option(args, '--samples');
+   if (samples) mkdirSync(samples, { recursive: true });
 
    config.logLevel = 'silent';
    config.timeout = 15_000;
@@ -216,6 +225,14 @@ async function main() {
             console.log(`  ❌ ${f.check}: ${f.text}`);
          }
          found = run.findings.size;
+         // The response that showed something new, for typing it
+         if (samples) {
+            const stamp = at.toISOString().replace(/[-:.]/g, '');
+            writeFileSync(
+               join(samples, `${name}-${game?.id ?? 'date'}-${stamp}.json`),
+               JSON.stringify(result.data, null, 1),
+            );
+         }
       }
       return changed;
    };
