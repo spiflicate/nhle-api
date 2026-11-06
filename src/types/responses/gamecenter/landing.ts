@@ -212,7 +212,8 @@ interface SituationTeam {
 
 interface Summary {
    scoring: Scoring[];
-   shootout: unknown[];
+   /** A list once the game is over; an object while a shootout is on */
+   shootout: unknown[] | LiveShootout;
    threeStars: ThreeStar[];
    penalties: SummaryPenalty[];
    iceSurface?: IceSurface;
@@ -333,4 +334,13 @@ interface ThreeStar {
    points?: number;
    goalsAgainstAverage?: number;
    savePctg?: number;
+}
+
+/** `summary.shootout` while a shootout is in progress */
+interface LiveShootout {
+   liveScore: {
+      home: number;
+      away: number;
+   };
+   events: unknown[];
 }
