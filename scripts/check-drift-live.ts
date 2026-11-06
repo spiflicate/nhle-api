@@ -18,7 +18,7 @@
  *    --max-min <n>      stop after n minutes (default 360)
  *    --report <path>    write the Markdown report there
  *    --samples <dir>    save each response that brings a new finding
- *    --update           merge every live shape into the baseline
+ *    --update           merge every live shape into live-baseline.json
  *
  * Every poll calls `gc.score` and each watched game's landing. The rest
  * of the game-scoped endpoints, and the scoreboard and schedule, run on
@@ -26,6 +26,10 @@
  * gets a full set of responses. Stops when every watched game is OFF,
  * after --max-min, or on Ctrl-C, and writes the report either way; with
  * --report it also rewrites the report every slow cycle while running.
+ *
+ * Responses are compared with the daily baseline plus
+ * scripts/drift/live-baseline.json, which holds the paths only live games
+ * show and which `--update` adds to; the daily check never reads it.
  *
  * Fails when a response has a field the baseline lacks, a field of a new
  * type, or a game state or position code the types don't declare, or a
@@ -35,6 +39,7 @@
  */
 import {
    appendFileSync,
+   existsSync,
    mkdirSync,
    readFileSync,
    writeFileSync,
@@ -46,13 +51,21 @@ import { config } from '#/config/index.ts';
 import { ErrorCategory, NHLError } from '#/errors/index.ts';
 import { getCurrentNHLDate } from '#/utils/date.ts';
 import { BASELINE_PATH } from './check-drift.ts';
+
+export const LIVE_BASELINE_PATH = join(
+   import.meta.dir,
+   'drift/live-baseline.json',
+);
+
 import {
    describeTransition,
    hasStarted,
    LiveRun,
+   liveOnly,
    liveReport,
    selectGames,
    type WatchedGame,
+   withLive,
 } from './drift/live.ts';
 import type { Shape } from './drift/shape.ts';
 
@@ -173,9 +186,13 @@ async function main() {
 
    config.logLevel = 'silent';
    config.timeout = 15_000;
-   const baseline: Record<string, Shape> = JSON.parse(
+   const daily: Record<string, Shape> = JSON.parse(
       readFileSync(BASELINE_PATH, 'utf8'),
    );
+   const live: Record<string, Shape> = existsSync(LIVE_BASELINE_PATH)
+      ? JSON.parse(readFileSync(LIVE_BASELINE_PATH, 'utf8'))
+      : {};
+   const baseline = withLive(daily, live);
 
    const first = await gc.score(date);
    if (!first.success) {
@@ -336,10 +353,10 @@ async function main() {
          process.exit(1);
       }
       writeFileSync(
-         BASELINE_PATH,
-         `${JSON.stringify(run.updatedBaseline(), null, 3)}\n`,
+         LIVE_BASELINE_PATH,
+         `${JSON.stringify(liveOnly(daily, run.updatedBaseline()), null, 3)}\n`,
       );
-      console.log(`\nWrote ${BASELINE_PATH}`);
+      console.log(`\nWrote ${LIVE_BASELINE_PATH}`);
    }
    record();
    console.log(

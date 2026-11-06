@@ -339,7 +339,7 @@ export class LiveRun {
       );
    }
 
-   /** The baseline with every live shape merged in, for `--update` */
+   /** The baseline this run compared with, plus every live shape */
    updatedBaseline(): Record<string, Shape> {
       const next = { ...this.baseline };
       for (const [check, shape] of this.shapes) {
@@ -348,6 +348,41 @@ export class LiveRun {
       }
       return next;
    }
+}
+
+/**
+ * Live-only paths are kept apart from the daily baseline (in
+ * `live-baseline.json`): the daily check compares a finished game, which
+ * would report every live-only field as removed.
+ */
+
+/** The daily baseline with the live-only paths merged in */
+export function withLive(
+   daily: Readonly<Record<string, Shape>>,
+   live: Readonly<Record<string, Shape>>,
+): Record<string, Shape> {
+   const out = { ...daily };
+   for (const [check, shape] of Object.entries(live)) {
+      const before = out[check];
+      out[check] = before ? mergeShapes(before, shape) : shape;
+   }
+   return out;
+}
+
+/** What `merged` holds beyond the daily baseline, per check */
+export function liveOnly(
+   daily: Readonly<Record<string, Shape>>,
+   merged: Readonly<Record<string, Shape>>,
+): Record<string, Shape> {
+   const out: Record<string, Shape> = {};
+   for (const check of Object.keys(merged).sort()) {
+      const extra: Shape = {};
+      for (const [path, kinds] of Object.entries(merged[check] ?? {})) {
+         if (daily[check]?.[path] !== kinds) extra[path] = kinds;
+      }
+      if (Object.keys(extra).length > 0) out[check] = extra;
+   }
+   return out;
 }
 
 export function describeChange(c: Change): string {
