@@ -79,3 +79,51 @@ interface PeriodDescriptor {
    periodType: PeriodType;
    maxRegulationPeriods: number;
 }
+
+/**
+ * Puck and player positions around a goal, from the file each goal's
+ * `pptReplayUrl` points at (wsr.nhle.com/sprites/...). About 120 to 140
+ * frames, one every tenth of a second.
+ */
+export type PPTReplayFrames = PPTReplayFrame[];
+
+export interface PPTReplayFrame {
+   /** Tenths of a second since the Unix epoch (multiply by 100 for ms) */
+   timeStamp: number;
+   /**
+    * Everything tracked in this frame, keyed by its `id`. Key `"1"` is
+    * the puck; every other key is a player (goalies included).
+    */
+   onIce: Record<string, PPTReplayPlayer | PPTReplayPuck | PPTReplayNoPuck>;
+}
+
+/**
+ * Coordinates are in rink units of 1/12 ft from one corner: `x` runs
+ * 0 to 2400 along the 200 ft length and `y` 0 to 1020 across the 85 ft
+ * width. Tracked objects can sit slightly outside that range.
+ */
+interface PPTReplayPosition {
+   x: number;
+   y: number;
+}
+
+export interface PPTReplayPlayer extends PPTReplayPosition {
+   /** `teamId * 1000 + sweaterNumber`, the same as the `onIce` key */
+   id: number;
+   playerId: number;
+   sweaterNumber: number;
+   teamId: number;
+   teamAbbrev: string;
+}
+
+/** The puck (key `"1"`). Player fields are empty strings. */
+export interface PPTReplayPuck extends PPTReplayPosition {
+   id: 1;
+   playerId: '';
+   sweaterNumber: '';
+   teamId: '';
+   teamAbbrev: '';
+}
+
+/** The puck entry is `{}` in frames where the puck wasn't tracked */
+export type PPTReplayNoPuck = Record<string, never>;

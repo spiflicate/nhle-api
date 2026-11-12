@@ -950,6 +950,20 @@
       "$.homeTeam.placeNameWithPreposition.{lang}": "string",
       "$.id": "number"
    },
+   "gc.game.pptReplay.frames": {
+      "$": "array",
+      "$[]": "object",
+      "$[].onIce": "object",
+      "$[].onIce.{id}": "object",
+      "$[].onIce.{id}.id": "number",
+      "$[].onIce.{id}.playerId": "number|string",
+      "$[].onIce.{id}.sweaterNumber": "number|string",
+      "$[].onIce.{id}.teamAbbrev": "string",
+      "$[].onIce.{id}.teamId": "number|string",
+      "$[].onIce.{id}.x": "number",
+      "$[].onIce.{id}.y": "number",
+      "$[].timeStamp": "number"
+   },
    "gc.game.schedule": {
       "$": "object",
       "$.gameWeek": "array",
