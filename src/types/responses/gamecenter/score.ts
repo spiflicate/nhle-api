@@ -44,6 +44,8 @@ interface Game {
    ticketsLink: string;
    ticketsLinkFr: string;
    teamLeaders: TeamLeader[];
+   /** Set while the game is live */
+   situation?: Situation;
 }
 
 interface Team {
@@ -83,4 +85,20 @@ interface OddsPartner {
    bgColor: HexColorCode;
    textColor: HexColorCode;
    accentColor: HexColorCode;
+}
+
+/** Skater strength while a game is live; set during power plays */
+interface Situation {
+   homeTeam: SituationTeam;
+   awayTeam: SituationTeam;
+   situationCode: string;
+   timeRemaining: string;
+   secondsRemaining: number;
+}
+
+interface SituationTeam {
+   abbrev: string;
+   /** e.g. `PP`, `EN` */
+   situationDescriptions?: string[];
+   strength: number;
 }

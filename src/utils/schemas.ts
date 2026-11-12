@@ -152,10 +152,6 @@ export const SeriesLetter = type
    .enumerated(...Object.values(NHL.SeriesLetterEnum))
    .describe('a valid NHL playoff series letter (A-O)');
 
-export const GameState = type
-   .enumerated(...Object.values(NHL.GameStateEnum))
-   .describe('a valid NHL game state');
-
 export const CountryCode = type(/^[a-zA-Z]{2}$/)
    .pipe((v) => v.toLowerCase())
    .describe('a valid ISO 3166-1 alpha-2 country code, e.g. US, CA, RU');

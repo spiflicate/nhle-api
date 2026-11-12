@@ -9,10 +9,26 @@ import baseline from '../../scripts/drift/baseline.json' with {
 };
 import { checks } from '../../scripts/drift/checks.ts';
 import {
+   type Finding,
+   type Judge,
+   mergeFindings,
+   type RunFinding,
+   readState,
+   writeState,
+} from '../../scripts/drift/findings.ts';
+import {
    diffShapes,
    mergeShapes,
    shapeOf,
 } from '../../scripts/drift/shape.ts';
+import {
+   allowedValues,
+   DRAFT_POSITION_CODES,
+   GAME_STATES,
+   POSITION_CODES,
+   unknownValues,
+   unknownValuesFor,
+} from '../../scripts/drift/values.ts';
 
 describe('shapeOf', () => {
    test('merges array items and id-keyed entries', () => {
@@ -105,6 +121,15 @@ describe('diffShapes', () => {
       ]);
    });
 
+   test('translations of a known localized string are not drift', () => {
+      const plain = shapeOf({ name: { default: 'Montreal' } });
+      const translated = shapeOf({
+         name: { default: 'Montreal', fr: 'Montréal' },
+      });
+      expect(diffShapes(plain, translated)).toEqual([]);
+      expect(diffShapes(translated, plain)).toEqual([]);
+   });
+
    test('children of a retyped field are part of that change', () => {
       const live = shapeOf({ list: [{ a: '1', b: '2' }], meta: [1] });
       expect(diffShapes(base, live).map((c) => c.path)).toEqual(['$.meta']);
@@ -129,6 +154,90 @@ describe('mergeShapes', () => {
    });
 });
 
+describe('unknownValues', () => {
+   test('reports each undeclared code once per path', () => {
+      expect(
+         unknownValues(
+            {
+               homeTeam: {
+                  forwards: [
+                     { position: 'C' },
+                     { position: 'LW' },
+                     { position: 'LW' },
+                  ],
+               },
+               players: { 8478402: { positionCode: 'W' } },
+            },
+            'position',
+            POSITION_CODES,
+         ),
+      ).toEqual([
+         {
+            kind: 'position',
+            path: '$.homeTeam.forwards[].position',
+            value: 'LW',
+         },
+         {
+            kind: 'position',
+            path: '$.players.{id}.positionCode',
+            value: 'W',
+         },
+      ]);
+   });
+
+   test('accepts declared codes and ignores non-string positions', () => {
+      expect(
+         unknownValues(
+            {
+               picks: [{ position: 'C/LW' }, { position: 'RW' }],
+               position: { x: 1 },
+            },
+            'position',
+            DRAFT_POSITION_CODES,
+         ),
+      ).toEqual([]);
+   });
+});
+
+describe('allowedValues', () => {
+   test('picks the draft codes for draft checks', () => {
+      expect(allowedValues('gc.draft.picks 2024 1', 'position')).toBe(
+         DRAFT_POSITION_CODES,
+      );
+      expect(allowedValues('gc.game.boxscore', 'position')).toBe(
+         POSITION_CODES,
+      );
+      expect(allowedValues('stats.skater', 'position')).toBeUndefined();
+   });
+
+   test('checks game states across gc only', () => {
+      expect(allowedValues('gc.score', 'gameState')).toBe(GAME_STATES);
+      expect(allowedValues('stats.skater', 'gameState')).toBeUndefined();
+   });
+});
+
+describe('unknownValuesFor', () => {
+   test('reports undeclared positions and game states together', () => {
+      expect(
+         unknownValuesFor('gc.score', {
+            games: [
+               { gameState: 'OVER', position: 'C' },
+               { gameState: 'SUSP', position: 'X' },
+            ],
+         }),
+      ).toEqual([
+         { kind: 'position', path: '$.games[].position', value: 'X' },
+         { kind: 'gameState', path: '$.games[].gameState', value: 'SUSP' },
+      ]);
+   });
+
+   test('ignores game states outside gc', () => {
+      expect(
+         unknownValuesFor('stats.skater', { gameState: 'SUSP' }),
+      ).toEqual([]);
+   });
+});
+
 /** `ns.fn` for every function in the public API, nested namespaces too */
 function functionNames(mod: object, prefix = ''): string[] {
    return Object.entries(mod).flatMap(([key, value]) => {
@@ -140,6 +249,180 @@ function functionNames(mod: object, prefix = ''): string[] {
       return [];
    });
 }
+
+describe('mergeFindings', () => {
+   const added: RunFinding = {
+      check: 'gc.score',
+      kind: 'added',
+      path: '$.x',
+      kinds: 'string',
+      text: 'added `$.x` (string)',
+   };
+   const tracked = (f: RunFinding, seen = '2026-10-01'): Finding => ({
+      ...f,
+      firstSeen: seen,
+      lastSeen: seen,
+   });
+   const judge = (
+      status: string,
+      options: { volatile?: boolean; shape?: Record<string, string> } = {},
+   ): Judge => ({
+      checks: new Map([
+         ['gc.score', { status, volatile: options.volatile ?? false }],
+      ]),
+      baseline: { 'gc.score': options.shape ?? { $: 'object' } },
+      allowedValues: () => new Set(['C', 'OVER']),
+   });
+
+   test('adds new findings and reports them as fresh', () => {
+      const { findings, fresh } = mergeFindings(
+         [],
+         [added],
+         judge('drift'),
+         '2026-10-02',
+      );
+      expect(findings).toEqual([
+         { ...added, firstSeen: '2026-10-02', lastSeen: '2026-10-02' },
+      ]);
+      expect(fresh).toEqual(findings);
+   });
+
+   test('keeps a finding seen again, without reporting it as fresh', () => {
+      const { findings, fresh } = mergeFindings(
+         [tracked(added)],
+         [added],
+         judge('drift'),
+         '2026-10-02',
+      );
+      expect(findings).toEqual([
+         { ...added, firstSeen: '2026-10-01', lastSeen: '2026-10-02' },
+      ]);
+      expect(fresh).toEqual([]);
+   });
+
+   test('keeps a volatile finding a run did not see open', () => {
+      const { findings } = mergeFindings(
+         [tracked(added)],
+         [],
+         judge('ok', { volatile: true }),
+         '2026-10-02',
+      );
+      expect(findings).toEqual([tracked(added)]);
+   });
+
+   test('keeps a finding open while its check is unavailable', () => {
+      const { findings } = mergeFindings(
+         [tracked(added)],
+         [],
+         judge('unavailable'),
+         '2026-10-02',
+      );
+      expect(findings[0]?.resolved).toBeUndefined();
+   });
+
+   test('resolves a stable finding a run compared and did not see', () => {
+      const { findings } = mergeFindings(
+         [tracked(added)],
+         [],
+         judge('ok'),
+         '2026-10-02',
+      );
+      expect(findings[0]?.resolved).toBe('2026-10-02');
+   });
+
+   test('resolves a volatile finding once the baseline accepts it', () => {
+      const { findings } = mergeFindings(
+         [tracked(added)],
+         [],
+         judge('ok', { volatile: true, shape: { '$.x': 'string' } }),
+         '2026-10-02',
+      );
+      expect(findings[0]?.resolved).toBe('2026-10-02');
+   });
+
+   test('resolves an unknown position code once the types declare it', () => {
+      const position: RunFinding = {
+         check: 'gc.score',
+         kind: 'position',
+         path: '$.position',
+         value: 'C',
+         text: 'unknown position code `C` at `$.position`',
+      };
+      const { findings } = mergeFindings(
+         [tracked(position)],
+         [],
+         judge('ok', { volatile: true }),
+         '2026-10-02',
+      );
+      expect(findings[0]?.resolved).toBe('2026-10-02');
+   });
+
+   test('resolves an unknown game state once the types declare it', () => {
+      const state: RunFinding = {
+         check: 'gc.score',
+         kind: 'gameState',
+         path: '$.games[].gameState',
+         value: 'OVER',
+         text: 'unknown game state `OVER` at `$.games[].gameState`',
+      };
+      const { findings } = mergeFindings(
+         [tracked(state)],
+         [],
+         judge('ok', { volatile: true }),
+         '2026-10-02',
+      );
+      expect(findings[0]?.resolved).toBe('2026-10-02');
+   });
+
+   test('resolves an outage once the check answers', () => {
+      const outage: RunFinding = {
+         check: 'gc.score',
+         kind: 'unavailable',
+         text: 'unavailable: NetworkError',
+      };
+      const { findings } = mergeFindings(
+         [tracked(outage)],
+         [],
+         judge('ok', { volatile: true }),
+         '2026-10-02',
+      );
+      expect(findings[0]?.resolved).toBe('2026-10-02');
+   });
+
+   test('reopens a resolved finding that comes back', () => {
+      const { findings, fresh } = mergeFindings(
+         [{ ...tracked(added), resolved: '2026-10-01' }],
+         [added],
+         judge('drift'),
+         '2026-10-02',
+      );
+      expect(findings).toEqual([
+         { ...added, firstSeen: '2026-10-01', lastSeen: '2026-10-02' },
+      ]);
+      expect(fresh).toEqual(findings);
+   });
+});
+
+describe('drift state', () => {
+   test('round-trips through a report', () => {
+      const findings: Finding[] = [
+         {
+            check: 'gc.score',
+            kind: 'unexpected',
+            text: 'unexpected: a `-->` in the text',
+            firstSeen: '2026-10-01',
+            lastSeen: '2026-10-02',
+         },
+      ];
+      const body = `# Report\n\n${writeState(findings)}\n\n---\nLatest run`;
+      expect(readState(body)).toEqual(findings);
+   });
+
+   test('reads no findings from a body without state', () => {
+      expect(readState('# NHL API drift check')).toEqual([]);
+      expect(readState('<!-- drift-state:bm90IGpzb24= -->')).toEqual([]);
+   });
+});
 
 describe('drift checks', () => {
    const names = checks.map((c) => c.name);

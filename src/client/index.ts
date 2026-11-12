@@ -116,6 +116,33 @@ export class NHLClient {
       endpoint: string,
       params?: Record<string, unknown>,
    ): Promise<APIResult<T>> {
+      return this.request(
+         endpoint,
+         params,
+         async (response) => (await response.json()) as T,
+      );
+   }
+
+   /**
+    * Send a GET request and return the response body as text, for pages
+    * that aren't JSON (e.g. the official HTML game reports)
+    * @param endpoint - Path relative to the base URL
+    * @param params - Optional query parameters
+    * @returns Promise resolving to the body text or an error
+    */
+   async getText(
+      endpoint: string,
+      params?: Record<string, unknown>,
+   ): Promise<APIResult<string>> {
+      return this.request(endpoint, params, (response) => response.text());
+   }
+
+   /** Send a GET request and read a successful response with `read`. */
+   private async request<T>(
+      endpoint: string,
+      params: Record<string, unknown> | undefined,
+      read: (response: Response) => Promise<T>,
+   ): Promise<APIResult<T>> {
       const { timeout, headers, language } = this.config;
       const url = this.buildUrl(endpoint, params);
       const controller = new AbortController();
@@ -141,7 +168,7 @@ export class NHLClient {
             return { success: false, error };
          }
 
-         return { data: (await response.json()) as T, success: true };
+         return { data: await read(response), success: true };
       } catch (error) {
          clearTimeout(timeoutId);
 

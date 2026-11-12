@@ -3,8 +3,17 @@
 # own schedule, never on PRs, so an upstream API change never blocks
 # unrelated work.
 #
-# On the default branch, a failure opens (or refreshes) one issue labelled
-# api-drift, and the next passing run closes it.
+# On the default branch, drift opens (or refreshes) one issue labelled
+# api-drift. The issue is the alert: the run itself passes once the issue
+# is filed, so an unfixed drift doesn't send a failed-run notification
+# every day. Each run merges its findings into those the issue already
+# lists, so a finding a later run doesn't see (date-dependent data, a
+# one-off outage) stays listed until it is resolved. New findings are
+# posted as a comment, since GitHub doesn't notify on body edits. The
+# issue is closed once a run finds nothing open.
+#
+# The run fails when the check crashes, the issue can't be filed, or it
+# drifts outside the default branch, where no issue is filed.
 name: API drift
 
 on:
@@ -34,10 +43,23 @@ jobs:
       - uses: oven-sh/setup-bun@v2
       - run: bun install --frozen-lockfile
 
+      - name: Load the open drift issue
+        id: issue
+        if: env.ON_DEFAULT_BRANCH == 'true'
+        run: |
+          issue=$(gh issue list --label api-drift --state open \
+            --json number --jq '.[0].number')
+          echo "number=$issue" >> "$GITHUB_OUTPUT"
+          if [ -n "$issue" ]; then
+            gh issue view "$issue" --json body --jq .body > previous.md
+          fi
+
       - name: Check the live APIs
         id: check
         continue-on-error: true
-        run: bun run drift --report drift-report.md
+        run: |
+          bun run drift --report drift-report.md \
+            --previous previous.md --new drift-new.md
 
       - uses: actions/upload-artifact@v4
         if: always()
@@ -46,20 +68,27 @@ jobs:
           path: drift-report.md
           if-no-files-found: ignore
 
+      # A crash writes no report; the issue keeps its findings and the
+      # run fails below instead.
       - name: Open or refresh the drift issue
-        if: steps.check.outcome == 'failure' && env.ON_DEFAULT_BRANCH == 'true'
+        id: file
+        if: >-
+          steps.check.outcome == 'failure' &&
+          env.ON_DEFAULT_BRANCH == 'true' &&
+          hashFiles('drift-report.md') != ''
+        env:
+          ISSUE: ${{ steps.issue.outputs.number }}
         run: |
-          if [ ! -f drift-report.md ]; then
-            echo "The drift check crashed before writing a report." > drift-report.md
-          fi
           printf '\n---\nLatest run: %s\n' "$RUN_URL" >> drift-report.md
           gh label create api-drift --color d93f0b \
             --description 'The live NHL APIs no longer match the library' \
             2>/dev/null || true
-          issue=$(gh issue list --label api-drift --state open \
-            --json number --jq '.[0].number')
-          if [ -n "$issue" ]; then
-            gh issue edit "$issue" --body-file drift-report.md
+          if [ -n "$ISSUE" ]; then
+            gh issue edit "$ISSUE" --body-file drift-report.md
+            if [ -s drift-new.md ]; then
+              printf '\n%s\n' "$RUN_URL" >> drift-new.md
+              gh issue comment "$ISSUE" --body-file drift-new.md
+            fi
           else
             gh issue create --label api-drift \
               --title 'NHL API drift detected' --body-file drift-report.md
@@ -74,6 +103,6 @@ jobs:
               --comment "The APIs match the baseline again: $RUN_URL"
           done
 
-      - name: Fail the run on drift
-        if: steps.check.outcome == 'failure'
+      - name: Fail the run on unfiled drift
+        if: steps.check.outcome == 'failure' && steps.file.outcome != 'success'
         run: exit 1

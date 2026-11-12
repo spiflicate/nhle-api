@@ -1,5 +1,5 @@
 import type { TeamAbbrev } from '../../types.ts';
-import type { LocalizedText, TvBroadcast } from './common.ts';
+import type { GameState, LocalizedText, TvBroadcast } from './common.ts';
 
 export interface PlayoffSeries {
    seasonId: number;
@@ -271,7 +271,7 @@ interface Game {
    easternUTCOffset: string;
    venueUTCOffset: string;
    venueTimezone: string;
-   gameState: string;
+   gameState: GameState;
    gameScheduleState: string;
    tvBroadcasts: TvBroadcast[];
    awayTeam: Team;
