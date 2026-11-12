@@ -35,10 +35,6 @@ export type TeamId = typeof T.TeamId.inferIn | (number & {});
  */
 export type GameNumber = typeof T.GameNumber.inferIn;
 /**
- * Represents a valid NHL game state
- */
-export type GameState = typeof T.GameState.inferIn;
-/**
  * Represents a valid draft round (1-7)
  */
 export type DraftRound = typeof T.DraftRound.inferIn;

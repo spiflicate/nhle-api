@@ -1,5 +1,5 @@
 import type { Season } from '../../types.ts';
-import type { LocalizedText } from './common.ts';
+import type { GameState, LocalizedText } from './common.ts';
 
 export type NHLSeasons = Array<Season>;
 
@@ -23,7 +23,7 @@ interface Seed {
 export interface GameMeta {
    teams: Team[];
    seasonStates: SeasonStates;
-   gameState: string;
+   gameState: GameState;
 }
 
 interface SeasonStates {
