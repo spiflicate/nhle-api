@@ -214,5 +214,48 @@ describe('Player Module', () => {
          await player.statsLeaders.goalies(20232024, 2);
          expect(mockCalls[0]).toContain('goalie-stats-leaders');
       });
+
+      test('statsLeaders should send no query params by default', async () => {
+         await player.statsLeaders.skaters(20232024, 2);
+         expect(mockCalls[0]).not.toContain('?');
+      });
+
+      test('statsLeaders.skaters should pass categories and limit', async () => {
+         await player.statsLeaders.skaters(20232024, 2, {
+            categories: ['points', 'goals'],
+            limit: -1,
+         });
+         const url = new URL(mockCalls[0] ?? '');
+         expect(url.pathname).toEndWith('skater-stats-leaders/20232024/2');
+         expect(url.searchParams.get('categories')).toBe('points,goals');
+         expect(url.searchParams.get('limit')).toBe('-1');
+      });
+
+      test('statsLeaders.goalies should pass categories and limit', async () => {
+         await player.statsLeaders.goalies(20232024, 2, {
+            categories: ['savePctg'],
+            limit: 10,
+         });
+         const url = new URL(mockCalls[0] ?? '');
+         expect(url.searchParams.get('categories')).toBe('savePctg');
+         expect(url.searchParams.get('limit')).toBe('10');
+      });
+
+      test('statsLeaders should reject a category from the other endpoint', async () => {
+         const result = await player.statsLeaders.skaters(20232024, 2, {
+            // @ts-expect-error wins is a goalie category
+            categories: ['wins'],
+         });
+         expectValidationError(result);
+         expect(mockCalls.length).toBe(0);
+      });
+
+      test('statsLeaders should reject a non-integer limit', async () => {
+         const result = await player.statsLeaders.goalies(20232024, 2, {
+            limit: 1.5,
+         });
+         expectValidationError(result);
+         expect(mockCalls.length).toBe(0);
+      });
    });
 });

@@ -84,7 +84,7 @@ Teams are three-letter abbreviations (`'TOR'`, `'TBL'`).
 ### `gc.player`
 
 - `landing(playerId)`, `gameLog(playerId, season?, gameType?)`
-- `statsLeaders.skaters(season?, gameType?)`, `statsLeaders.goalies(season?, gameType?)`
+- `statsLeaders.skaters(season?, gameType?, { categories?, limit? }?)`, `statsLeaders.goalies(season?, gameType?, { categories?, limit? }?)`: `limit: -1` returns every player
 - `spotlight()`, `search(query)`
 
 `gc.player.v2` is the newer API that nhl.com player pages use:
@@ -103,6 +103,7 @@ Teams are three-letter abbreviations (`'TOR'`, `'TBL'`).
 ### `gc.misc`
 
 - `seasons()`
+- `meta.lookup({ players?, teams? })`: player and team metadata for several ids in one call
 - `meta.game(gameId)`, `meta.playoffSeries(seriesLetter, year?)`
 - `postalLookup(postalCode)`, `location()`, `partnerGame(countryCode)`
 
