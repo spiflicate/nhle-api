@@ -9,6 +9,7 @@ export * from './partner-game.ts';
 export * from './play-by-play.ts';
 export * from './player.ts';
 export * from './player-stats-leaders.ts';
+export * from './player-v2.ts';
 export * from './playoff.ts';
 export * from './postal-code-info.ts';
 export * from './ppt.ts';

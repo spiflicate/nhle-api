@@ -220,3 +220,9 @@ async function getStatsLeaders<T>(
    const path = resolvePath(endpoint, pathParams);
    return nhlClient.get(path, { categories: categories?.join(','), limit });
 }
+
+/**
+ * The v2 player API that nhl.com player pages use
+ * @description Header, home, bio, stats and a richer game log
+ */
+export * as v2 from './player-v2.ts';

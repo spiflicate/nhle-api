@@ -11,6 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - `gc.misc.meta.lookup({ players, teams })` for bulk player and team metadata (`BulkMeta`)
 - `categories` and `limit` options on `gc.player.statsLeaders.skaters` and `.goalies` (`limit: -1` returns every player); the result type narrows to the requested categories
+- `gc.player.v2` for the v2 player API that nhl.com player pages use: `header`, `home`, `bio`, `stats` and `gameLog`, with response types (`PlayerHeader`, `PlayerHome`, `PlayerBio`, `PlayerStats`, `PlayerGameLogV2`)
+- `gc.game.pptReplay.frames(gameId, eventId)` for the tracked puck and player positions around a goal (wsr.nhle.com), typed as `PPTReplayFrames`
 - `reports.shifts(gameId, { playByPlay? })` parses the home/away HTML time-on-ice reports, resolving player IDs from the game's PBP roster. HTML-only, with explicit errors rather than JSON fallback; source shift/event IDs are `null`.
 - `reports.gameSummary(gameId, { scheduledStart?, raw? })` returns the broader parsed GS sheet: teams/score, times, attendance/venue, scoring, penalties, period/strength totals, goalies, officials and stars. `gameTimes` remains a parsed-only convenience function for its header.
 - `{ raw: true }` on `reports.shifts` returns `{ home, away }` HTML and on `reports.gameSummary` returns Game Summary HTML, without PBP or boxscore requests. Parsed data remains the default.

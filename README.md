@@ -62,6 +62,7 @@ Seasons are written as `20242025`. Game types are `2` (regular season) and `3` (
 - `landing(gameId)`, `boxscore(gameId)`, `playByPlay(gameId)`, `reports(gameId)`
 - `wsc.gameStory(gameId)`, `wsc.playByPlay(gameId)`
 - `pptReplay.goal(gameId, eventId)`, `pptReplay.event(gameId, eventId)`: player and puck tracking for a replay
+- `pptReplay.frames(gameId, eventId)`: tracked puck and player positions around a goal, about 10 frames per second (the file behind `pptReplayUrl`)
 - `schedule(date?)`, `scheduleCalendar(date?)`, `networkTVSchedule(date?)`
 - `playoffBracket(year?)`, `playoffSeries(season?)`, `playoffSeriesSchedule(seriesLetter, season?)`
 - `whereToWatch()`: deprecated. The NHL retired this endpoint and it now returns a `NotFoundError`.
@@ -85,6 +86,14 @@ Teams are three-letter abbreviations (`'TOR'`, `'TBL'`).
 - `landing(playerId)`, `gameLog(playerId, season?, gameType?)`
 - `statsLeaders.skaters(season?, gameType?, { categories?, limit? }?)`, `statsLeaders.goalies(season?, gameType?, { categories?, limit? }?)`: `limit: -1` returns every player
 - `spotlight()`, `search(query)`
+
+`gc.player.v2` is the newer API that nhl.com player pages use:
+
+- `v2.header(playerId)`: name, number, position, badges and current team
+- `v2.home(playerId)`: last game, next game (with broadcasts and matchup stats) and current roster
+- `v2.bio(playerId)`: vitals, draft, awards, biography and transactions
+- `v2.stats(playerId)`: statline with league ranks, last 5 games, career and season totals in every league
+- `v2.gameLog(playerId, season?, gameType?)`: game log with home/away teams, scores and results
 
 ### `gc.draft`
 
