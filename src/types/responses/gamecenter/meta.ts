@@ -52,6 +52,7 @@ export interface PlayerMeta {
    playerSlug: string;
    actionShot: string;
    name: LocalizedText;
+   isGoalie: boolean;
    /** Empty for retired players */
    currentTeams: PlayerMetaTeam[];
 }

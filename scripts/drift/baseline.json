@@ -3029,6 +3029,7 @@
       "$.players[].currentTeams[].abbrev": "string",
       "$.players[].currentTeams[].force": "boolean",
       "$.players[].currentTeams[].teamId": "number",
+      "$.players[].isGoalie": "boolean",
       "$.players[].name": "object",
       "$.players[].name.default": "string",
       "$.players[].name.{lang}": "string",
