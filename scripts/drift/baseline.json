@@ -2268,7 +2268,6 @@
    },
    "gc.player.v2.header (retired)": {
       "$": "object",
-      "$.age": "number",
       "$.badges": "array",
       "$.badges[]": "object",
       "$.badges[].logoUrl": "object",

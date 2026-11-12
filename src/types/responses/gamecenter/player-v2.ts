@@ -68,7 +68,8 @@ export interface PlayerHeader {
    nationality: string;
    /** Two-letter country code, e.g. `CA`. */
    nationalityCountry2Code: string;
-   age: number;
+   /** Left out for some retired players. */
+   age?: number;
    sweaterNumber: number;
    position: PositionCode;
    playerSlug: string;
