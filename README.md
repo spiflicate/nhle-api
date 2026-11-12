@@ -87,6 +87,14 @@ Teams are three-letter abbreviations (`'TOR'`, `'TBL'`).
 - `statsLeaders.skaters(season?, gameType?)`, `statsLeaders.goalies(season?, gameType?)`
 - `spotlight()`, `search(query)`
 
+`gc.player.v2` is the newer API that nhl.com player pages use:
+
+- `v2.header(playerId)`: name, number, position, badges and current team
+- `v2.home(playerId)`: last game, next game (with broadcasts and matchup stats) and current roster
+- `v2.bio(playerId)`: vitals, draft, awards, biography and transactions
+- `v2.stats(playerId)`: statline with league ranks, last 5 games, career and season totals in every league
+- `v2.gameLog(playerId, season?, gameType?)`: game log with home/away teams, scores and results
+
 ### `gc.draft`
 
 - `picks(year?, round?)`, `tracker()`
