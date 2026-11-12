@@ -62,6 +62,7 @@ Seasons are written as `20242025`. Game types are `2` (regular season) and `3` (
 - `landing(gameId)`, `boxscore(gameId)`, `playByPlay(gameId)`, `reports(gameId)`
 - `wsc.gameStory(gameId)`, `wsc.playByPlay(gameId)`
 - `pptReplay.goal(gameId, eventId)`, `pptReplay.event(gameId, eventId)`: player and puck tracking for a replay
+- `pptReplay.frames(gameId, eventId)`: tracked puck and player positions around a goal, about 10 frames per second (the file behind `pptReplayUrl`)
 - `schedule(date?)`, `scheduleCalendar(date?)`, `networkTVSchedule(date?)`
 - `playoffBracket(year?)`, `playoffSeries(season?)`, `playoffSeriesSchedule(seriesLetter, season?)`
 - `whereToWatch()`: deprecated. The NHL retired this endpoint and it now returns a `NotFoundError`.
