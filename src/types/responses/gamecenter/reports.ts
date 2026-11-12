@@ -132,6 +132,8 @@ interface SeasonSeriesGame {
    gameCenterLink: string;
    gameOutcome: GameOutcome;
    clock?: Clock;
+   /** Set while the game is live */
+   situation?: Situation;
 }
 
 interface TeamDetail {
@@ -189,4 +191,20 @@ interface TeamSeasonStatsDetail {
    faceoffWinningPctgRank: number;
    goalsForPerGamePlayedRank: number;
    goalsAgainstPerGamePlayedRank: number;
+}
+
+/** Skater strength while a game is live; set during power plays */
+interface Situation {
+   homeTeam: SituationTeam;
+   awayTeam: SituationTeam;
+   situationCode: string;
+   timeRemaining: string;
+   secondsRemaining: number;
+}
+
+interface SituationTeam {
+   abbrev: string;
+   /** e.g. `PP`, `EN` */
+   situationDescriptions?: string[];
+   strength: number;
 }

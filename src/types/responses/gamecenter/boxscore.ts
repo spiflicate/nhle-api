@@ -44,6 +44,8 @@ interface Team {
    placeName: LocalizedText;
    placeNameWithPreposition: LocalizedText;
    radioLink?: string;
+   /** French-language radio stream, for teams that have one */
+   radioLinkFr?: string;
 }
 
 interface Clock {

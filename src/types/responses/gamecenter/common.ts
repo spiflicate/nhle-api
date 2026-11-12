@@ -183,4 +183,11 @@ export interface TvBroadcast {
    countryCode: CountryCode;
    network: string;
    sequenceNumber: number;
+   /** e.g. `en`, `fr`; on some broadcasts */
+   languageCode?: string;
+   parentId?: number;
+   logoUrls?: {
+      light: string;
+      dark: string;
+   };
 }
