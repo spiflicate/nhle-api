@@ -6,5 +6,5 @@
    // prioritize ArkType's "type" for autoimports
    "typescript.preferences.autoImportSpecifierExcludeRegexes": [
       "^(node:)?os$"
-   ],
+   ]
 }

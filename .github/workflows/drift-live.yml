@@ -1,0 +1,60 @@
+# Polls in-progress games and compares every response with
+# scripts/drift/baseline.json (bun run drift:live). Started by hand before
+# a slate (Actions → API drift (live games) → Run workflow); it waits for
+# games that haven't started and stops once every watched game is OFF.
+#
+# The report is the job summary and the live-drift-report artifact. The
+# run fails when it finds drift. It doesn't file issues yet: live
+# findings are often baseline gaps (fields the finished baseline game
+# doesn't have) that need a look at the types before they're accepted.
+name: API drift (live games)
+
+on:
+  workflow_dispatch:
+    inputs:
+      games:
+        description: Game ids to watch, space-separated (default every game today that isn't OFF)
+        required: false
+        default: ''
+      max_minutes:
+        description: Stop after this many minutes
+        required: false
+        default: '330'
+      interval:
+        description: Seconds between polls
+        required: false
+        default: '10'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: api-drift-live
+  cancel-in-progress: false
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+
+      - name: Poll live games
+        env:
+          GAMES: ${{ inputs.games }}
+          MAX_MINUTES: ${{ inputs.max_minutes }}
+          INTERVAL: ${{ inputs.interval }}
+        run: |
+          args=()
+          for game in $GAMES; do args+=(--game "$game"); done
+          bun run drift:live --report live-report.md \
+            --max-min "$MAX_MINUTES" --interval "$INTERVAL" "${args[@]}"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: live-drift-report
+          path: live-report.md
+          if-no-files-found: ignore

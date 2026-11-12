@@ -9,22 +9,72 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- `gc.game.pptReplay.frames(gameId, eventId)` for the tracked puck and player positions around a goal (wsr.nhle.com), typed as `PPTReplayFrames`
+- `reports.shifts(gameId, { playByPlay? })` parses the home/away HTML time-on-ice reports, resolving player IDs from the game's PBP roster. HTML-only, with explicit errors rather than JSON fallback; source shift/event IDs are `null`.
+- `reports.gameSummary(gameId, { scheduledStart?, raw? })` returns the broader parsed GS sheet: teams/score, times, attendance/venue, scoring, penalties, period/strength totals, goalies, officials and stars. `gameTimes` remains a parsed-only convenience function for its header.
+- `{ raw: true }` on `reports.shifts` returns `{ home, away }` HTML and on `reports.gameSummary` returns Game Summary HTML, without PBP or boxscore requests. Parsed data remains the default.
+- `reports` namespace for the official HTML game reports on www.nhl.com
+- `reports.url(gameId, code)` builds a report URL for the nine report codes (`GS`, `ES`, `PL`, `FS`, `FC`, `RO`, `SS`, `TV`, `TH`), listed in `reports.REPORT_CODES`
+- `reports.gameTimes(gameId)` returns when a game actually started and ended, read from the Game Summary report, in local time and UTC. The JSON APIs only carry the scheduled start time. A zone abbreviation it doesn't know gives a `ParseError`. The am/pm the report leaves out is decided by the scheduled start, looked up from the boxscore or passed as `scheduledStart`
+- `NHLClient.getText(endpoint, params)` for responses that aren't JSON
+- `topSeedTeamAbbrev` and `bottomSeedTeamAbbrev` on the `seriesStatus` of team schedule games, newly returned by `team.schedule.season`
+- `overlay` on `EdgeByTheNumbers.sogTeam` and `EdgeByTheNumbers.highDangerSavesGoalie`, newly returned by `adv.byTheNumbers`
+- `EdgeOverlay.team`, set instead of `player` on overlays for team stats
+- `OVER` in `GameState`, the state the API now reports between `LIVE`/`CRIT` and `FINAL`
+- The drift check flags game states a response's types don't declare, and `--update` won't accept them
+- Live-only fields found by polling the 2026-11-05 slate: `radioLinkFr` on gamecenter team objects; `languageCode`, `parentId` and `logoUrls` on TV broadcasts; `situation` on live `gc.score` games and right-rail `seasonSeries` games; `servedBy` on landing penalties; `goalInGame` on landing, wsc and play-by-play goals
+
+### Changed
+
+- `gameState` on playoff series schedule games and on `GameMeta` is typed as `GameState` instead of `string`
+- `summary.shootout` on `gc.game.landing` is typed as a list or, while a shootout is in progress, a `{ liveScore, events }` object, which the API sends then
+
+### Fixed
+
+- **Breaking:** the exported `GameState` type is the gamecenter response union (`FUT`, `PRE`, `LIVE`, `CRIT`, `OVER`, `FINAL`, `OFF`) instead of the stale `'FUT' | 'LIV' | 'FIN'`, which no response ever returned. `NHL.GameStateEnum` lists the same states; `GameStateEnum.LIV` and `GameStateEnum.FIN` are removed, so use `LIVE` and `FINAL`
+
+## [0.7.1] - 2026-10-23
+
+### Fixed
+
+- **Breaking:** `RateLimitError.retryAfter` is `undefined` when the 429 response has no usable `Retry-After` header, instead of `0`. Code that checks `retryAfter === 0` or `retryAfter > 0` should check for `undefined` instead; `retryAfter ?? fallback` now works as expected
+- A `Retry-After` header sent as an HTTP date is converted to seconds from now (never below 0) instead of being discarded
+
+## [0.7.0] - 2026-10-19
+
+### Added
+
+- `EdgeByTheNumbers.highDangerSavesGoalie`, the goalie with the most high-danger saves, newly returned by `adv.byTheNumbers`
+- Live-game fields on `Scoreboard` games: `clock`, `situation` and each team's `sog`
+- `DraftPositionCode` (`C`, `LW`, `RW`, `D`, `G`, `F`, `C/LW`, `C/RW`, `LW/RW`), used by the `draft.picks`, `draft.rankings` and `draft.tracker` response types
+- The drift check flags position codes a response's types don't declare, and `--update` won't accept them
+
+### Changed
+
+- `savePctgLast10` and `savePctg5v5Last10` on `adv.goalies.compare` and `adv.goalies.savePercentage5v5` are typed as `EdgeGoalieGame[]` and `EdgeGoalieGameDecision[]` instead of `unknown[]`, now that the API fills them
+- **Breaking:** `PositionCode` is now `'C' | 'L' | 'R' | 'D' | 'G'`. Outside the draft endpoints the API sends `L`/`R` for wingers, never `LW`/`RW`
+
+## [0.6.0] - 2026-10-03
+
+### Added
+
 - `stats` namespace for the Stats API (`api.nhle.com/stats/rest`): skater, goalie and team reports, leaders, milestones, teams, seasons, games, shift charts, drafts, config, countries, glossary and franchises
 - `getStats(report, params)` for skaters, goalies and teams, with `SkaterReport`, `GoalieReport` and `TeamReport` unions of the report names
 - Response types for every `adv` function (`EdgeSkaterDetail`, `EdgeTeamZoneTime`, ...) and `LocalizedText`
 - `video.metadata(videoId)` for Brightcove video titles, descriptions and sources
-- `gc.game.pptReplay.frames(gameId, eventId)` for the tracked puck and player positions around a goal (wsr.nhle.com), typed as `PPTReplayFrames`
 - Root exports: `APIResult`, `NHLClient`, `createNHLClient`, `BASE_URLS`, the error classes (`NHLError`, `NotFoundError`, `ValidationError`...), `ErrorCategory`, `ErrorLogLevel`, and the Cayenne query builder
 - `nhle-api/toolkit` entry point with constants, date helpers, `resolvePath`, `normalizeAbbrev`, the Cayenne query builder, and team branding (colors and logo URLs)
 - `NHLClient` accepts an options object (`baseUrl`, `timeout`, `language`, `headers`, `errorConfig`)
 - Level-aware `logger` and `writeLog`
 - Daily API drift check (`bun run drift`, GitHub workflow "API drift") covering every public function
+- CI on pull requests (lint, typecheck, tests, build, publint and are-the-types-wrong) and a tag-triggered release workflow that publishes with npm trusted publishing
 
 ### Changed
 
 - `config` is read on every request, so changing it at runtime takes effect; environment variable configuration was removed
 - Invalid `adv` parameters resolve to a failed result with a `ValidationError` instead of rejecting
 - Date parameters use the NHL's timezone (America/New_York)
+- `require` resolves `.d.cts` type declarations; the package declares `sideEffects: false` and `engines.node >= 18`
 - Stats API: `getPlayerInfo`, `getLeaders`, `getGames`, `teams.getAll` and `teams.getById` take query params before `lang`; `teams.getById` returns a list, matching the API
 
 ### Fixed
@@ -34,6 +84,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Edge skater and team paths, goalie top-10 save percentage paths and top-10 filter codes (23 endpoints)
 - `postalLookup` sends Canadian postal codes in the only form the API matches
 - `stats.skaters.getStats()` requested an unresolved `{report}` path, report functions sent no `cayenneExp` (HTTP 500), and `getStatsWithFilters` dropped most filters
+- Functions that default to the current season used 2025-26 (the last hardcoded season); the default now follows today's date
 
 ### Deprecated
 

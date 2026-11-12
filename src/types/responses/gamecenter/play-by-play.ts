@@ -57,6 +57,8 @@ interface Team {
    placeName: LocalizedText;
    placeNameWithPreposition: LocalizedText;
    radioLink?: string;
+   /** French-language radio stream, for teams that have one */
+   radioLinkFr?: string;
 }
 
 interface Clock {
@@ -104,6 +106,8 @@ interface Details {
    shotType?: ShotType;
    scoringPlayerId?: number;
    scoringPlayerTotal?: number;
+   /** The scorer's goal number in this game; so far only seen on a second goal */
+   goalInGame?: number;
    assist1PlayerId?: number;
    assist1PlayerTotal?: number;
    assist2PlayerId?: number;

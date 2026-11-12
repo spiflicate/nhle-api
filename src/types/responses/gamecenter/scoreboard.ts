@@ -38,6 +38,8 @@ interface Game {
    ticketsLinkFr: string;
    period?: number;
    periodDescriptor?: PeriodDescriptor;
+   clock?: Clock;
+   situation?: Situation;
    threeMinRecap?: string;
    threeMinRecapFr?: string;
 }
@@ -49,6 +51,7 @@ interface Team {
    placeNameWithPreposition: LocalizedText;
    abbrev: TeamAbbrev;
    score?: number;
+   sog?: number;
    logo: string;
    record?: string;
 }
@@ -57,4 +60,25 @@ interface PeriodDescriptor {
    number: number;
    periodType: PeriodType;
    maxRegulationPeriods: number;
+}
+
+interface Clock {
+   timeRemaining: string;
+   secondsRemaining: number;
+   running: boolean;
+   inIntermission: boolean;
+}
+
+interface Situation {
+   homeTeam: SituationDetails;
+   awayTeam: SituationDetails;
+   situationCode: string;
+   timeRemaining: string;
+   secondsRemaining: number;
+}
+
+interface SituationDetails {
+   abbrev: string;
+   situationDescriptions?: string[];
+   strength: number;
 }

@@ -2,8 +2,19 @@
  * Common types used in Gamecenter API responses
  */
 
-/** The current state of the game. */
-export type GameState = 'OFF' | 'FUT' | 'LIVE' | 'PRE' | 'CRIT' | 'FINAL';
+/**
+ * The current state of the game, in the order a game moves through them:
+ * `FUT`, `PRE`, `LIVE`, `CRIT`, `OVER`, `FINAL`, `OFF`.
+ * See `NHL.GameStateEnum` for what each one means.
+ */
+export type GameState =
+   | 'FUT'
+   | 'PRE'
+   | 'LIVE'
+   | 'CRIT'
+   | 'OVER'
+   | 'FINAL'
+   | 'OFF';
 
 /** The current state of the game. */
 export type GameScheduleState = 'OK' | 'TBD' | 'CNCL' | (string & {});
@@ -30,8 +41,24 @@ export type Market = 'H' | 'A' | 'N' | 'S';
 /** The country code for this broadcast. (CA = Canada, US = United States) */
 export type CountryCode = 'CA' | 'US';
 
-/** The position code for a player. (C = Center, L[W] = Left Wing, R[W] = Right Wing, D = Defenseman, G = Goalie) */
-export type PositionCode = 'C' | 'LW' | 'L' | 'RW' | 'R' | 'D' | 'G';
+/** The position code for a player. (C = Center, L = Left Wing, R = Right Wing, D = Defenseman, G = Goalie) */
+export type PositionCode = 'C' | 'L' | 'R' | 'D' | 'G';
+
+/**
+ * The position code for a draft prospect. The draft endpoints spell
+ * wingers `LW`/`RW` and may list a generic forward (`F`) or two
+ * positions (`C/LW`).
+ */
+export type DraftPositionCode =
+   | 'C'
+   | 'LW'
+   | 'RW'
+   | 'D'
+   | 'G'
+   | 'F'
+   | 'C/LW'
+   | 'C/RW'
+   | 'LW/RW';
 
 /** Player's shooting/catching handedness. (L = Left, R = Right) */
 export type ShootsCatches = 'L' | 'R';
@@ -156,4 +183,11 @@ export interface TvBroadcast {
    countryCode: CountryCode;
    network: string;
    sequenceNumber: number;
+   /** e.g. `en`, `fr`; on some broadcasts */
+   languageCode?: string;
+   parentId?: number;
+   logoUrls?: {
+      light: string;
+      dark: string;
+   };
 }
