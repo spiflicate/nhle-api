@@ -12,10 +12,43 @@ import type { APIResult } from '#/client/types.ts';
 import { ParseError, ValidationError } from '#/errors/index.ts';
 import type { GameId } from '#/types/index.ts';
 import { GameId as GameIdAT, isParseError } from '#/utils/schemas.ts';
-import { boxscore } from '../gamecenter/game.ts';
+import { boxscore, playByPlay } from '../gamecenter/game.ts';
 import { type GameTimes, parseGameTimes } from './parse.ts';
+import {
+   parseShifts,
+   type ShiftChart,
+   type ShiftRoster,
+} from './shifts.ts';
+import { type GameSummary, parseGameSummary } from './summary.ts';
 
 export type { GameTimes, ReportTime } from './parse.ts';
+export type { ReportShift, ShiftChart, ShiftRoster } from './shifts.ts';
+export type {
+   GameSummary,
+   SummaryGoal,
+   SummaryGoalie,
+   SummaryPenalty,
+   SummaryPeriod,
+   SummaryStar,
+   SummaryStrength,
+   SummaryTeam,
+} from './summary.ts';
+
+/** Return the report HTML instead of parsing it. */
+export interface ReportOptions {
+   raw?: boolean;
+}
+
+/** Both time-on-ice reports, unchanged from the HTML client. */
+export interface RawShiftReports {
+   home: string;
+   away: string;
+}
+
+export interface ShiftsOptions extends ReportOptions {
+   /** Game-specific PBP roster; avoids a play-by-play request. Ignored in raw mode. */
+   playByPlay?: ShiftRoster;
+}
 
 /** Options for {@link gameTimes} */
 export interface GameTimesOptions {
@@ -26,6 +59,11 @@ export interface GameTimesOptions {
     */
    scheduledStart?: string | Date;
 }
+
+/** Raw mode ignores `scheduledStart` and makes no boxscore request. */
+export interface GameSummaryOptions
+   extends GameTimesOptions,
+      ReportOptions {}
 
 const BASE_URL = 'https://www.nhl.com/scores/htmlreports';
 
@@ -103,7 +141,8 @@ export function url(gameId: GameId, code: ReportCode): string {
  * times (`start` is null until the puck drops, `end` until the game
  * ends); a game whose report isn't published yet, which happens one to
  * two hours before the scheduled start, gives a NotFoundError result,
- * and a header that can't be read or converted a ParseError
+ * and a header that can't be read or converted a ParseError.
+ * For the full report (parsed or raw HTML), use {@link gameSummary}.
  *
  * @example
  * const result = await reports.gameTimes(2026020180);
@@ -117,6 +156,77 @@ export async function gameTimes(
    gameId: GameId,
    options: GameTimesOptions = {},
 ): Promise<APIResult<GameTimes>> {
+   const result = await summaryReport(gameId, options);
+   if (!result.success) return result;
+   const times = parseGameTimes(
+      result.data.html,
+      result.data.scheduledStart,
+   );
+   return withSummaryEndpoint(gameId, times);
+}
+
+/**
+ * Read the full Game Summary (GS): teams/score, times, attendance/venue,
+ * goals, penalties, period/strength totals, goalies, officials and stars.
+ * Names and sweater numbers are as printed, without synthetic player IDs.
+ * `raw: true` returns GS HTML without parsing or a boxscore lookup.
+ */
+export function gameSummary(
+   gameId: GameId,
+   options: GameSummaryOptions & { raw: true },
+): Promise<APIResult<string>>;
+export function gameSummary(
+   gameId: GameId,
+   options?: GameSummaryOptions & { raw?: false },
+): Promise<APIResult<GameSummary>>;
+export function gameSummary(
+   gameId: GameId,
+   options: GameSummaryOptions,
+): Promise<APIResult<GameSummary | string>>;
+export async function gameSummary(
+   gameId: GameId,
+   options: GameSummaryOptions = {},
+): Promise<APIResult<GameSummary | string>> {
+   const parsed = GameIdAT(gameId);
+   if (isParseError(parsed))
+      return { success: false, error: new ValidationError(parsed.summary) };
+   if (options.raw !== undefined && typeof options.raw !== 'boolean') {
+      return {
+         success: false,
+         error: new ValidationError('raw must be a boolean'),
+      };
+   }
+   if (options.raw) return reportsClient.getText(reportPath(parsed, 'GS'));
+   const result = await summaryReport(parsed, options);
+   if (!result.success) return result;
+   return withSummaryEndpoint(
+      parsed,
+      parseGameSummary(
+         parsed,
+         result.data.html,
+         result.data.scheduledStart,
+      ),
+   );
+}
+
+function withSummaryEndpoint<T>(
+   gameId: GameId,
+   result: APIResult<T>,
+): APIResult<T> {
+   if (result.success) return result;
+   return {
+      success: false,
+      error: new ParseError(result.error.message, {
+         endpoint: url(gameId, 'GS'),
+      }),
+   };
+}
+
+/** Shared acquisition; gameTimes deliberately needs only the header to parse. */
+async function summaryReport(
+   gameId: GameId,
+   options: GameTimesOptions,
+): Promise<APIResult<{ html: string; scheduledStart: Date }>> {
    const parsed = GameIdAT(gameId);
    if (isParseError(parsed)) {
       return {
@@ -149,17 +259,73 @@ export async function gameTimes(
       scheduledStart = game.data.startTimeUTC;
    }
 
-   const times = parseGameTimes(
-      result.data,
-      new Date(scheduledStart ?? NaN),
-   );
-   if (!times.success) {
+   return {
+      success: true,
+      data: {
+         html: result.data,
+         scheduledStart: new Date(scheduledStart ?? NaN),
+      },
+   };
+}
+
+/**
+ * Read shifts from the home/away time-on-ice reports. No JSON shift fallback.
+ * Parsed mode also fetches PBP to join team/sweater numbers to NHL player IDs,
+ * unless `playByPlay` is supplied. Raw mode fetches only TH and TV, returning
+ * `{ home, away }` HTML. Missing reports return the client's error; unreadable
+ * rows or ambiguous/unmapped sweaters return a ParseError, not partial data.
+ * Rows are preserved in report order (home then away), including duplicates.
+ */
+export function shifts(
+   gameId: GameId,
+   options: ShiftsOptions & { raw: true },
+): Promise<APIResult<RawShiftReports>>;
+export function shifts(
+   gameId: GameId,
+   options?: ShiftsOptions & { raw?: false },
+): Promise<APIResult<ShiftChart>>;
+export function shifts(
+   gameId: GameId,
+   options: ShiftsOptions,
+): Promise<APIResult<ShiftChart | RawShiftReports>>;
+export async function shifts(
+   gameId: GameId,
+   options: ShiftsOptions = {},
+): Promise<APIResult<ShiftChart | RawShiftReports>> {
+   const parsed = GameIdAT(gameId);
+   if (isParseError(parsed)) {
+      return { success: false, error: new ValidationError(parsed.summary) };
+   }
+   if (options.raw !== undefined && typeof options.raw !== 'boolean') {
       return {
          success: false,
-         error: new ParseError(times.error.message, {
-            endpoint: `${BASE_URL}/${path}`,
-         }),
+         error: new ValidationError('raw must be a boolean'),
       };
    }
-   return times;
+   if (
+      !options.raw &&
+      options.playByPlay &&
+      options.playByPlay.id !== parsed
+   ) {
+      return {
+         success: false,
+         error: new ValidationError(
+            'playByPlay must belong to the requested game',
+         ),
+      };
+   }
+   const [home, away] = await Promise.all([
+      reportsClient.getText(reportPath(parsed, 'TH')),
+      reportsClient.getText(reportPath(parsed, 'TV')),
+   ]);
+   if (!home.success) return home;
+   if (!away.success) return away;
+   if (options.raw)
+      return { success: true, data: { home: home.data, away: away.data } };
+
+   const roster = options.playByPlay
+      ? { success: true as const, data: options.playByPlay }
+      : await playByPlay(parsed);
+   if (!roster.success) return roster;
+   return parseShifts(parsed, home.data, away.data, roster.data);
 }
