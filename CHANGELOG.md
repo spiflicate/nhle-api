@@ -7,11 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-11-12
+
 ### Added
 
-- `gc.misc.meta.lookup({ players, teams })` for bulk player and team metadata (`BulkMeta`)
+- `gc.misc.meta.lookup({ players, teams })` for bulk player and team metadata (`BulkMeta`, with `isGoalie` on each player)
 - `categories` and `limit` options on `gc.player.statsLeaders.skaters` and `.goalies` (`limit: -1` returns every player); the result type narrows to the requested categories
-- `gc.player.v2` for the v2 player API that nhl.com player pages use: `header`, `home`, `bio`, `stats` and `gameLog`, with response types (`PlayerHeader`, `PlayerHome`, `PlayerBio`, `PlayerStats`, `PlayerGameLogV2`)
+- `gc.player.v2` for the v2 player API that nhl.com player pages use: `header`, `home`, `bio`, `stats` and `gameLog`, with response types (`PlayerHeader`, `PlayerHome`, `PlayerBio`, `PlayerStats`, `PlayerGameLogV2`). `PlayerHeader.age` is optional, since the API leaves it out for some retired players
 - `gc.game.pptReplay.frames(gameId, eventId)` for the tracked puck and player positions around a goal (wsr.nhle.com), typed as `PPTReplayFrames`
 - `reports.shifts(gameId, { playByPlay? })` parses the home/away HTML time-on-ice reports, resolving player IDs from the game's PBP roster. HTML-only, with explicit errors rather than JSON fallback; source shift/event IDs are `null`.
 - `reports.gameSummary(gameId, { scheduledStart?, raw? })` returns the broader parsed GS sheet: teams/score, times, attendance/venue, scoring, penalties, period/strength totals, goalies, officials and stars. `gameTimes` remains a parsed-only convenience function for its header.
