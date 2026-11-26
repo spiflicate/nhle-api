@@ -47,6 +47,7 @@
       "test:watch": "bun test --watch",
       "drift": "bun scripts/check-drift.ts",
       "drift:live": "bun scripts/check-drift-live.ts",
+      "discover": "bun scripts/check-discover.ts",
       "prepublishOnly": "bun run build",
       "lint": "bunx biome check .",
       "format": "bunx biome check --write .",
