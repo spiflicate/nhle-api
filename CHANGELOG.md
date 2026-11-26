@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Weekly API endpoint discovery (`bun run discover`, GitHub workflow "API discovery"): lists the paths nhl.com's own apps request that the library doesn't call, Stats API reports `/config` names that the report types don't, and any WADL or OpenAPI document that answers again
+- Weekly API endpoint discovery (`bun run discover`, GitHub workflow "API discovery"): lists the paths nhl.com's own apps request that the library doesn't call, per API (api-web v1 and v2 separately, and the Stats API), Stats API reports `/config` names that the report types don't, and any WADL or OpenAPI document that answers again
 
 ## [0.8.0] - 2026-11-12
 

@@ -20,14 +20,29 @@ import {
    scorePaths,
    teamPaths,
 } from '#/api/gamecenter/paths.ts';
-import type { Template } from './extract.ts';
+import type { Template, Version } from './extract.ts';
 
 /**
- * The two APIs nhl.com's apps call: `web` is api-web.nhle.com (v1 and
- * v2 share one namespace here, since the site picks the version per
- * call), `stats` is api.nhle.com/stats/rest/{lang}.
+ * The APIs nhl.com's apps call: a version of api-web.nhle.com (`v1`,
+ * `v2`, and any the site starts using), or `stats`,
+ * api.nhle.com/stats/rest/{lang}.
  */
-export type Api = 'web' | 'stats';
+export type Api = Version | 'stats';
+
+/** The library's paths per API: v1 and v2 of api-web, and stats */
+export type Library = Record<'v1' | 'v2' | 'stats', string[]>;
+
+/** The library's paths for an API; none for a version it doesn't call */
+export function pathsOf(library: Library, api: Api): string[] {
+   return (library as Record<string, string[] | undefined>)[api] ?? [];
+}
+
+/** Order for listing APIs: versions in order, then stats */
+export function compareApis(a: Api, b: Api): number {
+   const rank = (api: Api) =>
+      api === 'stats' ? Number.POSITIVE_INFINITY : Number(api.slice(1));
+   return rank(a) - rank(b);
+}
 
 type PathTree = { [key: string]: string | PathTree };
 
@@ -44,12 +59,11 @@ const OTHER_HOST: ReadonlySet<string> = new Set([
 ]);
 
 /** Every path template the library requests, per API */
-export function libraryTemplates(): Record<Api, string[]> {
-   const web = [
+export function libraryTemplates(): Library {
+   const v1 = [
       teamPaths,
       scorePaths,
       playerPaths,
-      playerV2Paths,
       miscPaths,
       gamePaths,
       draftPaths,
@@ -60,11 +74,16 @@ export function libraryTemplates(): Record<Api, string[]> {
    ]
       .flatMap((tree) => flatten(tree as PathTree))
       .filter((p) => !OTHER_HOST.has(p));
+   const v2 = flatten(playerV2Paths);
    // The site's stats base URL already includes the language
    const stats = flatten(dataPaths as PathTree).map((p) =>
       p.replace(/^\{lang\}\//, ''),
    );
-   return { web: [...new Set(web)], stats: [...new Set(stats)] };
+   return {
+      v1: [...new Set(v1)],
+      v2: [...new Set(v2)],
+      stats: [...new Set(stats)],
+   };
 }
 
 type Segment =

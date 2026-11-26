@@ -21,8 +21,10 @@ import ignoreFile from '../../scripts/discover/ignore.json' with {
    type: 'json',
 };
 import {
+   type Api,
    isCovered,
    isIgnored,
+   type Library,
    libraryTemplates,
 } from '../../scripts/discover/match.ts';
 import {
@@ -31,9 +33,45 @@ import {
    wadlPaths,
 } from '../../scripts/discover/sources.ts';
 
-const extract = (source: string) => [...extractTemplates(source)].sort();
+const extract = (source: string) =>
+   extractTemplates(source)
+      .map((e) => e.path)
+      .sort();
+
+const versions = (source: string) =>
+   extractTemplates(source).map((e) => `${e.version ?? '-'} ${e.path}`);
 
 describe('extractTemplates', () => {
+   test('reads the version from the call the path is passed to', () => {
+      expect(
+         versions(
+            'x=(0,le.xo)("/player/".concat(w,"/bio"),void 0!==w,void 0,le.mG.V2)',
+         ),
+      ).toEqual(['v2 /player/{}/bio']);
+   });
+
+   test('reads the version from the chain of a direct fetch', () => {
+      expect(
+         versions(
+            'fetch("".concat(h.webAPIBaseURL,"/").concat(M.mG.V1,"/playoff-series/carousel/").concat(s,"/"),{credentials:"include"})',
+         ),
+      ).toEqual(['v1 /playoff-series/carousel/{}/']);
+   });
+
+   test('leaves the version unset when the request states none', () => {
+      expect(versions('s("/gamecenter/".concat(e,"/landing"),e)')).toEqual([
+         '- /gamecenter/{}/landing',
+      ]);
+   });
+
+   test('lists a path once per version it is requested with', () => {
+      expect(
+         versions(
+            'a=xo("/player/".concat(p,"/game-log"),!0);b=xo("/player/".concat(p,"/game-log"),!0,void 0,le.mG.V2)',
+         ).sort(),
+      ).toEqual(['- /player/{}/game-log', 'v2 /player/{}/game-log']);
+   });
+
    test('joins concat chains, with {} for every variable', () => {
       expect(
          extract(
@@ -161,19 +199,39 @@ describe('ignore.json', () => {
    test('ignores no path the library calls', () => {
       const library = libraryTemplates();
       const ignore = loadIgnore();
-      for (const api of ['web', 'stats'] as const) {
-         for (const path of library[api]) {
-            expect(isIgnored(`/${path}`, ignore[api])).toBe(false);
+      for (const [api, paths] of Object.entries(library)) {
+         for (const path of paths) {
+            expect(isIgnored(`/${path}`, ignore(api as Api))).toBe(false);
          }
       }
+   });
+
+   test('web entries apply to every api-web version, not stats', () => {
+      const ignore = loadIgnore({
+         '*': { '/pending': 'r' },
+         web: { '/scores': 'r' },
+         v2: { '/only-v2': 'r' },
+      });
+      expect(ignore('v1')).toEqual(['/pending', '/scores']);
+      expect(ignore('v2')).toEqual(['/pending', '/scores', '/only-v2']);
+      expect(ignore('v3')).toEqual(['/pending', '/scores']);
+      expect(ignore('stats')).toEqual(['/pending']);
    });
 });
 
 describe('libraryTemplates', () => {
-   test('lists both APIs, stats without the language', () => {
-      const { web, stats } = libraryTemplates();
-      expect(web).toContain('gamecenter/{gameId}/boxscore');
-      expect(web).toContain('player/{playerId}/header');
+   test('lists v1, v2 and stats, stats without the language', () => {
+      const { v1, v2, stats } = libraryTemplates();
+      expect(v1).toContain('gamecenter/{gameId}/boxscore');
+      expect(v1).toContain('player/{playerId}/landing');
+      expect(v1).not.toContain('player/{playerId}/header');
+      expect(v2).toEqual([
+         'player/{playerId}/header',
+         'player/{playerId}/home',
+         'player/{playerId}/bio',
+         'player/{playerId}/player-stats',
+         'player/{playerId}/game-log/{season}/{gameType}',
+      ]);
       expect(stats).toContain('skater/{report}');
       expect(stats.some((p) => p.includes('{lang}'))).toBe(false);
    });
@@ -191,13 +249,19 @@ describe('specs', () => {
       ]);
    });
 
-   test('specTemplate strips the version or language', () => {
+   test('specTemplate takes the version from the path or the URL', () => {
       expect(
          specTemplate(
             'https://api-web.nhle.com/application.wadl',
-            'v1/odds/{id}',
+            'v2/player/{id}/odds',
          ),
-      ).toEqual({ api: 'web', path: '/odds/{}' });
+      ).toEqual({ api: 'v2', path: '/player/{}/odds' });
+      expect(
+         specTemplate(
+            'https://api-web.nhle.com/v2/application.wadl',
+            'player/{id}/odds',
+         ),
+      ).toEqual({ api: 'v2', path: '/player/{}/odds' });
       expect(
          specTemplate(
             'https://api.nhle.com/stats/rest/application.wadl',
@@ -217,53 +281,97 @@ describe('declaredReports', () => {
 });
 
 describe('judge and report', () => {
-   const app: App = { api: 'stats', page: 'p', bundle: /x/ };
+   const files = new Set(['main']);
+   const web: App = { kind: 'web', page: 'p', bundle: /x/ };
+   const stats: App = { kind: 'stats', page: 'p', bundle: /y/ };
    const scan: ScanResult = {
       apps: [
          {
-            app,
-            bundleUrl: 'https://example.test/main.js',
+            app: web,
+            bundleUrl: 'https://example.test/web.js',
             chunks: { listed: 1, fetched: 1 },
             found: new Map([
-               ['/season', new Set(['main'])],
-               ['/componentSeason', new Set(['main'])],
-               ['/pending', new Set(['main'])],
+               [
+                  'v1',
+                  new Map([
+                     ['/score/{}', files],
+                     // only on v2 in the library
+                     ['/player/{}/bio', files],
+                  ]),
+               ],
+               ['v2', new Map([['/player/{}/bio', files]])],
+               ['v3', new Map([['/score/{}', files]])],
+            ]),
+         },
+         {
+            app: stats,
+            bundleUrl: 'https://example.test/stats.js',
+            chunks: { listed: 1, fetched: 1 },
+            found: new Map([
+               [
+                  'stats',
+                  new Map([
+                     ['/season', files],
+                     ['/componentSeason', files],
+                     ['/pending', files],
+                  ]),
+               ],
             ]),
          },
       ],
       specs: [],
       reports: { skater: ['summary', 'newReport'], goalie: [], team: [] },
    };
-   const library = { web: [], stats: ['season', 'skater/{report}'] };
-   const ignore = { web: [], stats: ['/pending'] };
+   const library: Library = {
+      v1: ['score/{date}'],
+      v2: ['player/{playerId}/bio', 'player/{playerId}/home'],
+      stats: ['season', 'skater/{report}'],
+   };
+   const ignore = loadIgnore({ stats: { '/pending': 'action type' } });
    const declared = {
       skater: new Set(['summary']),
       goalie: new Set<string>(),
       team: new Set<string>(),
    };
 
-   test('reports uncovered, unignored paths and undeclared reports', () => {
+   test('matches each API against its own library paths', () => {
       const { findings, unseen } = judge(scan, library, ignore, declared);
       expect(findings).toEqual([
+         { kind: 'report', entity: 'skater', name: 'newReport' },
+         {
+            kind: 'path',
+            api: 'v1',
+            path: '/player/{}/bio',
+            where: ['main'],
+         },
+         { kind: 'path', api: 'v3', path: '/score/{}', where: ['main'] },
          {
             kind: 'path',
             api: 'stats',
             path: '/componentSeason',
             where: ['main'],
          },
-         { kind: 'report', entity: 'skater', name: 'newReport' },
       ] satisfies Finding[]);
-      expect(unseen.stats).toEqual(['skater/{report}']);
+      expect(unseen).toEqual([
+         { api: 'v2', path: 'player/{playerId}/home' },
+         { api: 'stats', path: 'skater/{report}' },
+      ]);
    });
 
-   test('first-seen dates round-trip through the report', () => {
+   test('labels paths with their version, and keeps first-seen dates', () => {
       const { findings, unseen } = judge(scan, library, ignore, declared);
       const firstSeen = Object.fromEntries(
          findings.map((f) => [keyOf(f), '2026-11-01']),
       );
       const report = renderReport(scan, findings, unseen, firstSeen);
       expect(readState(report)).toEqual(firstSeen);
-      expect(report).toContain('`/componentSeason`');
+      expect(report).toContain(
+         '| api-web.nhle.com/v1 | `/player/{}/bio` | main | 2026-11-01 |',
+      );
+      expect(report).toContain('| api-web.nhle.com/v3 | `/score/{}`');
+      expect(report).toContain(
+         'api-web.nhle.com/v2: `player/{playerId}/home`',
+      );
       expect(readState('no state here')).toEqual({});
    });
 });

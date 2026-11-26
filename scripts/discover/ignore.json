@@ -1,5 +1,5 @@
 {
-   "$comment": "Paths scraped from nhl.com's bundles that aren't API endpoints the library should call, per API (\"*\" for both). Keys are templates as the discovery report prints them; a key ending in * matches every template that starts with it. Each value says why it's ignored.",
+   "$comment": "Paths scraped from nhl.com's bundles that aren't API endpoints the library should call, under \"*\" (every API), \"web\" (every api-web version), or one API: \"v1\", \"v2\", \"stats\". Keys are templates as the discovery report prints them; a key ending in * matches every template that starts with it. Each value says why it's ignored.",
    "*": {
       "/add": "Redux Toolkit action type",
       "/executeMutation": "RTK Query action type",

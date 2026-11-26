@@ -11,14 +11,24 @@
  */
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { chunkFiles, extractTemplates, type Template } from './extract.ts';
+import {
+   chunkFiles,
+   type Extracted,
+   extractTemplates,
+   type Template,
+} from './extract.ts';
 import type { Api } from './match.ts';
 
 /** Generic client name, like the library's own requests */
 const HEADERS = { 'User-Agent': 'nhle-api endpoint discovery' };
 
 export interface App {
-   api: Api;
+   /**
+    * `web`: api-web.nhle.com, at the version each request states (v1
+    * when it states none, as the site's request hook does); `stats`:
+    * the Stats API, which has no versions.
+    */
+   kind: 'web' | 'stats';
    /** A page that loads the app */
    page: string;
    /** The app's main bundle among the page's scripts */
@@ -31,19 +41,19 @@ export interface App {
  */
 export const APPS: App[] = [
    {
-      api: 'web',
+      kind: 'web',
       page: 'https://www.nhl.com/scores',
       bundle: /\/static\/js\/main\.bundle\.js/,
    },
    {
-      api: 'stats',
+      kind: 'stats',
       page: 'https://www.nhl.com/stats/',
       bundle: /\/stats\/static\/js\/client\.bundle\.js/,
    },
 ];
 
-/** A template and the bundle files it was found in */
-export type Found = Map<Template, Set<string>>;
+/** Per API, each template and the bundle files it was found in */
+export type Found = Map<Api, Map<Template, Set<string>>>;
 
 export interface AppScan {
    app: App;
@@ -81,11 +91,25 @@ async function bundleText(url: string, page: string): Promise<string> {
    }
 }
 
-function add(found: Found, templates: Set<Template>, file: string) {
-   for (const t of templates) {
-      const files = found.get(t) ?? new Set<string>();
-      found.set(t, files.add(file));
+function add(
+   found: Found,
+   kind: App['kind'],
+   extracted: Extracted[],
+   file: string,
+) {
+   for (const { path, version } of extracted) {
+      const api: Api = kind === 'stats' ? 'stats' : (version ?? 'v1');
+      const paths = found.get(api) ?? new Map<Template, Set<string>>();
+      found.set(api, paths);
+      paths.set(path, (paths.get(path) ?? new Set<string>()).add(file));
    }
+}
+
+/** How many templates a scan found, over all its APIs */
+export function templateCount(found: Found): number {
+   let n = 0;
+   for (const paths of found.values()) n += paths.size;
+   return n;
 }
 
 /** Load an app's page, its main bundle and every lazy chunk */
@@ -100,7 +124,7 @@ export async function scanApp(app: App): Promise<AppScan> {
 
    const main = await bundleText(src.href, app.page);
    const found: Found = new Map();
-   add(found, extractTemplates(main), 'main');
+   add(found, app.kind, extractTemplates(main), 'main');
 
    // Chunks load from webpack's publicPath, the folder above the main
    // bundle's (main at /static/js/main.bundle.js, chunks at /static/js/…)
@@ -114,7 +138,7 @@ export async function scanApp(app: App): Promise<AppScan> {
             new URL(c.file, publicPath).href,
             app.page,
          );
-         add(found, extractTemplates(source), c.name);
+         add(found, app.kind, extractTemplates(source), c.name);
          fetched++;
       }
    };
@@ -134,6 +158,8 @@ export const SPEC_URLS = [
    'https://api-web.nhle.com/v1/application.wadl',
    'https://api-web.nhle.com/model/v1/openapi.json',
    'https://api-web.nhle.com/v1/openapi.json',
+   'https://api-web.nhle.com/v2/application.wadl',
+   'https://api-web.nhle.com/v2/openapi.json',
    'https://api.nhle.com/stats/rest/application.wadl',
    'https://api.nhle.com/stats/rest/en/application.wadl',
    'https://api.nhle.com/stats/rest/openapi.json',

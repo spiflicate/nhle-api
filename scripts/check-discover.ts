@@ -27,9 +27,12 @@ import { join } from 'node:path';
 import type { Template } from './discover/extract.ts';
 import {
    type Api,
+   compareApis,
    isCovered,
    isIgnored,
+   type Library,
    libraryTemplates,
+   pathsOf,
 } from './discover/match.ts';
 import {
    APPS,
@@ -40,6 +43,7 @@ import {
    type ReportEntity,
    type Spec,
    scanApp,
+   templateCount,
 } from './discover/sources.ts';
 
 export const IGNORE_PATH = join(import.meta.dir, 'discover/ignore.json');
@@ -67,31 +71,52 @@ export function keyOf(f: Finding): string {
    }
 }
 
-type IgnoreFile = Partial<Record<Api | '*', Record<string, string>>>;
+/**
+ * ignore.json: entries under `*` apply to every API, under `web` to
+ * every api-web version (site routes don't depend on it), and under an
+ * API's own name (`v1`, `v2`, `stats`) to that API alone.
+ */
+type IgnoreFile = Record<string, Record<string, string> | string>;
+
+/** The ignore entries for an API */
+export type Ignore = (api: Api) => string[];
 
 export function loadIgnore(
    file: IgnoreFile = JSON.parse(readFileSync(IGNORE_PATH, 'utf8')),
-): Record<Api, string[]> {
-   const shared = Object.keys(file['*'] ?? {});
-   return {
-      web: [...shared, ...Object.keys(file.web ?? {})],
-      stats: [...shared, ...Object.keys(file.stats ?? {})],
+): Ignore {
+   const keys = (name: string) => {
+      const entries = file[name];
+      return typeof entries === 'object' ? Object.keys(entries) : [];
    };
+   return (api) => [
+      ...keys('*'),
+      ...(api === 'stats' ? [] : keys('web')),
+      ...keys(api),
+   ];
 }
 
-/** A WADL resource path as a template of the API it belongs to */
+/**
+ * A WADL resource path as a template of the API it belongs to. An
+ * api-web path names its version (`v1/score/{date}`), or takes it from
+ * the document's own URL (`/v2/application.wadl`).
+ */
 export function specTemplate(
    url: string,
    path: string,
 ): { api: Api; path: Template } {
-   const api: Api = new URL(url).hostname.startsWith('api-web')
-      ? 'web'
-      : 'stats';
-   const stripped =
-      api === 'web'
-         ? path.replace(/^v\d+\//, '')
-         : path.replace(/^(?:\{lang\}|[a-z]{2})\//, '');
-   return { api, path: `/${stripped.replace(/\{[^}]*\}/g, '{}')}` };
+   const toTemplate = (p: string) => `/${p.replace(/\{[^}]*\}/g, '{}')}`;
+   if (!new URL(url).hostname.startsWith('api-web')) {
+      return {
+         api: 'stats',
+         path: toTemplate(path.replace(/^(?:\{lang\}|[a-z]{2})\//, '')),
+      };
+   }
+   const named = path.match(/^(v\d+)\/(.*)$/);
+   const fromUrl = new URL(url).pathname.match(/^\/(v\d+)\//)?.[1];
+   return {
+      api: (named?.[1] ?? fromUrl ?? 'v1') as Api,
+      path: toTemplate(named?.[2] ?? path),
+   };
 }
 
 export interface ScanResult {
@@ -100,32 +125,36 @@ export interface ScanResult {
    reports: Record<ReportEntity, string[]>;
 }
 
+/** Library paths no scanned request matched, per API */
+export type Unseen = Array<{ api: Api; path: string }>;
+
 /** Turn a scan into findings and the library paths nothing referenced */
 export function judge(
    scan: ScanResult,
-   library: Record<Api, string[]>,
-   ignore: Record<Api, string[]>,
+   library: Library,
+   ignore: Ignore,
    declared: Record<ReportEntity, Set<string>>,
-): { findings: Finding[]; unseen: Record<Api, string[]> } {
-   const findings: Finding[] = [];
-   const seen: Record<Api, Template[]> = { web: [], stats: [] };
+): { findings: Finding[]; unseen: Unseen } {
+   const pathFindings: Array<Finding & { kind: 'path' }> = [];
+   const others: Finding[] = [];
+   const seen = new Map<Api, Template[]>();
 
    const consider = (api: Api, path: Template, where: string[]) => {
-      seen[api].push(path);
-      if (isCovered(path, library[api])) return;
-      if (isIgnored(path, ignore[api])) return;
-      findings.push({ kind: 'path', api, path, where });
+      seen.set(api, [...(seen.get(api) ?? []), path]);
+      if (isCovered(path, pathsOf(library, api))) return;
+      if (isIgnored(path, ignore(api))) return;
+      pathFindings.push({ kind: 'path', api, path, where });
    };
 
-   for (const { app, found } of scan.apps) {
-      for (const [path, files] of [...found].sort(([a], [b]) =>
-         a.localeCompare(b),
-      )) {
-         consider(app.api, path, [...files].sort());
+   for (const { found } of scan.apps) {
+      for (const [api, paths] of found) {
+         for (const [path, files] of paths) {
+            consider(api, path, [...files].sort());
+         }
       }
    }
    for (const spec of scan.specs) {
-      findings.push({ kind: 'spec', url: spec.url });
+      others.push({ kind: 'spec', url: spec.url });
       for (const p of spec.paths) {
          const t = specTemplate(spec.url, p);
          consider(t.api, t.path, [spec.url]);
@@ -134,7 +163,7 @@ export function judge(
    for (const [entity, names] of Object.entries(scan.reports)) {
       for (const name of names) {
          if (!declared[entity as ReportEntity].has(name)) {
-            findings.push({
+            others.push({
                kind: 'report',
                entity: entity as ReportEntity,
                name,
@@ -143,13 +172,22 @@ export function judge(
       }
    }
 
-   const unseen = {} as Record<Api, string[]>;
-   for (const api of ['web', 'stats'] as Api[]) {
-      unseen[api] = library[api].filter(
-         (lib) => !seen[api].some((t) => isCovered(t, [lib])),
-      );
+   pathFindings.sort(
+      (a, b) => compareApis(a.api, b.api) || a.path.localeCompare(b.path),
+   );
+
+   const unseen: Unseen = [];
+   for (const [api, paths] of Object.entries(library) as Array<
+      [Api, string[]]
+   >) {
+      const requested = seen.get(api) ?? [];
+      for (const path of paths) {
+         if (!requested.some((t) => isCovered(t, [path]))) {
+            unseen.push({ api, path });
+         }
+      }
    }
-   return { findings, unseen };
+   return { findings: [...others, ...pathFindings], unseen };
 }
 
 const STATE_RE = /<!-- discover-state: (\{.*?\}) -->/;
@@ -165,15 +203,16 @@ export function readState(report: string): Record<string, string> {
    }
 }
 
-const API_LABEL: Record<Api, string> = {
-   web: 'api-web.nhle.com',
-   stats: 'api.nhle.com/stats/rest',
-};
+function apiLabel(api: Api): string {
+   return api === 'stats'
+      ? 'api.nhle.com/stats/rest'
+      : `api-web.nhle.com/${api}`;
+}
 
 function line(f: Finding, firstSeen: string): string {
    switch (f.kind) {
       case 'path':
-         return `| ${API_LABEL[f.api]} | \`${f.path}\` | ${f.where.join(', ')} | ${firstSeen} |`;
+         return `| ${apiLabel(f.api)} | \`${f.path}\` | ${f.where.join(', ')} | ${firstSeen} |`;
       case 'report':
          return `- \`${f.entity}/${f.name}\` (first seen ${firstSeen})`;
       case 'spec':
@@ -224,13 +263,17 @@ export function renderFindings(
 export function renderReport(
    scan: ScanResult,
    findings: Finding[],
-   unseen: Record<Api, string[]>,
+   unseen: Unseen,
    firstSeen: Record<string, string>,
 ): string {
    const out: string[] = ['## NHL endpoints the library does not call', ''];
    for (const s of scan.apps) {
+      const perApi = [...s.found]
+         .sort(([a], [b]) => compareApis(a, b))
+         .map(([api, paths]) => `${paths.size} ${apiLabel(api)}`)
+         .join(', ');
       out.push(
-         `- **${API_LABEL[s.app.api]}**: ${s.found.size} path templates in ${s.chunks.fetched + 1} bundle files of ${s.bundleUrl.split('?')[0]}`,
+         `- **${s.bundleUrl.split('?')[0]}** (${s.chunks.fetched + 1} bundle files): ${templateCount(s.found)} path templates (${perApi})`,
       );
    }
    out.push(
@@ -251,15 +294,12 @@ export function renderReport(
       );
    }
 
-   const unseenCount = unseen.web.length + unseen.stats.length;
-   if (unseenCount > 0) {
+   if (unseen.length > 0) {
       out.push(
          '<details>',
-         `<summary>Library paths nhl.com does not reference (${unseenCount}): not an error, the site doesn't use every endpoint</summary>`,
+         `<summary>Library paths nhl.com does not request (${unseen.length}): not an error, the site doesn't use every endpoint</summary>`,
          '',
-         ...(['web', 'stats'] as Api[]).flatMap((api) =>
-            unseen[api].map((p) => `- ${API_LABEL[api]}: \`${p}\``),
-         ),
+         ...unseen.map((u) => `- ${apiLabel(u.api)}: \`${u.path}\``),
          '',
          '</details>',
          '',
@@ -291,9 +331,12 @@ async function main(): Promise<number> {
             `${scan.bundleUrl}: no lazy-chunk map found, the webpack runtime changed`,
          );
       }
-      const covered = library[app.api].filter((lib) =>
-         [...scan.found.keys()].some((t) => isCovered(t, [lib])),
-      ).length;
+      let covered = 0;
+      for (const [api, paths] of scan.found) {
+         covered += pathsOf(library, api).filter((lib) =>
+            [...paths.keys()].some((t) => isCovered(t, [lib])),
+         ).length;
+      }
       if (covered < MIN_COVERED) {
          throw new Error(
             `${scan.bundleUrl}: only ${covered} library paths found, the extractor no longer reads this bundle`,

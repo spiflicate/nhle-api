@@ -18,6 +18,9 @@
 /** A path template, with `{}` for each value the site fills in */
 export type Template = string;
 
+/** An API version as the site names it: `v1`, `v2` */
+export type Version = `v${number}`;
+
 /** Placeholder for a non-literal argument while a chain is joined */
 const HOLE = '\uE000'; // private use: never in bundle source paths
 
@@ -82,24 +85,66 @@ function literal(code: string): string | undefined {
 }
 
 /**
- * Whether the literal starting at `index` is an argument of a `.concat`:
- * walk back to the `(` that encloses it and look at what precedes it.
- * Brackets inside string literals are rare enough in these bundles to
- * ignore.
+ * The index of the `(` of the call whose argument list holds the code at
+ * `index`, or -1 when it isn't a call argument (inside an object or array
+ * literal, or a statement of its own). Brackets inside string literals
+ * are rare enough in these bundles to ignore.
  */
-function insideConcat(s: string, index: number): boolean {
+function enclosingParen(s: string, index: number): number {
    let depth = 0;
    for (let k = index - 1; k >= Math.max(0, index - 400); k--) {
       const c = s[k];
       if (c === ')' || c === ']' || c === '}') depth++;
       else if (c === '(' || c === '[' || c === '{') {
-         if (depth === 0) return c === '(' && s.endsWith('.concat', k);
+         if (depth === 0) return c === '(' ? k : -1;
          depth--;
       } else if (depth === 0 && (c === ';' || isAssignment(s, k))) {
-         return false;
+         return -1;
       }
    }
-   return false;
+   return -1;
+}
+
+/** Whether the literal starting at `index` is an argument of a `.concat` */
+function insideConcat(s: string, index: number): boolean {
+   const paren = enclosingParen(s, index);
+   return paren !== -1 && s.endsWith('.concat', paren);
+}
+
+/**
+ * The site's API version enum (`p={V1:"v1",V2:"v2"}`), as minified code
+ * refers to it: `le.mG.V2`, `M.mG.V1`.
+ */
+const VERSION_REF = /^(?:[\w$]+\.)+V(\d+)$/;
+
+function versionOf(code: string): Version | undefined {
+   const m = code.match(VERSION_REF);
+   return m ? (`v${m[1]}` as Version) : undefined;
+}
+
+/**
+ * The API version a request states: in its concat chain, for a direct
+ * fetch (`"".concat(base,"/").concat(M.mG.V1,"/playoff-series/...")`), or
+ * as an argument of the call the path goes to
+ * (`xo("/player/".concat(w,"/bio"),!0,void 0,le.mG.V2)`).
+ */
+function statedVersion(
+   s: string,
+   at: number,
+   chainArgs: string[],
+): Version | undefined {
+   for (const arg of chainArgs) {
+      const v = versionOf(arg);
+      if (v) return v;
+   }
+   const paren = enclosingParen(s, at);
+   if (paren === -1 || s.endsWith('.concat', paren)) return undefined;
+   const [args] = callArgs(s, paren);
+   for (const arg of args) {
+      const v = versionOf(arg);
+      if (v) return v;
+   }
+   return undefined;
 }
 
 /** `=` at `k` assigns: not `==`, `!=`, `<=`, `>=` or `=>` */
@@ -111,13 +156,24 @@ function isAssignment(s: string, k: number): boolean {
    );
 }
 
+/** A candidate request path, and the API version the code states */
+export interface Extracted {
+   path: Template;
+   /**
+    * `v1`, `v2`... when the request names one. Most requests don't: the
+    * site's request hook then uses v1.
+    */
+   version: Version | undefined;
+}
+
 /**
- * Every candidate path template in a bundle's source. Consecutive
- * placeholders collapse to one, so `{}` can stand for several segments
- * (`/player/{}` where the site appends `"/".concat(id, "/landing")`).
+ * Every candidate path template in a bundle's source, once per version
+ * it is requested with. Consecutive placeholders collapse to one, so
+ * `{}` can stand for several segments (`/player/{}` where the site
+ * appends `"/".concat(id, "/landing")`).
  */
-export function extractTemplates(source: string): Set<Template> {
-   const found = new Set<Template>();
+export function extractTemplates(source: string): Extracted[] {
+   const found = new Map<string, Extracted>();
    // "" or a path made of /segments: the start of a concat chain
    for (const m of source.matchAll(/"((?:\/[A-Za-z0-9._-]*)*)"/g)) {
       const at = m.index ?? 0;
@@ -126,10 +182,12 @@ export function extractTemplates(source: string): Set<Template> {
       if (NOT_REQUESTS.test(before)) continue;
 
       const parts = [m[1] ?? ''];
+      const chainArgs: string[] = [];
       let k = at + m[0].length;
       while (source.startsWith('.concat(', k)) {
          const [args, end] = callArgs(source, k + '.concat'.length);
          k = end;
+         chainArgs.push(...args);
          for (const arg of args) parts.push(literal(arg) ?? HOLE);
       }
       if (parts.length === 1 && parts[0] === '') continue;
@@ -146,9 +204,10 @@ export function extractTemplates(source: string): Set<Template> {
          '{}',
       );
       if (!PATH.test(path) || ASSET.test(path)) continue;
-      found.add(path);
+      const version = statedVersion(source, at, chainArgs);
+      found.set(`${version} ${path}`, { path, version });
    }
-   return found;
+   return [...found.values()];
 }
 
 /**
