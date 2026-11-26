@@ -42,6 +42,24 @@ Each response is compared with the daily baseline plus `scripts/drift/live-basel
 
 The **API drift (live games)** workflow runs the same thing by hand (Actions → API drift (live games) → Run workflow). It doesn't file issues.
 
+## Endpoint discovery
+
+The drift check only calls endpoints the library already wraps, so it never sees a new one. The NHL publishes no endpoint list any more (the APIs' `application.wadl` now returns 404), so `bun run discover` reads what nhl.com itself requests:
+
+- **Site bundles.** It loads the two apps behind nhl.com (scores, gamecenter, players, draft and Edge on `wsr.nhle.com`, and the stats pages on `dcs.nhl.com`): each app's main bundle and every lazy chunk its webpack runtime lists. From those it reads every path template the code builds (`"/gamecenter/".concat(e,"/boxscore")` gives `/gamecenter/{}/boxscore`). Each template is compared with the paths in `src/api/*/paths.ts`, where a `{}` can stand for one or more segments.
+- **Stats reports.** It lists the report names the Stats API's `/config` gives that the `SkaterReport`, `GoalieReport` and `TeamReport` unions don't declare.
+- **Spec documents.** It probes the places a WADL or OpenAPI document used to be (`scripts/discover/sources.ts`), and if one answers it compares that document's paths with the library too.
+
+The same scan also finds site routes, asset folders and Redux action types. Once someone has checked them, they're listed in `scripts/discover/ignore.json`, each with a reason. A key ending in `*` ignores every template that starts with it. A path the site only builds partly (`/player/{}`, followed by a suffix from a variable) counts as covered when a library path starts with it, so a new endpoint built that way can't be told apart from the known ones.
+
+The **API discovery** workflow runs the scan weekly and can be started by hand (Actions → API discovery → Run workflow). When something turns up, it opens an issue labelled `api-discovery`, or updates the one already open. Each finding keeps the date it was first seen, and new findings are also posted as a comment. To resolve a finding:
+
+- If it's an endpoint worth wrapping, add a function and its path to the API's `paths.ts`, with types and a drift check.
+- If it's not an endpoint, or not one to wrap, add the path to `ignore.json` with the reason.
+- If it's a report name, add it to the report union in `src/api/edge-stats/types.ts`.
+
+The issue closes once nothing is left. The run fails when the scan itself breaks, for example when a page stops loading its bundle or fewer than ten library paths turn up in an app, so a change to nhl.com's build doesn't pass as "nothing new".
+
 ## Game Summary lifecycle capture
 
 `scripts/gs-capture/collect.ts` follows one game's Game Summary (GS) report from before it is published to the next day, to see how an unfinished report really looks (#43). The **GS capture** workflow runs it every ten minutes; each run is one tick, and the state and evidence are committed to the `gs-capture-data` branch, so collection doesn't depend on anyone's computer or session.

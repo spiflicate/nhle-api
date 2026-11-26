@@ -1,0 +1,118 @@
+# Looks for NHL API endpoints the library doesn't call (bun run
+# discover). The NHL publishes no endpoint list any more (application.wadl
+# is gone), so this reads every path nhl.com's own apps request, from
+# their webpack bundles, and compares them with the library's paths.ts.
+# It also checks the Stats API's /config for report names the types
+# don't list, and whether a WADL or OpenAPI document answers again.
+#
+# The daily API drift check only calls endpoints the library already
+# wraps, so it can't see new ones; this is the complement, weekly since
+# the site changes far less often than the data.
+#
+# On the default branch, findings open (or refresh) one issue labelled
+# api-discovery. Each finding keeps the date it was first seen, and new
+# findings are posted as a comment, since GitHub doesn't notify on body
+# edits. The issue is closed once nothing is left to report: wrap the
+# endpoint, or list the path in scripts/discover/ignore.json.
+#
+# The run fails when the scan breaks (nhl.com moved its bundles, the
+# extractor stops finding the library's own paths), the issue can't be
+# filed, or it has findings outside the default branch, where no issue is
+# filed. Findings on the default branch don't fail it: the issue is the
+# alert.
+name: API discovery
+
+on:
+  schedule:
+    - cron: '47 10 * * 1' # Mondays, 10:47 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: api-discovery
+  cancel-in-progress: false
+
+jobs:
+  discover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      ON_DEFAULT_BRANCH: ${{ github.ref_name == github.event.repository.default_branch }}
+      RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+      - run: bun install --frozen-lockfile
+
+      - name: Load the open discovery issue
+        id: issue
+        if: env.ON_DEFAULT_BRANCH == 'true'
+        run: |
+          issue=$(gh issue list --label api-discovery --state open \
+            --json number --jq '.[0].number')
+          echo "number=$issue" >> "$GITHUB_OUTPUT"
+          if [ -n "$issue" ]; then
+            gh issue view "$issue" --json body --jq .body > previous.md
+          fi
+
+      # Exit 0: nothing to report, 1: findings, 2: the scan failed
+      - name: Scan nhl.com
+        id: scan
+        run: |
+          set +e
+          bun run discover --report discover-report.md \
+            --previous previous.md --new discover-new.md
+          echo "code=$?" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: discover-report
+          path: discover-report.md
+          if-no-files-found: ignore
+
+      - name: Write the job summary
+        if: always() && hashFiles('discover-report.md') != ''
+        run: cat discover-report.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Open or refresh the discovery issue
+        id: file
+        if: steps.scan.outputs.code == '1' && env.ON_DEFAULT_BRANCH == 'true'
+        env:
+          ISSUE: ${{ steps.issue.outputs.number }}
+        run: |
+          printf '\n---\nLatest run: %s\n' "$RUN_URL" >> discover-report.md
+          gh label create api-discovery --color 1d76db \
+            --description 'nhl.com calls NHL API endpoints the library does not' \
+            2>/dev/null || true
+          if [ -n "$ISSUE" ]; then
+            gh issue edit "$ISSUE" --body-file discover-report.md
+            if [ -s discover-new.md ]; then
+              printf '\n%s\n' "$RUN_URL" >> discover-new.md
+              gh issue comment "$ISSUE" --body-file discover-new.md
+            fi
+          else
+            gh issue create --label api-discovery \
+              --title 'NHL API endpoints the library does not call' \
+              --body-file discover-report.md
+          fi
+
+      - name: Close the discovery issue
+        if: steps.scan.outputs.code == '0' && env.ON_DEFAULT_BRANCH == 'true'
+        run: |
+          for issue in $(gh issue list --label api-discovery --state open \
+            --json number --jq '.[].number'); do
+            gh issue close "$issue" \
+              --comment "Every path nhl.com requests is covered or ignored: $RUN_URL"
+          done
+
+      - name: Fail the run on a broken scan or unfiled findings
+        if: >-
+          steps.scan.outputs.code == '2' ||
+          (steps.scan.outputs.code == '1' && steps.file.outcome != 'success')
+        run: exit 1
