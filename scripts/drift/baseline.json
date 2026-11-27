@@ -8121,13 +8121,10 @@
    },
    "stats.season.getActiveSeason": {
       "$": "object",
-      "$.data": "array",
-      "$.data[]": "object",
-      "$.data[].component": "string",
-      "$.data[].gameTypeId": "number",
-      "$.data[].id": "string",
-      "$.data[].seasonId": "number",
-      "$.total": "number"
+      "$.component": "string",
+      "$.gameTypeId": "number",
+      "$.id": "string",
+      "$.seasonId": "number"
    },
    "stats.season.getGames": {
       "$": "object",

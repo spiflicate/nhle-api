@@ -307,10 +307,7 @@ export interface Season {
    minimumRegularGamesForGoalieStatsLeaders: number;
 }
 
-/**
- * The season and game type a part of the stats site currently shows,
- * from `/componentSeason`
- */
+/** The season and game type the stats site currently shows, from `/componentSeason` */
 export interface ActiveSeason {
    /** The site component, e.g. `'stats'` (same as `component`) */
    id: string;
