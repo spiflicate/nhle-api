@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test } from 'bun:test';
 import { season } from '#/api/edge-stats/index.ts';
+import { ParseError } from '#/errors/index.ts';
 import { MockResponseFactory } from '../../test-utils.ts';
 import { expectSuccess } from '../helpers.ts';
 
@@ -14,7 +15,22 @@ describe('Season/Game/Draft Modules', () => {
       globalThis.fetch = (async (url: string) => {
          mockCalls.push(String(url));
 
-         if (url.includes('/componentSeason') || url.includes('/season')) {
+         if (url.includes('/componentSeason')) {
+            return {
+               ok: true,
+               json: async () =>
+                  MockResponseFactory.paginatedResponse([
+                     {
+                        id: 'stats',
+                        component: 'stats',
+                        gameTypeId: 2,
+                        seasonId: 20262027,
+                     },
+                  ]),
+            } as Response;
+         }
+
+         if (url.includes('/season')) {
             return {
                ok: true,
                json: async () =>
@@ -81,6 +97,35 @@ describe('Season/Game/Draft Modules', () => {
             expect(result.data.data).toBeInstanceOf(Array);
          }
          expect(mockCalls[0]).toContain('/season');
+      });
+   });
+
+   describe('Active season', () => {
+      test('should return the stats row of /componentSeason', async () => {
+         const result = await season.getActiveSeason('en');
+         expectSuccess(result);
+         if (result.success) {
+            expect(result.data).toEqual({
+               id: 'stats',
+               component: 'stats',
+               gameTypeId: 2,
+               seasonId: 20262027,
+            });
+         }
+         expect(mockCalls[0]).toContain('/en/componentSeason');
+      });
+
+      test('should give a ParseError when there is no stats row', async () => {
+         globalThis.fetch = (async () =>
+            ({
+               ok: true,
+               json: async () => ({ data: [], total: 0 }),
+            }) as Response) as unknown as typeof fetch;
+         const result = await season.getActiveSeason('en');
+         expect(result.success).toBe(false);
+         if (!result.success) {
+            expect(result.error).toBeInstanceOf(ParseError);
+         }
       });
    });
 

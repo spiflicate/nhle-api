@@ -8119,6 +8119,13 @@
       "$.data[].wildcardInUse": "number",
       "$.total": "number"
    },
+   "stats.season.getActiveSeason": {
+      "$": "object",
+      "$.component": "string",
+      "$.gameTypeId": "number",
+      "$.id": "string",
+      "$.seasonId": "number"
+   },
    "stats.season.getGames": {
       "$": "object",
       "$.data": "array",

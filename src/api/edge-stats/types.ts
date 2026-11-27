@@ -307,6 +307,18 @@ export interface Season {
    minimumRegularGamesForGoalieStatsLeaders: number;
 }
 
+/** The season and game type the stats site currently shows, from `/componentSeason` */
+export interface ActiveSeason {
+   /** The site component, e.g. `'stats'` (same as `component`) */
+   id: string;
+   /** The site component, e.g. `'stats'` */
+   component: string;
+   /** 2 = regular season, 3 = playoffs */
+   gameTypeId: number;
+   /** Season id, e.g. 20262027 */
+   seasonId: number;
+}
+
 /** A game from `/game` */
 export interface Game {
    /** Game id, e.g. 2024020001 */

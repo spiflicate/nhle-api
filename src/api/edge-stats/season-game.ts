@@ -8,10 +8,13 @@
  */
 
 import { edgeStatsClient } from '#/client/index.ts';
+import type { APIResult } from '#/client/types.ts';
 import { config } from '#/config/index.ts';
+import { ParseError } from '#/errors/index.ts';
 import { resolvePath } from '#/utils/utils.ts';
 import { dataPaths as p } from './paths.ts';
 import type {
+   ActiveSeason,
    APIResultPaginated,
    Draft,
    Game,
@@ -35,6 +38,48 @@ export async function getSeasons(
 ): Promise<APIResultPaginated<Season>> {
    const path = resolvePath(p.season, { lang });
    return edgeStatsClient.get<PaginatedData<Season>>(path);
+}
+
+/**
+ * Get the season and game type the stats site currently shows
+ *
+ * This is what nhl.com's stats pages default to: the current season, and
+ * the regular season or playoffs depending on the time of year.
+ *
+ * The endpoint lists one row per site component; this returns the
+ * `'stats'` row (today the only one), and a `ParseError` result if the
+ * response has none.
+ *
+ * @param lang - Language code (default: configured language)
+ * @returns Promise resolving to the active season
+ *
+ * @example
+ * const result = await stats.season.getActiveSeason();
+ * if (result.success) {
+ *    const { seasonId, gameTypeId } = result.data; // 20262027, 2
+ * }
+ */
+export async function getActiveSeason(
+   lang: string = config.language,
+): Promise<APIResult<ActiveSeason>> {
+   const path = resolvePath(p.activeSeason, { lang });
+   const result =
+      await edgeStatsClient.get<PaginatedData<ActiveSeason>>(path);
+   if (!result.success) return result;
+
+   const row = result.data.data?.find((r) => r.component === 'stats');
+   if (!row) {
+      return {
+         success: false,
+         error: new ParseError(
+            "componentSeason response has no 'stats' row",
+            {
+               endpoint: path,
+            },
+         ),
+      };
+   }
+   return { success: true, data: row };
 }
 
 /**
