@@ -614,6 +614,10 @@ const statsApi: DriftCheck[] = [
       run: () => stats.season.getSeasons(),
    },
    {
+      name: 'stats.season.getActiveSeason',
+      run: () => stats.season.getActiveSeason(),
+   },
+   {
       name: 'stats.season.getGames',
       run: () =>
          stats.season.getGames({ cayenneExp: `gameDate="${DATE}"` }),

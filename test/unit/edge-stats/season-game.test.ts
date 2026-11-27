@@ -14,7 +14,22 @@ describe('Season/Game/Draft Modules', () => {
       globalThis.fetch = (async (url: string) => {
          mockCalls.push(String(url));
 
-         if (url.includes('/componentSeason') || url.includes('/season')) {
+         if (url.includes('/componentSeason')) {
+            return {
+               ok: true,
+               json: async () =>
+                  MockResponseFactory.paginatedResponse([
+                     {
+                        id: 'stats',
+                        component: 'stats',
+                        gameTypeId: 2,
+                        seasonId: 20262027,
+                     },
+                  ]),
+            } as Response;
+         }
+
+         if (url.includes('/season')) {
             return {
                ok: true,
                json: async () =>
@@ -81,6 +96,18 @@ describe('Season/Game/Draft Modules', () => {
             expect(result.data.data).toBeInstanceOf(Array);
          }
          expect(mockCalls[0]).toContain('/season');
+      });
+   });
+
+   describe('Active season', () => {
+      test('should fetch the active season from /componentSeason', async () => {
+         const result = await season.getActiveSeason('en');
+         expectSuccess(result);
+         if (result.success) {
+            expect(result.data.data[0]?.seasonId).toBe(20262027);
+            expect(result.data.data[0]?.gameTypeId).toBe(2);
+         }
+         expect(mockCalls[0]).toContain('/en/componentSeason');
       });
    });
 

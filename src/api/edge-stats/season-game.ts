@@ -12,6 +12,7 @@ import { config } from '#/config/index.ts';
 import { resolvePath } from '#/utils/utils.ts';
 import { dataPaths as p } from './paths.ts';
 import type {
+   ActiveSeason,
    APIResultPaginated,
    Draft,
    Game,
@@ -35,6 +36,29 @@ export async function getSeasons(
 ): Promise<APIResultPaginated<Season>> {
    const path = resolvePath(p.season, { lang });
    return edgeStatsClient.get<PaginatedData<Season>>(path);
+}
+
+/**
+ * Get the season and game type the stats site currently shows
+ *
+ * This is what nhl.com's stats pages default to: the current season, and
+ * the regular season or playoffs depending on the time of year. There is
+ * one row per site component; today that is only `'stats'`.
+ *
+ * @param lang - Language code (default: configured language)
+ * @returns Promise resolving to the active season of each component
+ *
+ * @example
+ * const result = await stats.season.getActiveSeason();
+ * if (result.success) {
+ *    const { seasonId, gameTypeId } = result.data.data[0];
+ * }
+ */
+export async function getActiveSeason(
+   lang: string = config.language,
+): Promise<APIResultPaginated<ActiveSeason>> {
+   const path = resolvePath(p.activeSeason, { lang });
+   return edgeStatsClient.get<PaginatedData<ActiveSeason>>(path);
 }
 
 /**

@@ -126,7 +126,7 @@ if (result.success) console.log(result.data.skatingSpeed.speedMax.imperial);
 - `stats.skaters`, `stats.goalies`, `stats.teams`: `getStats(report, params)` for any report (`'summary'`, `'realtime'`, `'powerplay'`, and the rest listed in `SkaterReport`, `GoalieReport` and `TeamReport`), plus `getStatsWithParams`, `getStatsWithBuilder` and `getStatsWithFilters`
 - `stats.skaters.getPlayerInfo(params)`; `getLeaders(category, params)` and `getMilestones()` on skaters and goalies
 - `stats.teams.getAll(params)`, `stats.teams.getById(teamId, params)`
-- `stats.season`: `getSeasons()`, `getGames(params)`, `getShiftChart(gameId)`, `getDraft()`
+- `stats.season`: `getSeasons()`, `getActiveSeason()` (the season and game type the stats site currently shows), `getGames(params)`, `getShiftChart(gameId)`, `getDraft()`
 - `stats.misc`: `getConfig()` (the columns of every report), `getCountries()`, `getGlossary()`, `getFranchises()`
 
 Report endpoints return `{ data, total }` and take `cayenneExp`, `sort`, `dir`, `limit` and `start`:

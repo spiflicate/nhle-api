@@ -59,6 +59,8 @@ export const dataPaths = {
    },
    /** Season-related data. */
    season: '{lang}/season',
+   /** The season and game type the stats site currently shows. */
+   activeSeason: '{lang}/componentSeason',
    /** Game-related data. */
    game: '{lang}/game',
    /** Draft-related data. */
